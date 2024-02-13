@@ -2,7 +2,6 @@ const mongoose = require("mongoose"); // para interactuar con la base de datos d
 const Schema = mongoose.Schema; //
 
 const CommentSchema = new Schema({
-
   title: {
     type: String,
     required: true,
@@ -36,11 +35,6 @@ const CommentSchema = new Schema({
       ref: "User",
     },
   ],
-  /*Rating:{
-    type: Number
-    min: 0,
-    max: 5
-  }*/
   timestamps: true,
 });
 
