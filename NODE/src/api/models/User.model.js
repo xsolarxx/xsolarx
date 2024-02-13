@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt"); // para encryptar informacion
+const validator = require("validator"); /// n os sirve para validad info
 const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema(
   {
@@ -21,7 +23,6 @@ const UserSchema = new mongoose.Schema(
       validate: [validator.isEmail, "Email not valid"], // en caso de no ser un email valido
       // lanza el error ----> 'Email not valid'
     },
-
     gender: {
       type: String,
       enum: ["hombre", "mujer", "otros"],
@@ -70,4 +71,5 @@ UserSchema.pre("save", async function (next) {
     next("Error hashing password", error);
   }
 });
+const User = mongoose.model("User", UserSchema);
 module.exports = User;
