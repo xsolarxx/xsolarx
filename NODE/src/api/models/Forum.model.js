@@ -6,31 +6,33 @@ const storage = multer.memoryStorage(); // Almacenamiento en memoria para este e
 const upload = multer({ storage: storage });
 
 // Esquema para los posts
-const PostSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const PostSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    image: {
+      type: string, // Representación URL
+    },
+
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    owner: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
 
-  image: {
-    type: string, // Representación URL
-  },
-
-  content: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-
-  owner: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
-
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
-  timestamps: true,
-});
+  { timestamps: true } //! todos los timestamps así(comment.model corregido yA)
+);
 
 // Modelo del forum que agrupa preguntas
 const Forum = mongoose.model("Forum", PostSchema);
