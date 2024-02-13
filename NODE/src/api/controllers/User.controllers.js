@@ -9,7 +9,7 @@ const User = require("../models/User.model");
 
 //! ---------------------------- utils ----------------------------------
 const randomCode = require("../../utils/randomCode");
-//*const sendEmail = require("../../utils/sendEmail"); //* estamos usando register with redirect que no utiliza send email
+const sendEmail = require("../../utils/sendEmail"); 
 
 //! ------------------------------librerias--------------------------------
 const nodemailer = require("nodemailer");
