@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema(
   {
     userName: {
@@ -69,3 +70,4 @@ UserSchema.pre("save", async function (next) {
     next("Error hashing password", error);
   }
 });
+module.exports = User;
