@@ -27,6 +27,19 @@ const createComment = async (req, res, next) => {
     });
   }
 };
+const getById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const commentById = await Comment.findById(id);
+    if (commentById) {
+      return res.status(200).json(commentById);
+    } else {
+      return res.status(404).json("no se ha encontrado el comentario");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
 const deleteComment = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -70,7 +83,7 @@ const deleteComment = async (req, res, next) => {
 };
 const getAll = async (req, res, next) => {
   try {
-    const allComment = await Comment.find()
+    const allComment = await Comment.find();
     /** el find nos devuelve un array */
     if (allComment.length > 0) {
       return res.status(200).json(allComment);
@@ -85,6 +98,4 @@ const getAll = async (req, res, next) => {
   }
 };
 
-
-
-module.exports = { deleteComment,createComment,getAll};
+module.exports = { deleteComment, createComment, getAll, getById };
