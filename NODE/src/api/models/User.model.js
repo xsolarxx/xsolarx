@@ -56,7 +56,7 @@ const UserSchema = new mongoose.Schema(
     valuedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   },
   {
-    timestamps: true,
+    timestamps: true, //Refleja el momento exacto de la modificación
   }
 );
 

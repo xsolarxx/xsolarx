@@ -2,6 +2,7 @@ const mongoose = require("mongoose"); // para interactuar con la base de datos d
 const Schema = mongoose.Schema; //
 
 const CommentSchema = new Schema({
+
   title: {
     type: String,
     required: true,
@@ -15,6 +16,7 @@ const CommentSchema = new Schema({
     type: String,
     required: true,
   },
+
   recipientNews: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "News",
@@ -27,17 +29,18 @@ const CommentSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
   },
-  tags: [String],
-  recipientForum: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Forum",
-  },
+
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
+  /*Rating:{
+    type: Number
+    min: 0,
+    max: 5
+  }*/
   timestamps: true,
 });
 
