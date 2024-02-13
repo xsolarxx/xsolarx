@@ -7,7 +7,6 @@ const upload = multer({ storage: storage });
 
 // Esquema para los posts
 const PostSchema = new mongoose.Schema({
-
   title: {
     type: String,
     required: true,
@@ -29,13 +28,12 @@ const PostSchema = new mongoose.Schema({
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
 
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    
+
   timestamps: true,
-  
 });
 
 // Modelo del forum que agrupa preguntas
-const Forum = mongoose.model("Forum", PostSchemaSchema);
+const Forum = mongoose.model("Forum", PostSchema);
 
 // Exportar el modelo para su uso en otros archivos
 module.exports = Forum;
