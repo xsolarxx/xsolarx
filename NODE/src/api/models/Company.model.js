@@ -16,24 +16,29 @@ const CompanySchema = new Schema({
     type: String,
     required: true,
   },
-  companyServices: {
-    type: String,
+  companyServices: [  
+    {  
+    type: String, //! checkear el enum
     required: true,
-  },
+    enum: ["Presupuesto de instalación","Presupuesto de placas fotovoltáicas",
+    "Estudio energético", "Mantenimiento","Dimensionado y modelado de la instalación", "Estudio de seguridad"],
+    },
+  ],
   image: {
     type: String,
     required: true,
   },
+
   userCompanyRatings: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Comment",
     },
   ],
   userCompanyReviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Comment",
     },
   ],
   userfavCompany: [
