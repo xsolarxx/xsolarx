@@ -2,6 +2,10 @@ const User = require("../models/User.model");
 const News = require("../models/News.model");
 const Comment = require("../models/Comment.model");
 
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ CREAR NEWS -------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 const createNews = async (req, res, next) => {
   let catchImg = req.file?.path;
 
@@ -17,8 +21,12 @@ const createNews = async (req, res, next) => {
       ownerAdmin: req.user._id,
     };
     const newNews = new News(customBody);
+    if (req.file) {
+      newNews.image = req.file.path;
+    } else {
+      newNews.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
+    }
     const savedNews = await newNews.save(); // el await espera a que se resuelva la promesa
-
     if (savedNews) {
       try {
         await User.findByIdAndUpdate(req.user._id, {
@@ -34,17 +42,16 @@ const createNews = async (req, res, next) => {
       }
     }
   } catch (error) {
+    // en caso de cualquier probelma, al principio de la función el catch se encarga de borrar la imagen, si se ha adjuntado una imagen
+    if (req.file) {
+      deleteImgCloudinary(catchImg);
+    }
     return res.status(404).json({
-      error: "error catch create news",
+      error:
+        "error creando la noticia, imagen ha sido borrada en caso de haber sido adjunta",
       message: error.message,
     });
   }
 };
-
-// if (req.file) {
-//   newUser.image = req.file.path;
-// } else {
-//   newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
-// }
 
 module.exports = { createNews };
