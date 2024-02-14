@@ -2,7 +2,7 @@ const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// deletar comentario
+// crear comentario
 const createComment = async (req, res, next) => {
   try {
     await Comment.syncIndexes();
@@ -185,4 +185,4 @@ const update = async (req, res, next) => {
   }
 };
 
-module.exports = { deleteComment, createComment, getAll, getById,update };
+module.exports = { deleteComment, createComment, getAll, getById, update };
