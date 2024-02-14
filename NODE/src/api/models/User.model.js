@@ -54,7 +54,11 @@ const UserSchema = new mongoose.Schema(
     usersFollowers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     favCompany: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }],
     favNews: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
-    valuedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    forumOwner: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo he creado
+    forumFollwing:  [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo sigo
+    valuedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // reviews a las complañias
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // comentarios a los foros y a las noticios
+
   },
   {
     timestamps: true, //Refleja el momento exacto de la modificación

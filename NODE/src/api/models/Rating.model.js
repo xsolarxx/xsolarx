@@ -9,12 +9,12 @@ const RatingSchema = new Schema({
     max: 5,
   }, // el rating en tipo estrella para la compañía
 
-  userPunctuation: [
+  userPunctuation:
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-  ], // la puntuación que da el User a la compañía
+   // la puntuación que da el User a la compañía
 
   companyPunctuated: [
     {
@@ -22,8 +22,9 @@ const RatingSchema = new Schema({
       ref: "Company",
     }, // hace referencia a la compañía que ha sido puntuada por el User
   ],
-  timestamps: true,
-});
+  
+}, 
+{timestamps: true});
 
 // Create Company model
 const Rating = mongoose.model("Rating", RatingSchema);
