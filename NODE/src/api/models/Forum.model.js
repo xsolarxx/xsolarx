@@ -15,7 +15,7 @@ const PostSchema = new mongoose.Schema(
     },
 
     image: {
-      type: string, // Representación URL
+      type: String, // Representación URL
     },
 
     content: {
