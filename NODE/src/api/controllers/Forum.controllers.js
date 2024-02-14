@@ -2,7 +2,9 @@ const User = require("../models/User.model");
 const Forum = require("../models/Forum.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// crear post
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ CREAR POST/FORUM-------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 const createForum = async (req, res, next) => {
   try {
     await Forum.syncIndexes();
@@ -27,5 +29,20 @@ const createForum = async (req, res, next) => {
     });
   }
 };
-
-module.exports = { createForum };
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ GET BY ID--------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+const getById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const forumtById = await Comment.findById(id);
+    if (forumtById) {
+      return res.status(200).json(forumtById);
+    } else {
+      return res.status(404).json("no se ha encontrado el post");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+module.exports = { createForum, getById };
