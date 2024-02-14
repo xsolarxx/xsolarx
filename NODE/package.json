@@ -22,10 +22,10 @@
       "multer": "^1.4.5-lts.1",
       "multer-storage-cloudinary": "^4.0.0",
       "node": "^21.6.1",
-      "nodemailer": "^6.9.9",
       "validator": "^13.11.0"
    },
    "devDependencies": {
+      "nodemailer": "^6.9.9",
       "nodemon": "^3.0.3"
    }
 }
