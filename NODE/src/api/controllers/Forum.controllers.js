@@ -1,5 +1,5 @@
 const User = require("../models/User.model");
-const Forum = require("../models/Forum.model")
+const Forum = require("../models/Forum.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 //-------------------------------------------------------------------------------------------------
@@ -68,52 +68,26 @@ const getAll = async (req, res, next) => {
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ DELETAR POST/FORUM-----------------------------------------------
 //-------------------------------------------------------------------------------------------------
-//! ver con el equipo
 
-/*const deleteComment = async (req, res, next) => {
+const deleteComment = async (req, res, next) => {
   try {
+    // extrai el id del comentario de los parametros de solicitacion http
     const { id } = req.params;
-    const comment = await Comment.findByIdAndDelete(id);
-    if (comment) {
-      // lo buscamos para vr si sigue existiendo o no
-      const finByIdComment = await Comment.findById(id);
 
-      try {
-        const test = await Comment.updateMany(
-          { comment: id },
-          { $pull: { comment: id } }
-        );
-        console.log(test);
+    // Validación básica del ID
+    if (!id) {
+      // si no tiene el id
 
-        try {
-          await User.updateMany(
-            { commentFav: id },
-            { $pull: { commentFav: id } }
-          );
-
-          return res.status(finByIdComment ? 404 : 200).json({
-            deleteTest: finByIdComment ? false : true,
-          });
-        } catch (error) {
-          return res.status(404).json({
-            error: "error catch update User",
-            message: error.message,
-          });
-        }
-      } catch (error) {
-        return res.status(404).json({
-          error: "error catch update Movie",
-          message: error.message,
-        });
-      }
+      return res
+        .status(400)
+        .json({ error: "ID del comentario no proporcionado" });
     }
-  } catch (error) {
-    return res.status(404).json(error.message);
-  }
-}; */
-
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ DELETAR POST/FORUM-----------------------------------------------
-//
+    // verificar si el comentario se eliminó correctamente
+    const comment = await Comment.findByIdAndDelete(id); // const para buscar y borrar
+    if (!comment) {
+      return res.status(400).json({ error: "Comentario no encotrado" });
+    }
+  } catch (error) {}
+};
 
 module.exports = { createForum, getById };
