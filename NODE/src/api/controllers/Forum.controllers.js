@@ -90,5 +90,5 @@ const getById = async (req, res, next) => {
   } catch (error) {
     return res.status(404).json(error.message);
   }
-};
-module.exports = { createForum, getById }; */
+};*/
+module.exports = { createForum, getById }; 
