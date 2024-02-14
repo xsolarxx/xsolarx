@@ -1,92 +1,101 @@
 const User = require("../models/User.model");
-const News = require("../models/News.model")
-const Forum = require("../models/Forum.model")
-const Company = require("../models/Company.model")
+const News = require("../models/News.model");
+const Forum = require("../models/Forum.model");
+const Company = require("../models/Company.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const CommentRoutes = require("../routes/Comment.routes");
 
 const createComment = async (req, res, next) => {
-try{
-  const {idRecipient} = req.params
-  const findNews = await News.findById (idRecipient) 
-  const findForum = await Forum.findById (idRecipient) 
-  const findCompany = await Company.findById (idRecipient) 
-  if(findNews)
-  {
-    //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
-    const newComment = new Comment({...req.body,owner:req.user._id,recipientNews:findNews})
-    const saveComment = await newComment.save()
-    if(saveComment){
-     try {
-      await News.findByIdAndUpdate(idRecipient, {
-        //*estamos actualizando el array de comentarios en noticias
-        $push: { comments: newComment._id },
+  try {
+    const { idRecipient } = req.params;
+    const findNews = await News.findById(idRecipient);
+    const findForum = await Forum.findById(idRecipient);
+    const findCompany = await Company.findById(idRecipient);
+    if (findNews) {
+      //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
+      const newComment = new Comment({
+        ...req.body,
+        owner: req.user._id,
+        recipientNews: findNews,
       });
-      await User.findByIdAndUpdate(req.user._id,{
-        $push: { comments: newComment._id },
+      const saveComment = await newComment.save();
+      if (saveComment) {
+        try {
+          await News.findByIdAndUpdate(idRecipient, {
+            //*estamos actualizando el array de comentarios en noticias
+            $push: { comments: newComment._id },
+          });
+          await User.findByIdAndUpdate(req.user._id, {
+            $push: { comments: newComment._id },
+          });
+          return res.status(200).json({ create: true, saveComment });
+        } catch (error) {
+          res.status(404).json({
+            error: "error update news and user",
+            message: error.message,
+          }) && next(error);
+        }
+      }
+    }
+    if (findForum) {
+      //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
+      const newComment = new Comment({
+        ...req.body,
+        owner: req.user._id,
+        recipientForum: findForum,
       });
-      return res.status(200).json({create:true,saveComment});
-     } catch (error) {
-      res.status(404).json({
-        error: "error update news and user",
-        message: error.message,
-      }) && next(error);
-      }}
-
+      const saveComment = await newComment.save();
+      if (saveComment) {
+        try {
+          await Forum.findByIdAndUpdate(idRecipient, {
+            //*estamos actualizando el array de comentarios en el foro
+            $push: { comments: newComment._id },
+          });
+          await User.findByIdAndUpdate(req.user._id, {
+            $push: { comments: newComment._id },
+          });
+          return res.status(200).json({ create: true, saveComment });
+        } catch (error) {
+          res.status(404).json({
+            error: "error update news and user",
+            message: error.message,
+          }) && next(error);
+        }
+      }
+    }
+    if (findCompany) {
+      //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
+      const newComment = new Comment({
+        ...req.body,
+        owner: req.user._id,
+        recipientCompanies: findCompany,
+      });
+      const saveComment = await newComment.save();
+      if (saveComment) {
+        try {
+          await Company.findByIdAndUpdate(idRecipient, {
+            //*estamos actualizando el array de comentarios en noticias
+            $push: { comments: newComment._id },
+          });
+          await User.findByIdAndUpdate(req.user._id, {
+            $push: { comments: newComment._id },
+          });
+          return res.status(200).json({ create: true, saveComment });
+        } catch (error) {
+          res.status(404).json({
+            error: "error update news and user",
+            message: error.message,
+          }) && next(error);
+        }
+      }
+    }
+  } catch (error) {
+    res.status(404).json({
+      error: "error crear comentario en news,foro and noticas",
+      message: error.message,
+    }) && next(error);
   }
-  if(findForum)
-  {
-    //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
-    const newComment = new Comment({...req.body,owner:req.user._id,recipientForum:findForum})
-    const saveComment = await newComment.save()
-    if(saveComment){
-     try {
-      await Forum.findByIdAndUpdate(idRecipient, {
-        //*estamos actualizando el array de comentarios en el foro
-        $push: { comments: newComment._id },
-      });
-      await User.findByIdAndUpdate(req.user._id,{
-        $push: { comments: newComment._id },
-      });
-      return res.status(200).json({create:true,saveComment});
-     } catch (error) {
-      res.status(404).json({
-        error: "error update news and user",
-        message: error.message,
-      }) && next(error);
-      }
-      }}
-  if(findCompany)
-  {
-    //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
-    const newComment = new Comment({...req.body,owner:req.user._id,recipientCompanies:findCompany})
-    const saveComment = await newComment.save()
-    if(saveComment){
-     try {
-      await Company.findByIdAndUpdate(idRecipient, {
-        //*estamos actualizando el array de comentarios en noticias
-        $push: { comments: newComment._id },
-      });
-      await User.findByIdAndUpdate(req.user._id,{
-        $push: { comments: newComment._id },
-      });
-      return res.status(200).json({create:true,saveComment});
-     } catch (error) {
-      res.status(404).json({
-        error: "error update news and user",
-        message: error.message,
-      }) && next(error);
-      }
-      }}}
-catch(error){
-  res.status(404).json({
-    error: "error crear comentario en news,foro and noticas",
-    message: error.message,
-  }) && next(error);
-}
-
-
 };
 
 // ) GET BY ID

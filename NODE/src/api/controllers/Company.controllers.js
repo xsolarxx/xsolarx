@@ -3,19 +3,21 @@
 
 const createCompany = async (req, res, next) => {
   let catchImg = req.file?.path;
-  
+
   try {
     await Company.syncIndexes();
     const newCompany = new Company(req.body);
 
-    // poner el create igual que en createComment, usando params  
+    // poner el create igual que en createComment, usando params
 
     try {
       const saveCompany = await newCompany.save();
       if (saveCompany) {
         return res.status(200).json(saveCompany);
       } else {
-        return res.status(404).json("No se ha podido guardar la Company en la DB ❌");
+        return res
+          .status(404)
+          .json("No se ha podido guardar la Company en la DB ❌");
       }
     } catch (error) {
       console.error("Error saving Company:", error);
@@ -31,6 +33,4 @@ const createCompany = async (req, res, next) => {
   }
 };
 
-
 // module.exports = { createCompany };
-  

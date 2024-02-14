@@ -1,5 +1,4 @@
-//? Queda pendiente --> togglelikeforum, togglelikecompany y togglelikenews , funcion de read  ---> getById 
-
+//? Queda pendiente --> togglelikeforum, togglelikecompany y togglelikenews , funcion de read  ---> getById
 
 //! --------------------------middleware------------------------------------
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
@@ -9,7 +8,7 @@ const User = require("../models/User.model");
 
 //! ---------------------------- utils ----------------------------------
 const randomCode = require("../../utils/randomCode");
-const sendEmail = require("../../utils/sendEmail"); 
+const sendEmail = require("../../utils/sendEmail");
 
 //! ------------------------------librerias--------------------------------
 const nodemailer = require("nodemailer");
@@ -27,9 +26,6 @@ const randomPassword = require("../../utils/randomPassword");
 
 dotenv.config();
 
-
-
-
 //! -----------------------------------------------------------------------------
 //? ----------------------------REGISTER CON REDIRECT----------------------------
 //! -----------------------------------------------------------------------------
@@ -40,8 +36,7 @@ const registerWithRedirect = async (req, res, next) => {
     let confirmationCode = randomCode();
     const userExist = await User.findOne(
       { email: req.body.email },
-      { userName: req.body.userName },
-      
+      { userName: req.body.userName }
     );
     if (!userExist) {
       const newUser = new User({ ...req.body, confirmationCode });
@@ -550,28 +545,28 @@ const update = async (req, res, next) => {
 //!Autologin------------------------------------------------
 
 const autoLogin = async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      const userDB = await User.findOne({ email });
-  
-      if (userDB) {
-        // comparo dos contraseñas encriptadas
-        if (password == userDB.password) {
-          const token = generateToken(userDB._id, email);
-          return res.status(200).json({
-            user: userDB,
-            token,
-          });
-        } else {
-          return res.status(404).json("password dont match");
-        }
+  try {
+    const { email, password } = req.body;
+    const userDB = await User.findOne({ email });
+
+    if (userDB) {
+      // comparo dos contraseñas encriptadas
+      if (password == userDB.password) {
+        const token = generateToken(userDB._id, email);
+        return res.status(200).json({
+          user: userDB,
+          token,
+        });
       } else {
-        return res.status(404).json("User no register");
+        return res.status(404).json("password dont match");
       }
-    } catch (error) {
-      return next(error);
+    } else {
+      return res.status(404).json("User no register");
     }
-  };
+  } catch (error) {
+    return next(error);
+  }
+};
 
 //! -----------------------------------------------------------------------------
 //? ---------------------------------DELETE--------------------------------------
@@ -607,7 +602,9 @@ const getById = async (req, res, next) => {
 };
 const getAll = async (req, res, next) => {
   try {
-    const allUser = await User.find().populate("forumOwner comments newsOwnerAdmin")
+    const allUser = await User.find().populate(
+      "forumOwner comments newsOwnerAdmin"
+    );
     /** el find nos devuelve un array */
     if (allUser.length > 0) {
       return res.status(200).json(allUser);
