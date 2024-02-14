@@ -592,6 +592,35 @@ const deleteUser = async (req, res, next) => {
     return next(error);
   }
 };
+const getById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id);
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("no se ha encontrado el comentario");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+const getAll = async (req, res, next) => {
+  try {
+    const allUser = await User.find();
+    /** el find nos devuelve un array */
+    if (allUser.length > 0) {
+      return res.status(200).json(allUser);
+    } else {
+      return res.status(404).json("no se han encontrado characters");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   sendCode,
   registerWithRedirect,
@@ -604,4 +633,6 @@ module.exports = {
   modifyPassword,
   update,
   deleteUser,
+  getById,
+  getAll,
 };
