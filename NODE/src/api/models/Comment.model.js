@@ -5,7 +5,7 @@ const CommentSchema = new Schema(
   {
     title: {
       type: String,
-      required:true,
+      required: true,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId, //*cuando hacemos referencia de user tenemos que poner el id en el imsonia

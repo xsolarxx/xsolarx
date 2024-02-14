@@ -17,24 +17,20 @@ const createForum = async (req, res, next) => {
 
     const newForum = new Forum(customBody);
     const savedForum = await newForum.save();
-    
-      if(savedForum)
-      {
+
+    if (savedForum) {
       try {
-      await User.findByIdAndUpdate(req.user._id,{
-        $push : {forumOwner : newForum._id,}
-      })
-      return res.status(200).json("El usuario ha creado el foro");
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { forumOwner: newForum._id },
+        });
+        return res.status(200).json("El usuario ha creado el foro");
       } catch (error) {
         return res.status(404).json({
           error: "error catch create foro",
           message: error.message,
         });
-        
       }
-        
-      }
-    
+    }
   } catch (error) {
     return res.status(404).json({
       error: "error catch create post",
@@ -63,7 +59,7 @@ const getById = async (req, res, next) => {
 //-------------------------------------------------------------------------------------------------
 const getAll = async (req, res, next) => {
   try {
-    const allForum = await Forum.find().populate("comment")
+    const allForum = await Forum.find().populate("comment");
     /** el find nos devuelve un array */
     if (allComment.length > 0) {
       return res.status(200).json(allComment);

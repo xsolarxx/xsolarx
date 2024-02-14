@@ -1,60 +1,61 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const CompanySchema = new Schema({
-  companyName: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  companyType: {
-    type: String,
-    required: true,
-  },
-  companyServices: [
-    {
-      type: String, //! checkear el enum
+const CompanySchema = new Schema(
+  {
+    companyName: {
+      type: String,
       required: true,
-      enum: [
-        "Presupuesto de instalación",
-        "Presupuesto de placas fotovoltáicas",
-        "Estudio energético",
-        "Mantenimiento",
-        "Dimensionado y modelado de la instalación",
-        "Estudio de seguridad",
-      ],
+      trim: true,
+      unique: true,
     },
-  ],
-  image: {
-    type: String,
-    required: true,
-  },
+    description: {
+      type: String,
+      required: true,
+    },
+    companyType: {
+      type: String,
+      required: true,
+    },
+    companyServices: [
+      {
+        type: String, //! checkear el enum
+        required: true,
+        enum: [
+          "Presupuesto de instalación",
+          "Presupuesto de placas fotovoltáicas",
+          "Estudio energético",
+          "Mantenimiento",
+          "Dimensionado y modelado de la instalación",
+          "Estudio de seguridad",
+        ],
+      },
+    ],
+    image: {
+      type: String,
+      required: true,
+    },
 
-  userCompanyRatings: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Rating",
-    },
-  ],
-  userCompanyReviews: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
-    },
-  ],
-  userfavCompany: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-},
-{timestamps: true}
+    userCompanyRatings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Rating",
+      },
+    ],
+    userCompanyReviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
+    userfavCompany: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
+  { timestamps: true }
 );
 
 // Create Company model
