@@ -61,13 +61,15 @@ const getAll = async (req, res, next) => {
   try {
     const allForum = await Forum.find().populate("comment");
     /** el find nos devuelve un array */
-    if (allComment.length > 0) {
-      return res.status(200).json(allComment);
+    if (allForum.length > 0) {
+      // Verifica si se encontraron foros
+      return res.status(200).json(allForum);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("No se encontraron foros");
     }
   } catch (error) {
     return res.status(404).json({
+      // Si ocurre un error durante la búsqueda de foros, devuelve una respuesta con estado 500 y el mensaje de error
       error: "error al buscar - lanzado en el catch",
       message: error.message,
     });
@@ -77,26 +79,37 @@ const getAll = async (req, res, next) => {
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ DELETAR POST/FORUM-----------------------------------------------
 //-------------------------------------------------------------------------------------------------
-
-const deleteComment = async (req, res, next) => {
+//! testar en insonmia
+const deleteForum = async (req, res, next) => {
   try {
     // extrai el id del comentario de los parametros de solicitacion http
     const { id } = req.params;
-
     // Validación básica del ID
     if (!id) {
       // si no tiene el id
-
-      return res
-        .status(400)
-        .json({ error: "ID del comentario no proporcionado" });
+      return res.status(400).json({ error: "ID del forum no proporcionado" });
     }
     // verificar si el comentario se eliminó correctamente
-    const comment = await Comment.findByIdAndDelete(id); // const para buscar y borrar
-    if (!comment) {
-      return res.status(400).json({ error: "Comentario no encotrado" });
+    const forum = await Forum.findByIdAndDelete(id); // const para buscar y borrar
+    if (!Forum) {
+      return res.status(400).json({ error: "forum no encotrado" });
     }
-  } catch (error) {}
+    await Promise.all([
+      // Eliminar las referencias al foro en otras colecciones
+      User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
+      User.updateMany(
+        { forumFollowing: id },
+        { $pull: { forumFollowing: id } }
+      ),
+    ]);
+    return res
+      .status(200)
+      .json({ exito: true, mensaje: "Foro eliminado correctamente" });
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ error: "Error al eliminar el foro", mensaje: error.message });
+  }
 };
 
-module.exports = { createForum, getById };
+module.exports = { createForum, getById, getAll, deleteForum };
