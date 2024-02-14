@@ -30,6 +30,9 @@ app.use("/api/v1/comment/", CommentRoutes);
 const ForumRoutes = require("./src/api/routes/Forum.routes");
 app.use("/api/v1/forum/", ForumRoutes);
 
+const NewsRoutes = require("./src/api/routes/News.routes");
+app.use("/api/v1/news/", NewsRoutes);
+
 app.use("*", (req, res, next) => {
   const error = new Error("Route not found");
   error.status = 404;

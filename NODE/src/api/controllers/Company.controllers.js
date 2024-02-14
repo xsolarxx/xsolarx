@@ -1,26 +1,14 @@
-const Company = require("../models/Company.model");
-const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+// const Company = require("../models/Company.model");
+// const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 const createCompany = async (req, res, next) => {
   let catchImg = req.file?.path;
+  
   try {
     await Company.syncIndexes();
     const newCompany = new Company(req.body);
 
-    if (req.file) {
-      newCompany.image = catchImg;
-    }
-
-    const customBody = {
-      companyName: req.body?.companyName,
-      description: req.body?.description,
-      companyType: req.body?.companyType,
-      companyServices: req.body?.companyServices,
-      image: req.body?.image,
-    };
-
-    newCompany = new Company(customBody);
-
+    // poner el create igual que en createComment, usando params  
 
     try {
       const saveCompany = await newCompany.save();
@@ -44,5 +32,5 @@ const createCompany = async (req, res, next) => {
 };
 
 
-module.exports = { createCompany };
+// module.exports = { createCompany };
   

@@ -40,6 +40,8 @@ const NewsSchema = new Schema({
       ref: "Comment",
     }, //array de los comentarios hechos por los users del Comment.model, según su ObjectId.
   ],
+ ownerAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
 },
 {timestamps: true}
 );

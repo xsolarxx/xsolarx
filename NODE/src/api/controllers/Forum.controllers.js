@@ -1,5 +1,6 @@
 const User = require("../models/User.model");
 const Forum = require("../models/Forum.model");
+const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 //-------------------------------------------------------------------------------------------------
