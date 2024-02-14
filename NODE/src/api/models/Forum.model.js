@@ -29,6 +29,7 @@ const PostSchema = new mongoose.Schema(
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
 
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    followed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
 
   { timestamps: true } //! todos los timestamps así(comment.model corregido yA)

@@ -14,10 +14,16 @@ const createComment = async (req, res, next) => {
       title: req.body?.title,
       content: req.body?.content,
       owner: req.body?.owner,
+
+      /// falta meter
     };
     const newComment = new Comment(customBody);
     const savedComment = await newComment.save();
 
+    /// teneis que actualizar las claves de a que le haber echo el comentario
+     /// ---> news: hay que actualizar el array  de comentarios con el id del comentario creado en el array comments
+     /// ---> forum: comments hay que modificarlo en el modelo de forum
+     /// ---> empresa: 
     // test en el runtime
     return res
       .status(savedComment ? 200 : 404)
