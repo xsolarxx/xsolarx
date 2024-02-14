@@ -52,10 +52,10 @@ const getAll = async (req, res, next) => {
   try {
     const allForum = await Forum.find();
     /** el find nos devuelve un array */
-    if (allComment.length > 0) {
-      return res.status(200).json(allComment);
+    if (allForum.length > 0) {
+      return res.status(200).json(allForum);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("no se han encontrado los post");
     }
   } catch (error) {
     return res.status(404).json({
@@ -69,51 +69,39 @@ const getAll = async (req, res, next) => {
 // ------------------------------ DELETAR POST/FORUM-----------------------------------------------
 //-------------------------------------------------------------------------------------------------
 //! ver con el equipo
-
-/*const deleteComment = async (req, res, next) => {
+const deleteComment = async (req, res, next) => {
   try {
+    // Extrai o ID do comentário dos parâmetros da solicitação HTTP
     const { id } = req.params;
-    const comment = await Comment.findByIdAndDelete(id);
-    if (comment) {
-      // lo buscamos para vr si sigue existiendo o no
-      const finByIdComment = await Comment.findById(id);
 
-      try {
-        const test = await Comment.updateMany(
-          { comment: id },
-          { $pull: { comment: id } }
-        );
-        console.log(test);
-
-        try {
-          await User.updateMany(
-            { commentFav: id },
-            { $pull: { commentFav: id } }
-          );
-
-          return res.status(finByIdComment ? 404 : 200).json({
-            deleteTest: finByIdComment ? false : true,
-          });
-        } catch (error) {
-          return res.status(404).json({
-            error: "error catch update User",
-            message: error.message,
-          });
-        }
-      } catch (error) {
-        return res.status(404).json({
-          error: "error catch update Movie",
-          message: error.message,
-        });
-      }
+    // Validação básica do ID
+    if (!id) {
+      return res.status(400).json({ error: "ID do comentário não fornecido" });
     }
+
+    // Exclui o comentário pelo ID fornecido
+    const comment = await Comment.findByIdAndDelete(id);
+
+    // Verifica se o comentário foi excluído com sucesso
+    if (!comment) {
+      return res.status(404).json({ error: "Comentário não encontrado" });
+    }
+
+    // Remove referências do comentário em outras coleções
+    await Promise.all([
+      User.updateMany({ commentFav: id }, { $pull: { commentFav: id } }),
+      Movie.updateMany({ comment: id }, { $pull: { comment: id } }),
+    ]);
+
+    // Retorna uma resposta indicando o sucesso da exclusão
+    return res
+      .status(200)
+      .json({ success: true, message: "Comentário excluído com sucesso" });
   } catch (error) {
-    return res.status(404).json(error.message);
+    // Trata os erros de forma mais detalhada
+    return res
+      .status(500)
+      .json({ error: "Erro ao excluir o comentário", message: error.message });
   }
-}; */
-
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ DELETAR POST/FORUM-----------------------------------------------
-//
-
+};
 module.exports = { createForum, getById };
