@@ -35,7 +35,7 @@ const createForum = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const forumtById = await Comment.findById(id);
+    const forumtById = await Forum.findById(id);
     if (forumtById) {
       return res.status(200).json(forumtById);
     } else {
@@ -45,6 +45,26 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
+//-------------------------------------------------------------------------------------------------
+// ------------------------------GET BY ALl-----------------------------------------------
+//-------------------------------------------------------------------------------------------------
+const getAll = async (req, res, next) => {
+  try {
+    const allForum = await Forum.find();
+    /** el find nos devuelve un array */
+    if (allComment.length > 0) {
+      return res.status(200).json(allComment);
+    } else {
+      return res.status(404).json("no se han encontrado characters");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
+
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ DELETAR POST/FORUM-----------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -90,5 +110,10 @@ const getById = async (req, res, next) => {
   } catch (error) {
     return res.status(404).json(error.message);
   }
-};
-module.exports = { createForum, getById }; */
+}; */
+
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ DELETAR POST/FORUM-----------------------------------------------
+//
+
+module.exports = { createForum, getById };
