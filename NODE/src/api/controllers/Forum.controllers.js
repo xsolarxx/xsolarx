@@ -45,4 +45,50 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
-module.exports = { createForum, getById };
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ DELETAR POST/FORUM-----------------------------------------------
+//-------------------------------------------------------------------------------------------------
+//! ver con el equipo
+
+/*const deleteComment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const comment = await Comment.findByIdAndDelete(id);
+    if (comment) {
+      // lo buscamos para vr si sigue existiendo o no
+      const finByIdComment = await Comment.findById(id);
+
+      try {
+        const test = await Comment.updateMany(
+          { comment: id },
+          { $pull: { comment: id } }
+        );
+        console.log(test);
+
+        try {
+          await User.updateMany(
+            { commentFav: id },
+            { $pull: { commentFav: id } }
+          );
+
+          return res.status(finByIdComment ? 404 : 200).json({
+            deleteTest: finByIdComment ? false : true,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: "error catch update User",
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: "error catch update Movie",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+module.exports = { createForum, getById }; */
