@@ -1,15 +1,13 @@
 //Se requiere mongoose y nos traemos el esquema de datos
-
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
-
 const NewsSchema = new Schema({
   title: {
     type: String,
     required: true,
   },
   shortContent: {
+    type: String,
     required: true,
   },
   fullContent: {
@@ -42,8 +40,9 @@ const NewsSchema = new Schema({
       ref: "Comment",
     }, //array de los comentarios hechos por los users del Comment.model, según su ObjectId.
   ],
-  timestamps: true,
-});
+},
+{timestamps: true}
+);
 
 // Create Company model
 const News = mongoose.model("News", NewsSchema);
