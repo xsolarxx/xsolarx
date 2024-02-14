@@ -12,6 +12,8 @@ const {
   modifyPassword,
   update,
   deleteUser,
+  getAll,
+  getById,
 } = require("../controllers/User.controllers");
 const express = require("express");
 const UserRoutes = express.Router();
@@ -22,6 +24,9 @@ UserRoutes.post("/resend", resendCode);
 UserRoutes.post("/check", checkNewUser);
 UserRoutes.post("/login", login);
 UserRoutes.post("/login/autologin", autoLogin);
+UserRoutes.get("/getall", getAll);
+UserRoutes.get("/getbyid/:id", getById);
+
 UserRoutes.patch("/forgotpassword", changePassword);
 UserRoutes.delete("/", [isAuth], deleteUser);
 
