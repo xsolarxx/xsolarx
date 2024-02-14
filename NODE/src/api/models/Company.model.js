@@ -53,8 +53,9 @@ const CompanySchema = new Schema({
       ref: "User",
     },
   ],
-  timestamps: true,
-});
+},
+{timestamps: true}
+);
 
 // Create Company model
 const Company = mongoose.model("Company", CompanySchema);

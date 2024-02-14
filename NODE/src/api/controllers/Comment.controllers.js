@@ -26,7 +26,7 @@ try{
       await User.findByIdAndUpdate(req.user._id,{
         $push: { comments: newComment._id },
       });
-      return res.status(200).json("El usuario ha comentado la noticia");
+      return res.status(200).json({create:true,saveComment});
      } catch (error) {
       res.status(404).json({
         error: "error update news and user",
@@ -49,7 +49,7 @@ try{
       await User.findByIdAndUpdate(req.user._id,{
         $push: { comments: newComment._id },
       });
-      return res.status(200).json("El usuario ha comentado en el foro");
+      return res.status(200).json({create:true,saveComment});
      } catch (error) {
       res.status(404).json({
         error: "error update news and user",
@@ -71,7 +71,7 @@ try{
       await User.findByIdAndUpdate(req.user._id,{
         $push: { comments: newComment._id },
       });
-      return res.status(200).json("El usuario ha comentado la compañia");
+      return res.status(200).json({create:true,saveComment});
      } catch (error) {
       res.status(404).json({
         error: "error update news and user",
