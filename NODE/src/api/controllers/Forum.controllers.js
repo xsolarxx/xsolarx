@@ -35,7 +35,7 @@ const createForum = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const forumtById = await Comment.findById(id);
+    const forumtById = await Forum.findById(id);
     if (forumtById) {
       return res.status(200).json(forumtById);
     } else {
