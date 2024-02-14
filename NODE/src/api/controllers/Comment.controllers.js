@@ -2,42 +2,41 @@ const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ CREAR COMENTARIO-------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 const createComment = async (req, res, next) => {
   try {
     await Comment.syncIndexes();
 
-    /** hacemos una instancia del modelo  */
     const customBody = {
       title: req.body?.title,
       content: req.body?.content,
       owner: req.body?.owner,
-
-      /// falta meter
+      recipientNews: req.body?.recipientNews,
+      recipientForum: req.body?.recipientForum,
+      recipientCompany: req.body?.recipientCompany,
     };
     const newComment = new Comment(customBody);
     const savedComment = await newComment.save();
 
-    /// teneis que actualizar las claves de a que le haber echo el comentario
-     /// ---> news: hay que actualizar el array  de comentarios con el id del comentario creado en el array comments
-     /// ---> forum: comments hay que modificarlo en el modelo de forum
-     /// ---> empresa: 
+    // PREGUNTA: teneis que actualizar las claves (try and catch)
+    //Hace 3 try catch de cada uno de:
+    /// ---> news: hay que actualizar el array  de comentarios con el id del comentario creado en el array comments
+    /// ---> forum: comments hay que modificarlo en el modelo de forum
+    /// ---> empresa:
+
     // test en el runtime
     return res
       .status(savedComment ? 200 : 404)
-      .json(savedComment ? savedComment : "error al crear el comentario");
+      .json(savedComment ? savedComment : "Error al crear el comentario");
   } catch (error) {
     return res.status(404).json({
-      error: "error catch create comentario",
+      error: "Error tipo catch al crear comentario",
       message: error.message,
     });
   }
 };
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ GET BY ID--------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+
+// ) GET BY ID
+
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -45,26 +44,27 @@ const getById = async (req, res, next) => {
     if (commentById) {
       return res.status(200).json(commentById);
     } else {
-      return res.status(404).json("no se ha encontrado el comentario");
+      return res.status(404).json("No se ha encontrado el comentario");
     }
   } catch (error) {
     return res.status(404).json(error.message);
   }
 };
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ DELETAR COMENTARIO-----------------------------------------------
-//-------------------------------------------------------------------------------------------------
+
+//) DELETE COMMENT //!PREGUNTAR A LAURA
+
 const deleteComment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const comment = await Comment.findByIdAndDelete(id);
     if (comment) {
-      // lo buscamos para vr si sigue existiendo o no
+      // Realiza una búsqueda para confirmar si aún sigue existiendo
       const finByIdComment = await Comment.findById(id);
 
       try {
+        //updateMany actualizará varios elementos del Comment
         const test = await Comment.updateMany(
-          { comment: id },
+          { comment: id }, //filtra por id
           { $pull: { comment: id } }
         );
         console.log(test);
@@ -80,13 +80,13 @@ const deleteComment = async (req, res, next) => {
           });
         } catch (error) {
           return res.status(404).json({
-            error: "error catch update User",
+            error: "error catch update User", //!queda actualizar el error.
             message: error.message,
           });
         }
       } catch (error) {
         return res.status(404).json({
-          error: "error catch update Movie",
+          error: "error catch update Movi", //!queda actualizar este error.
           message: error.message,
         });
       }
@@ -105,7 +105,7 @@ const getAll = async (req, res, next) => {
     if (allComment.length > 0) {
       return res.status(200).json(allComment);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("No se han encontrado comentarios");
     }
   } catch (error) {
     return res.status(404).json({
