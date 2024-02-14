@@ -1,4 +1,4 @@
-//! In progress
+//! In progress.
 
 const User = require("../models/User.model");
 const Rating = require("../models/Rating.model");
