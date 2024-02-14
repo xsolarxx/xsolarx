@@ -14,6 +14,7 @@ const CompanySchema = new Schema(
       required: true,
     },
     companyType: {
+      //! debería ser un enum también?
       type: String,
       required: true,
     },
