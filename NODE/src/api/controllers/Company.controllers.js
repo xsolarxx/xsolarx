@@ -58,8 +58,8 @@ const createCompany = async (req, res, next) => {
 // -------------------------------*GET BY NAME*--------------------------------------------------------
 const getByName = async (req, res, next) => {
   try {
-    const { name } = req.params;
-    const companyByName = await Company.find({ name });
+    const { companyName } = req.params;
+    const companyByName = await Company.find({ companyName });
     if (companyByName.length > 0) {
       //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
       return res.status(200).json(companyByName);
@@ -72,8 +72,8 @@ const getByName = async (req, res, next) => {
       message: error.message,
     });
   }
-};
-// --------------------------------*GET BY ID*--------------------------------------------------------
+}; //!TEST NO SE HA ENCONTRADO LA COMPAÑÍA
+// --------------------------------*GET BY ID*-------------------------------------------------------------
 
 const getById = async (req, res, next) => {
   try {
@@ -89,9 +89,8 @@ const getById = async (req, res, next) => {
   }
 };
 //--------------------------------*GET BY SERVICES*---------------------------------------------------------
-/* De este array de servicios, de este servicio en particular, dame las compañías
-que lo tienen. 
-Busca servicio de placas solares y solicito que se me devuelva las compañías que lo proporcionan. */
+//!PREGUNTAR COMO APLICAR EL ENUM EN NUESTROS GET BY. TENEMOS QUE REALIZAR 1 EJEMPLO DE UPDATE Y DELETE TAMBIEN
+//!De este array de servicios, de este servicio en particular, dame las compañías que lo tienen.
 
 const getByServices = async (req, res, next) => {
   try {
