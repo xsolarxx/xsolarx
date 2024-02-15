@@ -17,6 +17,7 @@ const {
   toggleFavComments,
   toggleLikedCompany,
   toggleLikedNews,
+  toggleLikedForum,
 } = require("../controllers/User.controllers");
 const express = require("express");
 const UserRoutes = express.Router();
@@ -40,6 +41,7 @@ UserRoutes.patch("/update/update", [isAuth], upload.single("image"), update);
 UserRoutes.patch("/commentFav/:idComment", [isAuth], toggleFavComments);
 UserRoutes.patch("/likedCompany/:idCompany", [isAuth], toggleLikedCompany);
 UserRoutes.patch("/likedNews/:idNews", [isAuth], toggleLikedNews);
+UserRoutes.patch("/likedForum/:idForum", [isAuth], toggleLikedForum);
 
 /// ------------------> rutas que pueden ser redirect
 UserRoutes.get("/register/sendMail/:id", sendCode); // :id ---> es el nombre del param
