@@ -24,6 +24,7 @@ const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
 const Comment = require("../models/Comment.model");
 const Company = require("../models/Company.model");
+const News = require("../models/News.model");
 //*const enumOk = require("../../utils/enumOk"); //*comentar temporalmente hasta que corrijamos la funcion enum en utils
 
 dotenv.config();
@@ -620,6 +621,9 @@ const getAll = async (req, res, next) => {
     });
   }
 };
+
+//-------------------------------*TOOGLE LIKED COMMENTS*-------------------------------------------------------------
+//!QUEDA PENDIENTE CAMBIAR TODOS LOS FAVCOMMENTS A likedComments
 // User campo de favcomments, ponendo el id del comentario
 // comentario en su campo de likes poner id de usuaruio
 // comprovar si el campo de favcoment inclui el id del comentario
@@ -672,6 +676,8 @@ const toggleFavComments = async (req, res, next) => {
     });
   }
 };
+
+//-------------------------------*TOOGLE LIKED COMPANY*-------------------------------------------------------------
 
 const toggleLikedCompany = async (req, res, nest) => {
   try {
@@ -730,6 +736,57 @@ const toggleLikedCompany = async (req, res, nest) => {
   }
 };
 
+//-------------------------------*TOOGLE LIKED NEWS*-------------------------------------------------------------
+
+const toggleLikedNews = async (req, res, next) => {
+  try {
+    const { idNews } = req.params;
+    const { _id, likedNews } = req.user;
+    if (likedNews.includes(idNews)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedNews: idNews },
+        });
+        await News.findByIdAndUpdate(idNews, {
+          $pull: { likes: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedNews"),
+          news: await News.findById(idNews).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el like de la noticia",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedNews: idNews },
+        });
+        await News.findByIdAndUpdate(idNews, {
+          $push: { likes: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedNews"), //!El populate es correcto?
+          news: await News.findById(idNews).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el like de la noticia",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendCode,
   registerWithRedirect,
@@ -746,4 +803,5 @@ module.exports = {
   getAll,
   toggleFavComments,
   toggleLikedCompany,
+  toggleLikedNews,
 };
