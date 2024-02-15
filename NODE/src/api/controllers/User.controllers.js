@@ -5,6 +5,7 @@ const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 //! ---------------------------- modelos ----------------------------------
 const User = require("../models/User.model");
+const Forum = require("../models/Forum.model");
 
 //! ---------------------------- utils ----------------------------------
 const randomCode = require("../../utils/randomCode");
@@ -15,10 +16,6 @@ const nodemailer = require("nodemailer");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
-const {
-  setTestEmailSend,
-  getTestEmailSend,
-} = require("../../state/state.data");
 const setError = require("../../helpers/handle-error");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
@@ -787,6 +784,55 @@ const toggleLikedNews = async (req, res, next) => {
   }
 };
 
+const toggleLikedForum = async (req, res, next) => {
+  try {
+    const { idForum } = req.params;
+    const { _id, likedForum } = req.user;
+    if (likedForum.includes(idForum)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedForum: idForum },
+        });
+        await Forum.findByIdAndUpdate(idForum, {
+          $pull: { likedForum: idForum },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedForum"),
+          news: await News.findById(idForum).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el like del foro",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedForum: idForum },
+        });
+        await News.findByIdAndUpdate(idForum, {
+          $push: { likes: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedForum"),
+          forum: await Forum.findById(idForum).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el like del foro",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendCode,
   registerWithRedirect,
@@ -804,4 +850,5 @@ module.exports = {
   toggleFavComments,
   toggleLikedCompany,
   toggleLikedNews,
+  toggleLikedForum,
 };
