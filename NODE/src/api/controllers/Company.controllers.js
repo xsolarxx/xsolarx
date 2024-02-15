@@ -3,7 +3,7 @@ const Company = require("../models/Company.model");
 const User = require("../models/User.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// ------------------------------*CREAR COMPANY* -------------------------------------------------
+// ------------------------------*CREATE COMPANY* -------------------------------------------------
 //! LAURA.COMO CREAR UN SORT BY EL QUE MÁS LIKES TIENE. QUIZÁ CON 1º GETALL Y LUEGO EN JS CON SORT METHOD.
 
 const createCompany = async (req, res, next) => {
@@ -88,19 +88,33 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ getByServices--------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+//--------------------------------*GET BY SERVICES*---------------------------------------------------------
+/* De este array de servicios, de este servicio en particular, dame las compañías
+que lo tienen. 
+Busca servicio de placas solares y solicito que se me devuelva las compañías que lo proporcionan. */
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ Delete --------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+const getByServices = async (req, res, next) => {
+  try {
+    const { companyServices } = req.params;
+    const companyByService = await Company.find({ companyServices });
+    if (companyByName.length > 0) {
+      //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
+      return res.status(200).json(companyByName);
+    } else {
+      return res.status(404).json("No se ha encontrado la compañía");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "Error tipo catch al buscar por nombre la compañía",
+      message: error.message,
+    });
+  }
+};
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ Update --------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+// --------------------------------*DELETE*--------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ getByLessLikes --------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+// --------------------------------*UPDATE*--------------------------------------------------------
+
+// --------------------------------*GET BY LIKES*--------------------------------------------------
+
 module.exports = { createCompany, getById, getByName };
