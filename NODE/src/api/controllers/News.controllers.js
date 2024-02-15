@@ -12,9 +12,9 @@ const createNews = async (req, res, next) => {
 
   try {
     await News.syncIndexes();
-    const newsExist = await News.findOne({title: req.body.title})
-    if (newsExist){
-      return res.status(409).json ("Título repetido")
+    const newsExist = await News.findOne({ title: req.body.title });
+    if (newsExist) {
+      return res.status(409).json("Título repetido");
     }
     const customBody = {
       title: req.body?.title,
@@ -62,5 +62,21 @@ const createNews = async (req, res, next) => {
     });
   }
 };
+const getAll = async (req, res, next) => {
+  try {
+    const allNews = await News.find();
+    /** el find nos devuelve un array */
+    if (allNews.length > 0) {
+      return res.status(200).json(allNews);
+    } else {
+      return res.status(404).json("no se han encontrado characters");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
 
-module.exports = { createNews };
+module.exports = { createNews, getAll };
