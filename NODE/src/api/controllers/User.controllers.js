@@ -611,7 +611,7 @@ const getAll = async (req, res, next) => {
     if (allUser.length > 0) {
       return res.status(200).json(allUser);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("no se han encontrado los usuarios");
     }
   } catch (error) {
     return res.status(404).json({
