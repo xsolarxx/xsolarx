@@ -454,7 +454,7 @@ const update = async (req, res, next) => {
 
     if (req.body?.gender) {
       // lo comprobamos y lo metermos en patchUser con un ternario en caso de que sea true o false el resultado de la funcion
-      const resultEnum = enumOk(req.body?.gender);
+      const resultEnum = enumOk("enumGender", req.body?.gender);
       patchUser.gender = resultEnum.check ? req.body?.gender : req.user.gender;
     }
 
