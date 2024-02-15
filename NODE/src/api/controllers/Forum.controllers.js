@@ -3,9 +3,8 @@ const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ CREAR POST/FORUM-------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+// -------------------------------*CREAR POST/FORUM*-------------------------------------------------
+
 const createForum = async (req, res, next) => {
   try {
     await Forum.syncIndexes();
@@ -26,14 +25,14 @@ const createForum = async (req, res, next) => {
         return res.status(200).json("El usuario ha creado el foro");
       } catch (error) {
         return res.status(404).json({
-          error: "error catch create foro",
+          error: "Error tipo catch al crear el foro",
           message: error.message,
         });
       }
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error catch create post",
+      error: "Error tipo catch encontrado al crear el foro",
       message: error.message,
     });
   }
@@ -44,11 +43,11 @@ const createForum = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const forumtById = await Forum.findById(id);
-    if (forumtById) {
-      return res.status(200).json(forumtById);
+    const forumById = await Forum.findById(id);
+    if (forumById) {
+      return res.status(200).json(forumById);
     } else {
-      return res.status(404).json("no se ha encontrado el post");
+      return res.status(404).json("No se ha encontrado el post");
     }
   } catch (error) {
     return res.status(404).json(error.message);
