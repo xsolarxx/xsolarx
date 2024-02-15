@@ -62,6 +62,9 @@ const createNews = async (req, res, next) => {
     });
   }
 };
+
+//* Get All
+
 const getAll = async (req, res, next) => {
   try {
     const allNews = await News.find();
@@ -69,7 +72,7 @@ const getAll = async (req, res, next) => {
     if (allNews.length > 0) {
       return res.status(200).json(allNews);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("no se han encontrado notícias");
     }
   } catch (error) {
     return res.status(404).json({
@@ -78,5 +81,20 @@ const getAll = async (req, res, next) => {
     });
   }
 };
+//* getbyID
 
-module.exports = { createNews, getAll };
+const getById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const NewsById = await News.findById(id);
+    if (NewsById) {
+      return res.status(200).json(NewsById);
+    } else {
+      return res.status(404).json("no se ha encontrado la noticia");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+
+module.exports = { createNews, getAll, getById };
