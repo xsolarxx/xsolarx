@@ -52,7 +52,7 @@ const CompanySchema = new Schema(
         ref: "Comment",
       },
     ],
-    userfavCompany: [
+    userLikedCompany: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

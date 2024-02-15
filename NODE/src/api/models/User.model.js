@@ -53,7 +53,7 @@ const UserSchema = new mongoose.Schema(
     ownerRating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }],
     usersFollowed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     usersFollowers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    favCompany: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }],
+    likedCompany: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }],
     favNews: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
     forumOwner: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo he creado
     forumFollowing: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo sigo
