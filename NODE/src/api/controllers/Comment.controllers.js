@@ -195,13 +195,6 @@ const update = async (req, res, next) => {
         title: req.body?.title ? req.body?.title : commentById.title,
       };
 
-      if (req.body?.gender) {
-        const resultEnum = enumOk(req.body?.gender);
-        customBody.gender = resultEnum.check
-          ? req.body?.gender
-          : characterById.gender;
-      }
-
       try {
         await Comment.findByIdAndUpdate(id, customBody);
         if (req.file?.path) {
