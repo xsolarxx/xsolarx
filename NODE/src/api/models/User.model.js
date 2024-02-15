@@ -49,7 +49,7 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    ownerRating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }],
     usersFollowed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     usersFollowers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     favCompany: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }],
@@ -58,7 +58,8 @@ const UserSchema = new mongoose.Schema(
     forumFollowing: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo sigo
     valuedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // reviews a las complañias
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // comentarios a los foros y a las noticios
-    newsOwnerAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }], // news que el admin ha creado
+    newsOwnerAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
+    companyOwnerAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "Company" }], // Company que el admin ha creado
   },
   {
     timestamps: true, //Refleja el momento exacto de la modificación
