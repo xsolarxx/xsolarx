@@ -71,8 +71,9 @@ const createRating = async (req, res, next) => {
 };
 
 //!EN NOTION SALE GET BY ID PERO CREO QUE NO ES NECESARIO. HAY QUE CONFIRMAR.
+//! PONER GET BY ALL CON LA INTENCIÓN DE ORDENAR POSTERIORMENTE LOS RATINGS DE MAYOR A MENOR.
 
-// ---------------------------------------* UPDATE *------------------------------------------------------
+// ---------------------------------------* UPDATE *---------Para que User pueda modificar su rating hecho---------------------------------------------
 //solo estructura copiada , no completo.
 
 /*const update = async (req, res, next) => {

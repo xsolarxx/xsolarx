@@ -1,12 +1,10 @@
-// const Company = require("../models/Company.model");
-// const { deleteImgCloudinary } = require("../../middleware/files.middleware");
-
 const enumOk = require("../../utils/enumOk");
 const Company = require("../models/Company.model");
 const User = require("../models/User.model");
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ CREAR COMPANY -------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+
+// ------------------------------*CREAR COMPANY* -------------------------------------------------
+//! LAURA.COMO CREAR UN SORT BY EL QUE MÁS LIKES TIENE. QUIZÁ CON 1º GETALL Y LUEGO EN JS CON SORT METHOD.
 
 const createCompany = async (req, res, next) => {
   let catchImg = req.file?.path;
@@ -35,7 +33,6 @@ const createCompany = async (req, res, next) => {
     const savedCompany = await newCompany.save();
     if (savedCompany) {
       try {
-        //const savedCompany = await newCompany.save();
         await User.findByIdAndUpdate(req.user._id, {
           $push: { companyOwnerAdmin: newCompany._id },
         });
@@ -43,7 +40,7 @@ const createCompany = async (req, res, next) => {
       } catch (error) {
         return res.status(404).json({
           error:
-            "Se ha encontrado error catch al crear la compañia por el admin",
+            "Se ha encontrado error catch al crear la compañía por el admin",
           message: error.message,
         });
       }
@@ -53,20 +50,31 @@ const createCompany = async (req, res, next) => {
       deleteImgCloudinary(catchImg);
     }
     return res.status(404).json({
-      error:
-        "error creando la empresa, imagen ha sido borrada en caso de haber sido adjunta",
+      error: "Error creando la empresa. Imagen ha sido borrada si fue adjunta",
       message: error.message,
     });
   }
 };
+// -------------------------------*GET BY NAME*--------------------------------------------------------
+const getByName = async (req, res, next) => {
+  try {
+    const { name } = req.params;
+    const companyByName = await Company.find({ name });
+    if (companyByName.length > 0) {
+      //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
+      return res.status(200).json(companyByName);
+    } else {
+      return res.status(404).json("No se ha encontrado la compañía");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "Error tipo catch al buscar por nombre la compañía",
+      message: error.message,
+    });
+  }
+};
+// --------------------------------*GET BY ID*--------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ getByName--------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ getById --------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -74,7 +82,7 @@ const getById = async (req, res, next) => {
     if (companyById) {
       return res.status(200).json(companyById);
     } else {
-      return res.status(404).json("no se ha encontrado la company");
+      return res.status(404).json("No se ha encontrado la compañía");
     }
   } catch (error) {
     return res.status(404).json(error.message);
@@ -95,4 +103,4 @@ const getById = async (req, res, next) => {
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ getByLessLikes --------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-module.exports = { createCompany };
+module.exports = { createCompany, getById, getByName };
