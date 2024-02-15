@@ -23,6 +23,7 @@ const setError = require("../../helpers/handle-error");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
 const Comment = require("../models/Comment.model");
+const Company = require("../models/Company.model");
 //*const enumOk = require("../../utils/enumOk"); //*comentar temporalmente hasta que corrijamos la funcion enum en utils
 
 dotenv.config();
@@ -610,7 +611,7 @@ const getAll = async (req, res, next) => {
     if (allUser.length > 0) {
       return res.status(200).json(allUser);
     } else {
-      return res.status(404).json("no se han encontrado characters");
+      return res.status(404).json("no se han encontrado los usuarios");
     }
   } catch (error) {
     return res.status(404).json({
@@ -672,6 +673,63 @@ const toggleFavComments = async (req, res, next) => {
   }
 };
 
+const toggleLikedCompany = async (req, res, nest) => {
+  try {
+    const { idCompany } = req.params; // id de la company
+    const { _id, likedCompany } = req.user; // usuario y company
+    console.log(req.user);
+    console.log("liked company:" + likedCompany);
+    // una condicional con includes
+    if (likedCompany.includes(idCompany)) {
+      console.log("liked company includes company ID");
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+        });
+        await Company.findByIdAndUpdate(idCompany, {
+          $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedCompany"),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al atualizar a la compania o el usuario",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+        });
+        await Company.findByIdAndUpdate(idCompany, {
+          $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("favComments"),
+          comment: await Comment.findById(idComment).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedCompany"),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendCode,
   registerWithRedirect,
@@ -687,4 +745,5 @@ module.exports = {
   getById,
   getAll,
   toggleFavComments,
+  toggleLikedCompany,
 };

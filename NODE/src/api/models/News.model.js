@@ -25,7 +25,7 @@ const NewsSchema = new Schema(
     tags: [
       {
         type: String,
-        enum: ["Paneles solares", "Energía eólica", "otros"],
+        enum: ["Paneles solares", "Energía eólica", "otros", "renovables"],
         required: true,
       },
     ], //array para poner la noticia en 1 o más tags diferentes de enum.

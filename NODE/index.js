@@ -36,10 +36,8 @@ app.use("/api/v1/news/", NewsRoutes);
 const RatingRoutes = require("./src/api/routes/Rating.routes");
 app.use("/api/v1/rating/", RatingRoutes);
 
-
 const CompanyRoutes = require("./src/api/routes/Company.routes");
 app.use("/api/v1/company/", CompanyRoutes);
-
 
 app.use("*", (req, res, next) => {
   const error = new Error("Route not found");
