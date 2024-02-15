@@ -4,7 +4,6 @@ const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const enumOk = require("../../utils/enumOk");
 
-//-------------------------------------------------------------------------------------------------
 // ------------------------------ CREAR NEWS ------------------------------------------------------
 
 const createNews = async (req, res, next) => {
@@ -63,8 +62,7 @@ const createNews = async (req, res, next) => {
   }
 };
 
-//* Get All
-
+//------------------------------------* GET ALL*----------------------------------------------------
 const getAll = async (req, res, next) => {
   try {
     const allNews = await News.find();
@@ -81,11 +79,12 @@ const getAll = async (req, res, next) => {
     });
   }
 };
-//* getbyID
 
+//------------------------------------* GET BY ID *----------------------------------------------------
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
+
     const NewsById = await News.findById(id);
     if (NewsById) {
       return res.status(200).json(NewsById);
@@ -96,9 +95,23 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
+//------------------------------------* GET BY TAGS *----------------------------------------------------
+const getByTags = async (req, res, next) => {
+  try {
+    const { tags } = req.params;
+    const NewsByTags = await News.find({ tags: tags });
+    if (!tags) {
+      return res.status(404).json("No ha fornecido la tag ");
+    } else {
+      return res.status(404).json("no se ha encontrado la noticia");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
 
 //* Update News
-
+//------------------------------------* UPDATE NEWS *----------------------------------------------------
 const update = async (req, res, next) => {
   await News.syncIndexes();
   let catchImg = req.file?.path;

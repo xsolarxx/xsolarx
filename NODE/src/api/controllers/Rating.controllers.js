@@ -10,10 +10,9 @@ const Company = require("../models/Company.model");
 const createRating = async (req, res, next) => {
   try {
     await Rating.syncIndexes();
-    const ratingExist = await User.findOne({
-      companyPunctuated: req.body.companyPunctuated,
-    });
-    if (ratingExist) {
+
+    if (req.user.companyPunctuated.includes(req.body.companyPunctuated)) {
+      //
       return res.status(404).json("Este usuario ya ha puntuado la empresa ");
     }
 
