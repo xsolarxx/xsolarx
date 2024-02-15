@@ -22,6 +22,7 @@ const {
 const setError = require("../../helpers/handle-error");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
+const Comment = require("../models/Comment.model");
 //*const enumOk = require("../../utils/enumOk"); //*comentar temporalmente hasta que corrijamos la funcion enum en utils
 
 dotenv.config();
@@ -618,6 +619,59 @@ const getAll = async (req, res, next) => {
     });
   }
 };
+// User campo de favcomments, ponendo el id del comentario
+// comentario en su campo de likes poner id de usuaruio
+// comprovar si el campo de favcoment inclui el id del comentario
+//con pull user o push para saber si tienes o no
+const toggleFavComments = async (req, res, next) => {
+  try {
+    const { idComment } = req.params;
+    const { _id, favComments } = req.user;
+    if (favComments.includes(idComment)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { favComments: idComment },
+        });
+        await Comment.findByIdAndUpdate(idComment, {
+          $pull: { likes: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("favComments"),
+          comment: await Comment.findById(idComment).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al atualizar al comentario o usuario",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { favComments: idComment },
+        });
+        await Comment.findByIdAndUpdate(idComment, {
+          $push: { likes: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("favComments"),
+          comment: await Comment.findById(idComment).populate("likes"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al atualizar al comentario o usuario",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendCode,
   registerWithRedirect,
@@ -632,4 +686,5 @@ module.exports = {
   deleteUser,
   getById,
   getAll,
+  toggleFavComments,
 };

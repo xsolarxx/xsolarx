@@ -8,6 +8,7 @@ const enumOk = (enumType, word) => {
     "Mantenimiento",
     "Dimensionado y modelado de la instalación",
     "Estudio de seguridad",
+    "otros",
   ];
   switch (enumType) {
     case "enumGender":

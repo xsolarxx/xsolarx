@@ -29,6 +29,7 @@ const CompanySchema = new Schema(
           "Mantenimiento",
           "Dimensionado y modelado de la instalación",
           "Estudio de seguridad",
+          "otros",
         ],
       },
     ],
@@ -36,7 +37,7 @@ const CompanySchema = new Schema(
       type: String,
       required: true,
     },
-    
+
     ownerAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     userCompanyRatings: [
