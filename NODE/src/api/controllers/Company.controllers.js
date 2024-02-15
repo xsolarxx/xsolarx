@@ -3,7 +3,7 @@
 
 const enumOk = require("../../utils/enumOk");
 const Company = require("../models/Company.model");
-
+const User = require("../models/User.model");
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ CREAR COMPANY -------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -13,40 +13,41 @@ const createCompany = async (req, res, next) => {
 
   try {
     await Company.syncIndexes();
-    const companyExist = await Company.findOne({companyName: req.body.companyName})
-    if (companyExist){
-      return res.status(409).json ("Esta empresa ya existe")
+    const companyExist = await Company.findOne({
+      companyName: req.body.companyName,
+    });
+    if (companyExist) {
+      return res.status(409).json("Esta empresa ya existe");
     }
     const customBody = {
       companyName: req.body?.companyName,
       description: req.body?.description,
       companyType: req.body?.companyType,
       image: req.file?.path,
-      
     };
     const newCompany = new Company(customBody);
-if (req.body?.companyServices){
-  const resultEnum = enumOk("enumServices", req.body?.companyServices);
-  newCompany.companyServices = resultEnum.check ? req.body?.companyServices : "otros"
-}
-const savedCompany = await newCompany.save();
-if (savedCompany){
-    try {
-      //const savedCompany = await newCompany.save();
-      await Company.findByIdAndUpdate(req.body?.companyServices, {
-        $push: { companyOwnerAdmin: newCompany._id },
-      });
-        return res.status(200).json(newCompany);
-
-    } catch (error) {
-      return res.status(404).json({
-        error:
-          "Se ha encontrado error catch al crear la compañia por el admin",
-        message: error.message,
-      });
+    if (req.body?.companyServices) {
+      const resultEnum = enumOk("enumServices", req.body?.companyServices);
+      newCompany.companyServices = resultEnum.check
+        ? req.body?.companyServices
+        : "otros";
     }
-  }
-  
+    const savedCompany = await newCompany.save();
+    if (savedCompany) {
+      try {
+        //const savedCompany = await newCompany.save();
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { companyOwnerAdmin: newCompany._id },
+        });
+        return res.status(200).json(newCompany);
+      } catch (error) {
+        return res.status(404).json({
+          error:
+            "Se ha encontrado error catch al crear la compañia por el admin",
+          message: error.message,
+        });
+      }
+    }
   } catch (error) {
     if (req.file) {
       deleteImgCloudinary(catchImg);
@@ -58,9 +59,6 @@ if (savedCompany){
     });
   }
 };
-
-
-
 
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ getByName--------------------------------------------------------

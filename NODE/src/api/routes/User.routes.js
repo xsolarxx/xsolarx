@@ -14,6 +14,7 @@ const {
   deleteUser,
   getAll,
   getById,
+  toggleFavComments,
 } = require("../controllers/User.controllers");
 const express = require("express");
 const UserRoutes = express.Router();
@@ -34,7 +35,7 @@ UserRoutes.delete("/", [isAuth], deleteUser);
 
 UserRoutes.patch("/changepassword", [isAuth], modifyPassword);
 UserRoutes.patch("/update/update", [isAuth], upload.single("image"), update);
-
+UserRoutes.patch("/commentFav/:idComment", [isAuth], toggleFavComments);
 /// ------------------> rutas que pueden ser redirect
 UserRoutes.get("/register/sendMail/:id", sendCode); // :id ---> es el nombre del param
 UserRoutes.patch("/sendPassword/:id", sendPassword);

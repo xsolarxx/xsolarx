@@ -10,6 +10,12 @@ const Company = require("../models/Company.model");
 const createRating = async (req, res, next) => {
   try {
     await Rating.syncIndexes();
+    const ratingExist = await User.findOne({
+      companyPunctuated: req.body.companyPunctuated,
+    });
+    if (ratingExist) {
+      return res.status(404).json("Este usuario ya ha puntuado la empresa ");
+    }
 
     const customBody = {
       punctuation: req.body?.punctuation,
@@ -18,35 +24,41 @@ const createRating = async (req, res, next) => {
     };
     const newRating = new Rating(customBody);
     const savedRating = await newRating.save();
-    if(savedRating){
+    if (savedRating) {
       try {
-      await User.findByIdAndUpdate(req.user._id,{
-        $push:{ownerRating: savedRating._id}
-      })
-      try {
-        await Company.findByIdAndUpdate(req.body.companyPunctuated,{
-          $push:{userCompanyRatings: savedRating._id}
-        })
-        return res.status(200).json(savedRating)
-
-      } catch (error) {
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { ownerRating: savedRating._id },
+        });
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { companyPunctuated: req.body.companyPunctuated },
+        });
+        try {
+          await Company.findByIdAndUpdate(req.body.companyPunctuated, {
+            $push: { userCompanyRatings: savedRating._id },
+          });
+          return res
+            .status(200)
+            .json(
+              await Rating.findById(savedRating._id).populate(
+                "userPunctuation companyPunctuated"
+              )
+            );
+        } catch (error) {
           return res.status(404).json({
-          error: "Error catch al actualizar la empresa",
+            error: "Error catch al actualizar la empresa",
+            message: error.message, // Comunica info sobre el error que se capturó
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error catch al actualizar el user",
           message: error.message, // Comunica info sobre el error que se capturó
         });
-        
       }
-      
-    } catch (error) {
-      return res.status(404).json({
-        error: "Error catch al actualizar el user",
-        message: error.message, // Comunica info sobre el error que se capturó
-      });
-      
-    }}else{
+    } else {
       return res.status(404).json({
         error: "Rating no guardado",
-      // Comunica info sobre el error que se capturó
+        // Comunica info sobre el error que se capturó
       });
     }
     // 1)   Runtime test
@@ -108,4 +120,4 @@ let test = {};
         }  */
 
 // ----------------------------* BORRAR RATING DE COMPAÑÍA--------------------------------------------
-module.exports = {createRating}
+module.exports = { createRating };
