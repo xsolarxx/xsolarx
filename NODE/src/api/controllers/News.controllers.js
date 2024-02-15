@@ -12,6 +12,10 @@ const createNews = async (req, res, next) => {
 
   try {
     await News.syncIndexes();
+    const newsExist = await News.findOne({title: req.body.title})
+    if (newsExist){
+      return res.status(409).json ("Título repetido")
+    }
     const customBody = {
       title: req.body?.title,
       shortContent: req.body?.shortContent,
@@ -37,7 +41,7 @@ const createNews = async (req, res, next) => {
         await User.findByIdAndUpdate(req.user._id, {
           $push: { newsOwnerAdmin: newNews._id },
         });
-        return res.status(200).json("El admin ha creado la noticia");
+        return res.status(200).json(newNews);
       } catch (error) {
         return res.status(404).json({
           error:
