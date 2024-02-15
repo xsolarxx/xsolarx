@@ -13,12 +13,11 @@ const RatingSchema = new Schema(
       ref: "User",
     },
     // la puntuación que da el User a la compañía
-    companyPunctuated: [
+    companyPunctuated: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Company",
       }, // hace referencia a la compañía que ha sido puntuada por el User
-    ],
   },
   { timestamps: true }
 );

@@ -1,6 +1,9 @@
 // const Company = require("../models/Company.model");
 // const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
+const enumOk = require("../../utils/enumOk");
+const Company = require("../models/Company.model");
+
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ CREAR COMPANY -------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -10,39 +13,54 @@ const createCompany = async (req, res, next) => {
 
   try {
     await Company.syncIndexes();
-
-    const newCompany = {
+    const companyExist = await Company.findOne({companyName: req.body.companyName})
+    if (companyExist){
+      return res.status(409).json ("Esta empresa ya existe")
+    }
+    const customBody = {
       companyName: req.body?.companyName,
       description: req.body?.description,
-      companyServices: req.body?.companyServices,
       companyType: req.body?.companyType,
       image: req.file?.path,
+      
     };
-    //! vamos a esperar a hablar con laura el crear el equivalente a "AuthOwner" de News
+    const newCompany = new Company(customBody);
+if (req.body?.companyServices){
+  const resultEnum = enumOk("enumServices", req.body?.companyServices);
+  newCompany.companyServices = resultEnum.check ? req.body?.companyServices : "otros"
+}
+const savedCompany = await newCompany.save();
+if (savedCompany){
     try {
-      const saveCompany = await newCompany.save();
-      if (saveCompany) {
-        return res.status(200).json(saveCompany);
-      } else {
-        return res
-          .status(404)
-          .json("No se ha podido guardar la Company en la DB ❌");
-      }
+      //const savedCompany = await newCompany.save();
+      await Company.findByIdAndUpdate(req.body?.companyServices, {
+        $push: { companyOwnerAdmin: newCompany._id },
+      });
+        return res.status(200).json(newCompany);
+
     } catch (error) {
-      console.error("Error saving Company:", error);
-      return res.status(404).json("Error general saving Company");
+      return res.status(404).json({
+        error:
+          "Se ha encontrado error catch al crear la compañia por el admin",
+        message: error.message,
+      });
     }
+  }
+  
   } catch (error) {
-    req.file?.path && deleteImgCloudinary(catchImg);
-    console.error("Error creating Company:", error);
+    if (req.file) {
+      deleteImgCloudinary(catchImg);
+    }
     return res.status(404).json({
-      message: "Error creating Company",
-      error: error,
+      error:
+        "error creando la empresa, imagen ha sido borrada en caso de haber sido adjunta",
+      message: error.message,
     });
   }
 };
 
-// module.exports = { createCompany };
+
+
 
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ getByName--------------------------------------------------------
@@ -79,3 +97,4 @@ const getById = async (req, res, next) => {
 //-------------------------------------------------------------------------------------------------
 // ------------------------------ getByLessLikes --------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
+module.exports = { createCompany };
