@@ -97,4 +97,91 @@ const getById = async (req, res, next) => {
   }
 };
 
-module.exports = { createNews, getAll, getById };
+//* Update News
+
+const update = async (req, res, next) => {
+  await News.syncIndexes();
+  let catchImg = req.file?.path;
+  try {
+    const { id } = req.params;
+    const newsById = await News.findById(id);
+    if (newsById) {
+      const oldImg = newsById.image;
+
+      const customBody = {
+        _id: newsById._id,
+        image: req.file?.path ? catchImg : oldImg,
+        title: req.body?.title ? req.body?.title : newsById.title,
+        author: req.body?.author ? req.body?.author : newsById.author,
+        //?Por que cuando ponemos tags en el custom body e intentamos hacer el update nos sale error en el imsonia???
+        //*tags: req.body?.tags ? req.body?.tags : newsById.tags,
+        shortContent: req.body?.shortContent
+          ? req.body?.shortContent
+          : newsById.shortContent,
+        fullContent: req.body?.fullContent
+          ? req.body?.fullContent
+          : newsById.fullContent,
+      };
+
+      try {
+        await News.findByIdAndUpdate(id, customBody);
+        if (req.file?.path) {
+          deleteImgCloudinary(oldImg);
+        }
+        // ......> VAMOS A BUSCAR EL ELEMENTO ACTUALIZADO POR ID
+
+        const newsByIdUpdate = await News.findById(id);
+
+        // ......> me cojer el req.body y vamos a sacarle las claves para saber que elementos nos ha dicho de actualizar
+        const elementUpdate = Object.keys(req.body);
+
+        /** vamos a hacer un objeto vacion donde meteremos los test */
+
+        let test = {};
+
+        /** vamos a recorrer las claves del body y vamos a crear un objeto con los test */
+
+        elementUpdate.forEach((item) => {
+          if (req.body[item] === newsByIdUpdate[item]) {
+            test[item] = true;
+          } else {
+            test[item] = false;
+          }
+        });
+
+        if (catchImg) {
+          newsByIdUpdate.image === catchImg
+            ? (test = { ...test, file: true })
+            : (test = { ...test, file: false });
+        }
+
+        /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
+         * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
+         */
+
+        let acc = 0;
+        for (clave in test) {
+          test[clave] == false && acc++;
+        }
+
+        if (acc > 0) {
+          return res.status(404).json({
+            dataTest: test,
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+          });
+        }
+      } catch (error) {}
+    } else {
+      return res.status(404).json("esta noticia no existe");
+    }
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
+
+module.exports = { createNews, getAll, getById, update };
