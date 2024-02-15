@@ -267,5 +267,60 @@ const update = async (req, res, next) => {
     return res.status(404).json(error);
   }
 };
+//-------------------------------------------------------------------------------------------------
+// ------------------------------ TOGGLE USER------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+const toggleUsers = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { users } = req.body;
 
-module.exports = { deleteComment, createComment, getAll, getById, update };
+    const commmet = await Comment.findById(id); // Procura el comentario por ID
+
+    if (!comment) {
+      //comprobar si se encontró el comentario
+      return res.status(404).json({ error: "Comentario no encontrado" });
+    }
+
+    const userIds = users.split(","); //Divide una lista de IDs del los usuários en um array
+
+    await Promise.all(
+      userIds.map(async (userId) => {
+        // verifica si el usuario esta associado al comentario
+        if (comment.users.includes(userId)) {
+          await Comment.findByIdAndUpdate(id, {
+            $pull: { users: userId }, // si no tiver remove
+          });
+          await User.findByIdAndUpdate(userId, {
+            $pull: { Comment: id }, //si no tiver remove
+          });
+        } else {
+          // verifica si el usuario no esta associado
+          await Comment.findByIdAndUpdate(id, {
+            $push: { users: userId }, // add
+          });
+          await User.findByIdAndUpdate(userId, {
+            //add
+            $push: { Comment: id },
+          });
+        }
+      })
+    );
+
+    const updatedComment = await Comment.findById(id).populate("users");
+    return res.status(200).json({ dataUpdate: updatedComment });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Internal server error", message: error.message });
+  }
+};
+
+module.exports = {
+  deleteComment,
+  createComment,
+  getAll,
+  getById,
+  update,
+  toggleUsers,
+};

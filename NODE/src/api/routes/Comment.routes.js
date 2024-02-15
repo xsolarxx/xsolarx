@@ -5,6 +5,7 @@ const {
   getAll,
   getById,
   update,
+  toggleUsers,
 } = require("../controllers/Comment.controllers");
 
 const CommentRoutes = require("express").Router();
@@ -14,4 +15,5 @@ CommentRoutes.delete("/:id", deleteComment);
 CommentRoutes.get("/getall", getAll);
 CommentRoutes.get("/getbyid/:id", getById);
 CommentRoutes.patch("/update/:id", update);
+CommentRoutes.patch("/add/:id", toggleUsers);
 module.exports = CommentRoutes;
