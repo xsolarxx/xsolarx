@@ -3,7 +3,7 @@ const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// -------------------------------*CREAR POST/FORUM*-------------------------------------------------
+// -----------------------------*CREATE POST/FORUM*-------------------------------------------------
 
 const createForum = async (req, res, next) => {
   try {
@@ -37,9 +37,9 @@ const createForum = async (req, res, next) => {
     });
   }
 };
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ GET BY ID--------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+
+// -------------------------------*GET BY ID*--------------------------------------------------------
+
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -47,19 +47,19 @@ const getById = async (req, res, next) => {
     if (forumById) {
       return res.status(200).json(forumById);
     } else {
-      return res.status(404).json("No se ha encontrado el post");
+      return res.status(404).json("No se ha encontrado el foro");
     }
   } catch (error) {
     return res.status(404).json(error.message);
   }
 };
-//-------------------------------------------------------------------------------------------------
-// ------------------------------GET BY ALl-----------------------------------------------
-//-------------------------------------------------------------------------------------------------
+
+// -------------------------------*GET ALL*-------------------------------------------------------
+
 const getAll = async (req, res, next) => {
   try {
     const allForum = await Forum.find().populate("comment");
-    /** el find nos devuelve un array */
+    /* El find nos devuelve un array */
     if (allForum.length > 0) {
       // Verifica si se encontraron foros
       return res.status(200).json(allForum);
@@ -69,32 +69,31 @@ const getAll = async (req, res, next) => {
   } catch (error) {
     return res.status(404).json({
       // Si ocurre un error durante la búsqueda de foros, devuelve una respuesta con estado 500 y el mensaje de error
-      error: "error al buscar - lanzado en el catch",
+      error: "Error en la búsqueda. Lanzado en el catch",
       message: error.message,
     });
   }
 };
 
-//-------------------------------------------------------------------------------------------------
-// ------------------------------ DELETAR POST/FORUM-----------------------------------------------
-//-------------------------------------------------------------------------------------------------
+// -------------------------------*DELETE POST/FORUM*-----------------------------------------------
+
 //! testar en insonmia
 const deleteForum = async (req, res, next) => {
   try {
-    // extrai el id del comentario de los parametros de solicitacion http
+    // Se extrae el id del comentario de los parametros de la solicitud http
     const { id } = req.params;
-    // Validación básica del ID
+    // Validación básica del id
     if (!id) {
-      // si no tiene el id
-      return res.status(400).json({ error: "ID del forum no proporcionado" });
+      // Si no tiene el id devuelve el siguiente error
+      return res.status(400).json({ error: "Id del foro no proporcionado" });
     }
-    // verificar si el comentario se eliminó correctamente
+    // Se verifica si el comentario se eliminó correctamente
     const forum = await Forum.findByIdAndDelete(id); // const para buscar y borrar
     if (!Forum) {
-      return res.status(400).json({ error: "forum no encotrado" });
+      return res.status(400).json({ error: "El foro no ha sido encontrado" });
     }
     await Promise.all([
-      // Eliminar las referencias al foro en otras colecciones
+      // Elimina las referencias al foro en otras colecciones
       User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
       User.updateMany(
         { forumFollowing: id },
@@ -103,12 +102,14 @@ const deleteForum = async (req, res, next) => {
     ]);
     return res
       .status(200)
-      .json({ exito: true, mensaje: "Foro eliminado correctamente" });
+      .json({ exito: true, mensaje: "Foro eliminado correctamente" }); //Spanish) exito y mensaje?
   } catch (error) {
     return res
       .status(400)
-      .json({ error: "Error al eliminar el foro", mensaje: error.message });
+      .json({ error: "Error al eliminar el foro", message: error.message });
   }
 };
 
 module.exports = { createForum, getById, getAll, deleteForum };
+
+//Se han realizado pequeñas correcciones gramaticales tanto en inglés como en español.
