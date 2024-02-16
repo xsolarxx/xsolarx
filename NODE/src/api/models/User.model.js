@@ -83,4 +83,4 @@ UserSchema.pre("save", async function (next) {
 const User = mongoose.model("User", UserSchema);
 module.exports = User;
 
-//Corregido y con comentarios.
+// Adición de comentarios junto a correcciones (no el código)
