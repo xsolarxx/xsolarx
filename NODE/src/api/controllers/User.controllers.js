@@ -1,35 +1,31 @@
-//? Queda pendiente --> togglelikeforum, togglelikecompany y togglelikenews , funcion de read  ---> getById
+//----------------------------------* Middleware and utils *-------------------------------------------------
 
-//! --------------------------middleware------------------------------------
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
-
-//! ---------------------------- modelos ----------------------------------
-const User = require("../models/User.model");
-const Forum = require("../models/Forum.model");
-
-//! ---------------------------- utils ----------------------------------
+const { generateToken } = require("../../utils/token");
+const randomPassword = require("../../utils/randomPassword");
+const enumOk = require("../../utils/enumOk");
 const randomCode = require("../../utils/randomCode");
-const sendEmail = require("../../utils/sendEmail");
+const sendEmail = require("../../utils/sendEmail"); //!sendEmail no ha sido llamado aún
 
-//! ------------------------------librerias--------------------------------
+//----------------------------------* Libraries and models*---------------------------------------------------------
+
 const nodemailer = require("nodemailer");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
 const setError = require("../../helpers/handle-error");
-const { generateToken } = require("../../utils/token");
-const randomPassword = require("../../utils/randomPassword");
+
+const User = require("../models/User.model");
+const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
 const Company = require("../models/Company.model");
 const News = require("../models/News.model");
 const Rating = require("../models/Rating.model");
-//*const enumOk = require("../../utils/enumOk"); //*comentar temporalmente hasta que corrijamos la funcion enum en utils
 
 dotenv.config();
 
-//! -----------------------------------------------------------------------------
-//? ----------------------------REGISTER CON REDIRECT----------------------------
-//! -----------------------------------------------------------------------------
+//---------------------------------* REGISTER WITH REDIRECT *-------------------------------------------------------
+
 const registerWithRedirect = async (req, res, next) => {
   let catchImg = req.file?.path;
   try {
@@ -61,7 +57,7 @@ const registerWithRedirect = async (req, res, next) => {
       }
     } else {
       if (req.file) deleteImgCloudinary(catchImg);
-      return res.status(409).json("this user already exist");
+      return res.status(409).json("Este usuario ya existe");
     }
   } catch (error) {
     if (req.file) {
@@ -71,24 +67,17 @@ const registerWithRedirect = async (req, res, next) => {
   }
 };
 
-//! -----------------------------------------------------------------------------
-//? ------------------CONTRALADORES QUE PUEDEN SER REDIRECT --------------------
-//! ----------------------------------------------------------------------------
+//-------------------CONTROLADORES QUE PUEDEN SER REDIRECT-------------------------------------------
 
-//!!! esto quiere decir que o bien tienen entidad propia porque se llaman por si mismos por parte del cliente
-//! o bien son llamados por redirect es decir son controladores de funciones accesorias
+/* Se llaman por sí mismos por parte del cliente o vía redirect, como controladores de funciones accesorias */
 
 const sendCode = async (req, res, next) => {
   try {
-    /// sacamos el param que hemos recibido por la ruta
-    /// recuerda la ruta: http://localhost:${PORT}/api/v1/users/register/sendMail/${userSave._id}
+    //Se saca el param recibido por la ruta
     const { id } = req.params;
-
-    /// VAMOS A BUSCAR EL USER POR ID para tener el email y el codigo de confirmacion
+    // Se busca user por id para obtener -> Email y código de confirmación
     const userDB = await User.findById(id);
-
-    /// ------------------> envio el codigo
-    const emailEnv = process.env.EMAIL;
+    const emailEnv = process.env.EMAIL; //Se envía el código
     const password = process.env.PASSWORD;
 
     const transporter = nodemailer.createTransport({
@@ -103,7 +92,7 @@ const sendCode = async (req, res, next) => {
       from: emailEnv,
       to: userDB.email,
       subject: "Confirmation code",
-      text: `tu codigo es ${userDB.confirmationCode}, gracias por confiar en nosotros ${userDB.userName}`,
+      text: `Tu código es ${userDB.confirmationCode}. Muchas gracias por formar parte de nuestra plataforma. ${userDB.userName}`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -111,7 +100,7 @@ const sendCode = async (req, res, next) => {
         console.log(error);
         return res.status(404).json({
           user: userDB,
-          confirmationCode: "error, resend code",
+          confirmationCode: "Error, resend code",
         });
       }
       console.log("Email sent: " + info.response);
@@ -125,13 +114,11 @@ const sendCode = async (req, res, next) => {
   }
 };
 
-//! -----------------------------------------------------------------------------
-//? -----------------------RESEND CODE -----------------------------
-//! -----------------------------------------------------------------------------
+//------------------------------* RESEND CODE *-------------------------------------------------------------------
 
 const resendCode = async (req, res, next) => {
   try {
-    //! vamos a configurar nodemailer porque tenemos que enviar un codigo
+    // Se configura nodemailer para el envío del código
     const email = process.env.EMAIL;
     const password = process.env.PASSWORD;
     const transporter = nodemailer.createTransport({
@@ -142,7 +129,7 @@ const resendCode = async (req, res, next) => {
       },
     });
 
-    //! hay que ver que el usuario exista porque si no existe no tiene sentido hacer ninguna verificacion
+    // Se verifica 1º si el usuario existe.
     const userExists = await User.findOne({ email: req.body.email });
 
     if (userExists) {
@@ -485,6 +472,7 @@ const update = async (req, res, next) => {
       // updateKeys ES UN ARRAY CON LOS NOMBRES DE LAS CLAVES = ["name", "email", "rol"]
 
       ///----------------> para todo lo diferente de la imagen ----------------------------------
+
       updateKeys.forEach((item) => {
         /** vamos a comprobar que la info actualizada sea igual que lo que me mando por el body... */
         if (updateUser[item] === req.body[item]) {
@@ -508,7 +496,7 @@ const update = async (req, res, next) => {
         }
       });
 
-      /// ---------------------- para la imagen ---------------------------------
+      //--------------------------para la imagen----------------------------------
       if (req.file) {
         /** si la imagen del user actualizado es estrictamente igual a la imagen nueva que la
          * guardamos en el catchImg, mandamos un objeto con la clave image y su valor en true
@@ -566,7 +554,7 @@ const autoLogin = async (req, res, next) => {
   }
 };
 
-//-----------------------------------* DELETE *-------------------------------------------------------------
+//-----------------------------------* DELETE USER *-------------------------------------------------------------
 
 const deleteUser = async (req, res, next) => {
   try {
@@ -730,7 +718,9 @@ const deleteUser = async (req, res, next) => {
     });
   }
 };
+
 //-------------------------------*GET BY ID*-------------------------------------------------------------
+
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -744,7 +734,8 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
-//-------------------------------*GET ALL*-------------------------------------------------------------
+//--------------------------------*GET ALL*-------------------------------------------------------------
+
 const getAll = async (req, res, next) => {
   try {
     const allUser = await User.find().populate(
@@ -819,7 +810,7 @@ const toggleFavComments = async (req, res, next) => {
   }
 };
 
-//-------------------------------*TOOGLE LIKED COMPANY*-------------------------------------------------------------
+//--------------------------------* TOOGLE LIKED COMPANY *-------------------------------------------------------------
 
 const toggleLikedCompany = async (req, res, nest) => {
   try {
@@ -873,7 +864,7 @@ const toggleLikedCompany = async (req, res, nest) => {
   }
 };
 
-//-------------------------------*TOOGLE LIKED NEWS*-------------------------------------------------------------
+//---------------------------------* TOOGLE LIKED NEWS *-------------------------------------------------------------
 
 const toggleLikedNews = async (req, res, next) => {
   try {
@@ -924,6 +915,8 @@ const toggleLikedNews = async (req, res, next) => {
   }
 };
 
+//-------------------------------* TOOGLE LIKED FORUM *-------------------------------------------------------------
+
 const toggleLikedForum = async (req, res, next) => {
   try {
     const { idForum } = req.params;
@@ -972,6 +965,70 @@ const toggleLikedForum = async (req, res, next) => {
     });
   }
 };
+
+//------------------------------------* TOOGLE USERS FOLLOWED *-------------------------------------------------------------
+/* PISTA: Request must have:
+UserID of who is triggering the follow action
+UserID of the user who the aforementioned user is FOLLOWING
+Toggle function which does two actions
+ MAIN TOGGLE FUNCTION CAN RUN BOTH THE BELOW
+ THE MAIN FUNTION IS THE ONE WHICH WILL BE TRIGGERED FROM THE ROUT
+ runs togglerUsersFollowers
+ runs toggleUsersFollowed */
+
+const toggleUsersFollowed = async (req, res, nest) => {
+  try {
+    const { idUser } = req.params; // Se requieren los datos del User
+    const { _id, usersFollowers } = req.user; // usuario y company
+    // una condicional con includes
+    if (likedCompany.includes(idCompany)) {
+      console.log("liked company includes company ID");
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+        });
+        await Company.findByIdAndUpdate(idCompany, {
+          $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedCompany"),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al atualizar a la compania o el usuario",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+        });
+        await Company.findByIdAndUpdate(idCompany, {
+          $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("likedCompany"),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
+      } catch (error) {
+        return res.status(404).json(error.message);
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
+//-------------------------------------------------------------------------------------------------------------------------
 
 module.exports = {
   sendCode,
