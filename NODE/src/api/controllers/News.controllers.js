@@ -99,18 +99,18 @@ const getById = async (req, res, next) => {
 const getByTags = async (req, res, next) => {
   try {
     const { tags } = req.params;
-    const NewsByTags = await News.find({ tags: tags });
-    if (!tags) {
-      return res.status(404).json("No ha fornecido la tag ");
+    const NewsByTags = await News.find({ tags: tags }); // procurar las noticias con base en las tags
+    if (NewsByTags.length > 0) {
+      // verifica si hay noticias
+      return res.status(200).json(NewsByTags);
     } else {
-      return res.status(404).json("no se ha encontrado la noticia");
+      return res.status(404).json("No ha fornecido la tag");
     }
   } catch (error) {
     return res.status(404).json(error.message);
   }
 };
 
-//* Update News
 //------------------------------------* UPDATE NEWS *----------------------------------------------------
 const update = async (req, res, next) => {
   await News.syncIndexes();
@@ -197,4 +197,4 @@ const update = async (req, res, next) => {
   }
 };
 
-module.exports = { createNews, getAll, getById, update };
+module.exports = { createNews, getAll, getById, update, getByTags };

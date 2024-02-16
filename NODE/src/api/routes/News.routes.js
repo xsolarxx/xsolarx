@@ -4,6 +4,7 @@ const {
   getAll,
   getById,
   update,
+  getByTags,
 } = require("../controllers/News.controllers");
 const { upload } = require("../../middleware/files.middleware");
 
@@ -12,7 +13,8 @@ const NewsRoutes = require("express").Router();
 NewsRoutes.post("/create", [isAuthAdmin], upload.single("image"), createNews);
 NewsRoutes.get("/getall", getAll);
 NewsRoutes.get("/getbyid/:id", getById);
-NewsRoutes.patch("/update/:id", update);
+NewsRoutes.get("/getbytags/:tags", getByTags);
+
 // NewsRoutes.get("/getbyid/:id", getById);
 
 module.exports = NewsRoutes;
