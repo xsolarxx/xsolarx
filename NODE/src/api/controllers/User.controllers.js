@@ -755,8 +755,9 @@ const getAll = async (req, res, next) => {
   }
 };
 
-//-------------------------------*TOOGLE LIKED COMMENTS*-------------------------------------------------------------
-//!QUEDA PENDIENTE CAMBIAR TODOS LOS FAVCOMMENTS A likedComments
+//--------------------------------*TOGGLE LIKED COMMENTS*-------------------------------------------------------------
+//? QUEDA PENDIENTE CAMBIAR TODOS LOS FAVCOMMENTS A likedComments
+
 // User campo de favcomments, ponendo el id del comentario
 // comentario en su campo de likes poner id de usuaruio
 // comprovar si el campo de favcoment inclui el id del comentario
@@ -779,7 +780,7 @@ const toggleFavComments = async (req, res, next) => {
         });
       } catch (error) {
         return res.status(404).json({
-          error: "Error al atualizar al comentario o usuario",
+          error: "Error al actualizar el like",
           message: error.message,
         });
       }
@@ -797,7 +798,7 @@ const toggleFavComments = async (req, res, next) => {
         });
       } catch (error) {
         return res.status(404).json({
-          error: "Error al atualizar al comentario o usuario",
+          error: "Error al actualizar el like del usuario",
           message: error.message,
         });
       }
@@ -812,7 +813,7 @@ const toggleFavComments = async (req, res, next) => {
 
 //--------------------------------* TOOGLE LIKED COMPANY *-------------------------------------------------------------
 
-const toggleLikedCompany = async (req, res, nest) => {
+const toggleLikedCompany = async (req, res, next) => {
   try {
     const { idCompany } = req.params; // id de la company
     const { _id, likedCompany } = req.user; // usuario y company
@@ -834,7 +835,7 @@ const toggleLikedCompany = async (req, res, nest) => {
         });
       } catch (error) {
         return res.status(404).json({
-          error: "Error al atualizar a la compania o el usuario",
+          error: "Error al actualizar el like a la compañía",
           message: error.message,
         });
       }
@@ -969,15 +970,14 @@ const toggleLikedForum = async (req, res, next) => {
 //------------------------------------* TOGGLE USERS FOLLOWED *-------------------------------------------------------------
 
 //? EN PROCESO, MUY HARDCORE TT__TT
-/* PISTA: Request must have:
-UserID of who is triggering the follow action
+/* PISTA: Request tiene que tener :
+UserID is triggering the follow action
 UserID of the user who the aforementioned user is FOLLOWING
-Toggle function which does two actions
+Option a: Toggle function which does two actions:
  MAIN TOGGLE FUNCTION CAN RUN BOTH THE BELOW
- THE MAIN FUNTION IS THE ONE WHICH WILL BE TRIGGERED FROM THE ROUT
+ THE MAIN FUNTION IS THE ONE WHICH WILL BE TRIGGERED FROM THE ROUTE
  runs togglerUsersFollowers
  runs toggleUsersFollowed */
-
 /*
 Cuando un user sigue a otro user se tiene que hacer:
 
