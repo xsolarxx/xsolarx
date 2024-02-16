@@ -95,25 +95,23 @@ const getById = async (req, res, next) => {
 const getByServices = async (req, res, next) => {
   try {
     const { companyServices } = req.params;
-    const companyByService = await Company.find({ companyServices });
-    if (companyByName.length > 0) {
+    const newcompanyByService = await Company.find({
+      companyServices: companyServices,
+    });
+    if (newcompanyByService.length > 0) {
       //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
-      return res.status(200).json(companyByName);
+      return res.status(200).json(newcompanyByService);
     } else {
-      return res.status(404).json("No se ha encontrado la compañía");
+      return res.status(404).json("No fue encontrado el service");
     }
   } catch (error) {
-    return res.status(404).json({
-      error: "Error tipo catch al buscar por nombre la compañía",
-      message: error.message,
-    });
+    return res.status(404).json("Error al buscar el service");
   }
 };
-
 // --------------------------------*DELETE*--------------------------------------------------------
 
 // --------------------------------*UPDATE*--------------------------------------------------------
 
 // --------------------------------*GET BY LIKES*--------------------------------------------------
 
-module.exports = { createCompany, getById, getByName };
+module.exports = { createCompany, getById, getByName, getByServices };
