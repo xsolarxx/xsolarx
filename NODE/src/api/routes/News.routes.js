@@ -14,6 +14,7 @@ NewsRoutes.post("/create", [isAuthAdmin], upload.single("image"), createNews);
 NewsRoutes.get("/getall", getAll);
 NewsRoutes.get("/getbyid/:id", getById);
 NewsRoutes.get("/getbytags", getByTags);
+NewsRoutes.patch("/update/:id", update);
 
 // NewsRoutes.get("/getbyid/:id", getById);
 

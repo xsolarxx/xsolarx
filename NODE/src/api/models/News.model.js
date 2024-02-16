@@ -22,13 +22,13 @@ const NewsSchema = new Schema(
       type: String,
       required: true,
     },
-    tags: [
+    tags: 
       {
         type: String,
         enum: ["Paneles solares", "Energía eólica", "otros", "renovables"],
         required: true,
       },
-    ], //array para poner la noticia en 1 o más tags diferentes de enum.
+    //array para poner la noticia en 1 o más tags diferentes de enum.
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -113,3 +113,7 @@ const deleteForum = async (req, res, next) => {
 module.exports = { createForum, getById, getAll, deleteForum };
 
 //Se han realizado pequeñas correcciones gramaticales tanto en inglés como en español.
+//!----------------------------------------------------------------------------------
+//-----------------------------------UPDATE------------------------------------------
+//!----------------------------------------------------------------------------------
+
