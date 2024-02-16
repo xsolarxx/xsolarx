@@ -619,6 +619,53 @@ const getAll = async (req, res, next) => {
   }
 };
 
+/**
+ * 
+ función deleteUser(req, res, next):
+    try:
+        id = extraer ID de usuario de los parámetros de la solicitud
+        usuario = encontrar y eliminar usuario de la base de datos usando el ID
+        
+        si el usuario existe:
+            verificar si el usuario aún existe después de la eliminación (runtime test)
+            
+            procedemos a hacer un TRY por cada referencias de interaciónes:
+            //? se pueden agrupar los trys? 
+               que ha tenido el usuario en la plataforma, y las vamos "eliminando" una a una si existen
+
+              todos los sitios donde ha comentado y/o publicado 
+              - comments
+              - forumOwner
+              - valuedReviews
+              - companyPunctuated
+              - ownerRating
+
+              hacer push en array de claves si hay información, para que se queden lo toggle en "off"?
+              todos los likes que ha podido hacer 
+              - favComments
+              - likedCompany
+              - likedNews
+              - likedForum
+              deshacer todos los follow
+              - forumFollowing
+              - usersFollowed
+              - usersFollowers 
+                    
+                    si el usuario aún existe:
+                        retornar "Error al eliminar usuario" con el código de estado 404
+                    sino:
+                        retornar "Usuario eliminado correctamente" con el código de estado 200
+                catch error:
+                    retornar "Error al actualizar datos de usuario" con el código de estado 404
+
+                    un chatch por cada try arriba
+            catch error:
+                retornar "Error al actualizar datos de <película>" con el código de estado 404
+    catch error:
+        retornar "Se produjo un error durante la eliminación del usuario" con el código de estado 404
+
+ */
+
 //-------------------------------*TOOGLE LIKED COMMENTS*-------------------------------------------------------------
 //!QUEDA PENDIENTE CAMBIAR TODOS LOS FAVCOMMENTS A likedComments
 // User campo de favcomments, ponendo el id del comentario
