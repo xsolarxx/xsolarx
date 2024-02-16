@@ -58,7 +58,6 @@ const UserSchema = new mongoose.Schema(
     likedForum: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }],
     forumOwner: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo he creado
     forumFollowing: [{ type: mongoose.Schema.Types.ObjectId, ref: "Forum" }], // foros que yo sigo
-    valuedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // reviews a las complañias
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // comentarios a los foros y a las noticios
     newsOwnerAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: "News" }],
     companyOwnerAdmin: [
