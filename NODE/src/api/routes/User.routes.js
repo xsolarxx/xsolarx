@@ -32,7 +32,7 @@ UserRoutes.get("/getall", getAll);
 UserRoutes.get("/getbyid/:id", getById);
 
 UserRoutes.patch("/forgotpassword", changePassword);
-UserRoutes.delete("/", [isAuth], deleteUser);
+UserRoutes.delete("/:id", [isAuth], deleteUser);
 
 //! ---------------- endPoints con auth ---------------------------------------
 

@@ -21,8 +21,10 @@ const createRating = async (req, res, next) => {
       userPunctuation: req.user._id,
       companyPunctuated: req.body?.companyPunctuated,
     };
+    console.log(customBody);
     const newRating = new Rating(customBody);
     const savedRating = await newRating.save();
+    console.log(savedRating);
     if (savedRating) {
       try {
         await User.findByIdAndUpdate(req.user._id, {

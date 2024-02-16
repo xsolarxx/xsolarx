@@ -4,7 +4,6 @@ const Forum = require("../models/Forum.model");
 const Company = require("../models/Company.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
-const CommentRoutes = require("../routes/Comment.routes");
 
 const createComment = async (req, res, next) => {
   try {
@@ -39,10 +38,11 @@ const createComment = async (req, res, next) => {
       }
     }
     if (findForum) {
+      console.log(req.user);
       //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
       const newComment = new Comment({
         ...req.body,
-        owner: req.user._id,
+        owner: req.user?._id,
         recipientForum: findForum,
       });
       const saveComment = await newComment.save();
