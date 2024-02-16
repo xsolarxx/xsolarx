@@ -98,7 +98,7 @@ const getById = async (req, res, next) => {
 //------------------------------------* GET BY TAGS *----------------------------------------------------
 const getByTags = async (req, res, next) => {
   try {
-    const { tags } = req.params;
+    const { tags } = req.body;
     const NewsByTags = await News.find({ tags: tags }); // procurar las noticias con base en las tags
     if (NewsByTags.length > 0) {
       // verifica si hay noticias

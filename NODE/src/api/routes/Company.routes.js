@@ -19,7 +19,7 @@ CompanyRoutes.post(
 );
 CompanyRoutes.get("/byName/:name", getByName);
 CompanyRoutes.get("/:id", getById);
-CompanyRoutes.get("/getbyservices/:companyServices", getByServices);
+CompanyRoutes.get("/companybyservices/services", getByServices);
 
 //!Preguntar al grupo si se quiere que users no registrados puedan buscar por nombre compañías
 module.exports = CompanyRoutes;

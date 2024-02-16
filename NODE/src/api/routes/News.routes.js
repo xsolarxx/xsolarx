@@ -13,7 +13,7 @@ const NewsRoutes = require("express").Router();
 NewsRoutes.post("/create", [isAuthAdmin], upload.single("image"), createNews);
 NewsRoutes.get("/getall", getAll);
 NewsRoutes.get("/getbyid/:id", getById);
-NewsRoutes.get("/getbytags/:tags", getByTags);
+NewsRoutes.get("/getbytags", getByTags);
 
 // NewsRoutes.get("/getbyid/:id", getById);
 
