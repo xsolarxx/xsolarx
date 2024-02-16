@@ -58,8 +58,8 @@ const createCompany = async (req, res, next) => {
 // -------------------------------*GET BY NAME*--------------------------------------------------------
 const getByName = async (req, res, next) => {
   try {
-    const { companyName } = req.params;
-    const companyByName = await Company.find({ companyName });
+    const { companyName } = req.body;
+    const companyByName = await Company.find({ companyName: companyName });
     if (companyByName.length > 0) {
       //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
       return res.status(200).json(companyByName);
