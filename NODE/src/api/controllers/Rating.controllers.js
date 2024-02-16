@@ -70,7 +70,39 @@ const createRating = async (req, res, next) => {
     });
   }
 };
-
+const getAll = async (req, res, next) => {
+  try {
+    const allRating = await Rating.find();
+    /** el find nos devuelve un array */
+    if (allRating.length > 0) {
+      return res.status(200).json(allRating);
+    } else {
+      return res.status(404).json("no se han encontrado ratings");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
+const getById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const ratingById = await Rating.findById(id);
+    if (ratingById) {
+      return res.status(200).json(ratingById);
+    } else {
+      return res.status(404).json("no se ha encontrado el rating");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
+module.exports = { createRating, getAll, getById };
 //!EN NOTION SALE GET BY ID PERO CREO QUE NO ES NECESARIO. HAY QUE CONFIRMAR.
 //! PONER GET BY ALL CON LA INTENCIÓN DE ORDENAR POSTERIORMENTE LOS RATINGS DE MAYOR A MENOR.
 
@@ -103,7 +135,7 @@ const createRating = async (req, res, next) => {
 
         /* vamos a hacer un objeto vacion donde meteremos los test */
 
-let test = {};
+//*let test = {};
 
 /* vamos a recorrer las claves del body y vamos a crear un objeto con los test
 
@@ -117,9 +149,8 @@ let test = {};
 
         if (catchImg) {
           characterByIdUpdate.image === catchImg
-            ? (test = { ...test, file: true })
+            //* (test = { ...test, file: true })
             : (test = { ...test, file: false });
         }  */
 
 // ----------------------------* BORRAR RATING DE COMPAÑÍA--------------------------------------------
-module.exports = { createRating };
