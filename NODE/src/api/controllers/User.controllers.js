@@ -368,9 +368,8 @@ const sendPassword = async (req, res, next) => {
   }
 };
 //*Antes de estar logeado es change password y modifypassword es cuando entras ya logeado y quieres cambiar la contraseña.
-//? -----------------------------------------------------------------------------
-//! ------------------CAMBIO DE CONTRASEÑA CUANDO YA SE ESTA ESTA LOGADO---------
-//? -----------------------------------------------------------------------------
+
+//--------------------------* CAMBIO DE CONTRASEÑA CUANDO YA SE ESTA ESTA LOGADO *------------------------------------------------
 
 const modifyPassword = async (req, res, next) => {
   /** IMPORTANTE ---> REQ.USER ----> LO CREAR LOS AUTH MIDDLEWARE */
@@ -426,9 +425,7 @@ const modifyPassword = async (req, res, next) => {
   }
 };
 
-//! -----------------------------------------------------------------------------
-//? ---------------------------------UPDATE--------------------------------------
-//! -----------------------------------------------------------------------------
+//-----------------------------------* UPDATE *-------------------------------------------------------------
 
 const update = async (req, res, next) => {
   // capturamos la imagen nueva subida a cloudinary
@@ -543,7 +540,7 @@ const update = async (req, res, next) => {
   }
 };
 
-//!Autologin------------------------------------------------
+//-----------------------------------* AUTO LOGIN *-------------------------------------------------------------
 
 const autoLogin = async (req, res, next) => {
   try {
@@ -569,9 +566,7 @@ const autoLogin = async (req, res, next) => {
   }
 };
 
-//! -----------------------------------------------------------------------------
-//? ---------------------------------DELETE--------------------------------------
-//! -----------------------------------------------------------------------------
+//-----------------------------------* DELETE *-------------------------------------------------------------
 
 const deleteUser = async (req, res, next) => {
   try {
@@ -728,7 +723,7 @@ const deleteUser = async (req, res, next) => {
     });
   }
 };
-
+//-------------------------------*GET BY ID*-------------------------------------------------------------
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -742,6 +737,7 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
+//-------------------------------*GET ALL*-------------------------------------------------------------
 const getAll = async (req, res, next) => {
   try {
     const allUser = await User.find().populate(
@@ -822,8 +818,6 @@ const toggleLikedCompany = async (req, res, nest) => {
   try {
     const { idCompany } = req.params; // id de la company
     const { _id, likedCompany } = req.user; // usuario y company
-    console.log(req.user);
-    console.log("liked company:" + likedCompany);
     // una condicional con includes
     if (likedCompany.includes(idCompany)) {
       console.log("liked company includes company ID");
