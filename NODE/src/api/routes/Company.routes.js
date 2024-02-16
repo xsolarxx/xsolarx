@@ -17,7 +17,7 @@ CompanyRoutes.post(
   upload.single("image"),
   createCompany
 );
-CompanyRoutes.get("/byName/:name", getByName);
+CompanyRoutes.get("/byName", getByName);
 CompanyRoutes.get("/:id", getById);
 CompanyRoutes.get("/companybyservices/services", getByServices);
 
