@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
     check: {
       type: Boolean,
       default: false,
-    },
+    }, //!SE TIENE QUE HACER UN TOGGLE CON FORUM FOLLOWING
     favComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // Comentarios en los que el user ha dado "like"
     ownerRating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }], // User que puntúa a una compañía
     usersFollowed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users que el usuario en particular sigue

@@ -966,7 +966,9 @@ const toggleLikedForum = async (req, res, next) => {
   }
 };
 
-//------------------------------------* TOOGLE USERS FOLLOWED *-------------------------------------------------------------
+//------------------------------------* TOGGLE USERS FOLLOWED *-------------------------------------------------------------
+
+//? EN PROCESO, MUY HARDCORE TT__TT
 /* PISTA: Request must have:
 UserID of who is triggering the follow action
 UserID of the user who the aforementioned user is FOLLOWING
@@ -976,56 +978,63 @@ Toggle function which does two actions
  runs togglerUsersFollowers
  runs toggleUsersFollowed */
 
-const toggleUsersFollowed = async (req, res, nest) => {
+/*
+Cuando un user sigue a otro user se tiene que hacer:
+
+1º El user que hace follow -> Añade a su perfil que está siguiendo a ese user
+2º El user que ha recibido el follow, que está siendo seguido -> 
+Se le añade en su perfil que "x user le está siguiendo" */
+
+const toggleUsersFollowed = async (req, res, next) => {
   try {
-    const { idUser } = req.params; // Se requieren los datos del User
-    const { _id, usersFollowers } = req.user; // usuario y company
+    const { iduserToFollow } = req.params; // Id de user que voy a seguir
+    const { _id, usersFollowed } = req.user; // Del req.user nos referimos a los user que "yo" ya sigo
+
+    // Se requiere el id, los users que "me" siguen y los que "yo" sigo
     // una condicional con includes
-    if (likedCompany.includes(idCompany)) {
-      console.log("liked company includes company ID");
+    if (usersFollowed.includes(iduserToFollow)) {
       try {
         await User.findByIdAndUpdate(_id, {
-          $pull: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
-        });
-        await Company.findByIdAndUpdate(idCompany, {
-          $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
-        });
+          $pull: { usersFollowed: iduserToFollow },
+        }); /* Se llama al User model, se realiza una búsqueda por id y se extraen de los users que
+         "yo" sigo, sus ids, los cuales serán necesitados */
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedCompany"),
-          company: await Company.findById(idCompany).populate(
-            "userLikedCompany"
-          ),
+          user: await User.findById(_id).populate("usersFollowed"),
         });
       } catch (error) {
         return res.status(404).json({
-          error: "Error al atualizar a la compania o el usuario",
+          error: "Error al actualizar a los users que yo sigo",
           message: error.message,
         });
       }
-    } else {
+    } else if (!usersFollowed.includes(iduserToFollow)) {
       try {
         await User.findByIdAndUpdate(_id, {
-          $push: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
-        });
-        await Company.findByIdAndUpdate(idCompany, {
-          $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+          $push: { usersFollowed: iduserToFollow },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedCompany"),
-          company: await Company.findById(idCompany).populate(
-            "userLikedCompany"
-          ),
+          user: await User.findById(_id).populate("usersFollowed"),
         });
       } catch (error) {
-        return res.status(404).json(error.message);
+        return res.status(404).json({
+          error: "Error al actualizar los users que yo sigo",
+          message: error.message,
+        });
       }
     }
+
+    const userToFollow = await User.findById(_iduserToFollow);
+
+    // Hay que actualizar el user que está siendo seguido con su nuevo follower
+    // 1º  read the information for user iduserToFollow
+    // Get "usersFollowers" for iduserToFollow
+    // Check if "usersFollowed" for the above contains _id (the user who has followed it)
   } catch (error) {
     return res.status(500).json({
       error: "Error general",
       message: error.message,
     });
-  }
+  } // Error 500 cogerá un error que los catches previos no han cogido
 };
 
 //-------------------------------------------------------------------------------------------------------------------------
