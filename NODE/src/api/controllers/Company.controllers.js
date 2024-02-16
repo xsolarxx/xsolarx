@@ -94,10 +94,11 @@ const getById = async (req, res, next) => {
 
 const getByServices = async (req, res, next) => {
   try {
-    const { companyServices } = req.params;
+    const { companyServices } = req.body;
     const newcompanyByService = await Company.find({
       companyServices: companyServices,
     });
+
     if (newcompanyByService.length > 0) {
       //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
       return res.status(200).json(newcompanyByService);
