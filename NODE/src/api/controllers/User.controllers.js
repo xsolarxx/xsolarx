@@ -575,7 +575,7 @@ const deleteUser = async (req, res, next) => {
 
     if (userExists) {
       await User.findByIdAndDelete(id);
-      const userDelete = User.findById(id);
+      const userDelete = await User.findById(id);
       const allCommentsAllRatings = [];
 
       userExists.ownerRating.forEach((item) => {
@@ -585,7 +585,7 @@ const deleteUser = async (req, res, next) => {
       userExists.comments.forEach((item) => {
         allCommentsAllRatings.push(item);
       });
-
+      console.log("userDelete", userDelete);
       if (!userDelete) {
         // lo que ejecutas opcion 1. req.User.image 2. userExists.image
         deleteImgCloudinary(userExists.image);
@@ -657,12 +657,19 @@ const deleteUser = async (req, res, next) => {
                               $pull: { comments: idElement },
                             }
                           );
+                          await User.updateMany(
+                            {
+                              favComments: idElement,
+                            },
+                            {
+                              $pull: { favComments: idElement },
+                            }
+                          );
                         })
                       ).then(async () => {
+                        console.log("entro");
                         // si sale bien la promesa
-                        return res
-                          .status(200)
-                          .json("usuario borrado correctamente");
+                        return res.status(200).json("user borrado");
                       });
                     } catch (error) {
                       return res.status(404).json({
@@ -707,10 +714,10 @@ const deleteUser = async (req, res, next) => {
           });
         }
       } else {
+        return res.status(404).json({
+          error: "Error al borrar usuario",
+        });
       }
-      return res.status(404).json({
-        error: "Error al borrar usuario",
-      });
     } else {
       return res.status(404).json({
         error: "Usuario no existe",
