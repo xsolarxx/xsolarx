@@ -22,6 +22,7 @@ const randomPassword = require("../../utils/randomPassword");
 const Comment = require("../models/Comment.model");
 const Company = require("../models/Company.model");
 const News = require("../models/News.model");
+const Rating = require("../models/Rating.model");
 //*const enumOk = require("../../utils/enumOk"); //*comentar temporalmente hasta que corrijamos la funcion enum en utils
 
 dotenv.config();
@@ -574,19 +575,160 @@ const autoLogin = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
-    const { _id, image } = req.user;
-    await User.findByIdAndDelete(_id);
-    if (await User.findById(_id)) {
-      // si el usuario
-      return res.status(404).json("not deleted"); ///
+    const { id } = req.params;
+    const userExists = await User.findById(id);
+
+    if (userExists) {
+      await User.findByIdAndDelete(id);
+      const userDelete = User.findById(id);
+      const allCommentsAllRatings = [];
+
+      userExists.ownerRating.forEach((item) => {
+        allCommentsAllRatings.push(item);
+      });
+
+      userExists.comments.forEach((item) => {
+        allCommentsAllRatings.push(item);
+      });
+
+      if (!userDelete) {
+        // lo que ejecutas opcion 1. req.User.image 2. userExists.image
+        deleteImgCloudinary(userExists.image);
+        // interaciones usuario con otros usuarios
+        // tenemos que poner las claves de los modelos donde estamos quitando/borrando
+        // (no en las claves del modelo de usuariio, excep`to aciones de usuario )
+        try {
+          await User.updateMany(
+            { usersFollowed: id },
+            { $pull: { usersFollowed: id } }
+          );
+          await User.updateMany(
+            { usersFollowers: id },
+            { $pull: { usersFollowers: id } }
+          );
+          try {
+            await Comment.updateMany({ likes: id }, { $pull: { likes: id } });
+            try {
+              await Company.updateMany(
+                { userLikedCompany: id },
+                { $pull: { userLikedCompany: id } }
+              );
+              try {
+                await News.updateMany({ likes: id }, { $pull: { likes: id } });
+                try {
+                  await Forum.updateMany(
+                    { likes: id },
+                    { $pull: { likes: id } }
+                  );
+                  await Forum.updateMany(
+                    { followed: id },
+                    { $pull: { followed: id } }
+                  );
+                  try {
+                    // borrar todos los rating que es su userPunctuation tenga en id del user borrado
+                    await Rating.deleteMany({ userPunctuation: id });
+                    try {
+                      // borramos comentarios
+                      await Comment.deleteMany({ owner: id });
+                      Promise.all(
+                        allCommentsAllRatings.map(async (idElement) => {
+                          await Company.updateOne(
+                            { userCompanyRatings: idElement },
+                            {
+                              $pull: { userCompanyRatings: idElement },
+                            }
+                          );
+                          await Company.updateOne(
+                            {
+                              userCompanyReviews: idElement,
+                            },
+                            {
+                              $pull: { userCompanyReviews: idElement },
+                            }
+                          );
+                          await Forum.updateOne(
+                            {
+                              comments: idElement,
+                            },
+                            {
+                              $pull: { comments: idElement },
+                            }
+                          );
+                          await News.updateOne(
+                            {
+                              comments: idElement,
+                            },
+                            {
+                              $pull: { comments: idElement },
+                            }
+                          );
+                        })
+                      ).then(async () => {
+                        // si sale bien la promesa
+                        return res
+                          .status(200)
+                          .json("usuario borrado correctamente");
+                      });
+                    } catch (error) {
+                      return res.status(404).json({
+                        error: "Error al borrar comentarios",
+                        message: error.message,
+                      });
+                    }
+                  } catch (error) {
+                    return res.status(404).json({
+                      error: "Error al borrar rating",
+                      message: error.message,
+                    });
+                  }
+                } catch (error) {
+                  return res.status(404).json({
+                    error: "Error al actualizar like y seguidores del Foro",
+                    message: error.message,
+                  });
+                }
+              } catch (error) {
+                return res.status(404).json({
+                  error: "Error al  actualizar like de la noticia",
+                  message: error.message,
+                });
+              }
+            } catch (error) {
+              return res.status(404).json({
+                error: "Error al actualizar like de la compañia  ",
+                message: error.message,
+              });
+            }
+          } catch (error) {
+            return res.status(404).json({
+              error: "Error al actualizar like del comentario",
+              message: error.message,
+            });
+          }
+        } catch (error) {
+          return res.status(404).json({
+            error: "Error al actualizar followed y followers del usuario",
+            message: error.message,
+          });
+        }
+      } else {
+      }
+      return res.status(404).json({
+        error: "Error al borrar usuario",
+      });
     } else {
-      deleteImgCloudinary(image);
-      return res.status(200).json("ok delete");
+      return res.status(404).json({
+        error: "Usuario no existe",
+      });
     }
   } catch (error) {
-    return next(error);
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
   }
 };
+
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -618,53 +760,6 @@ const getAll = async (req, res, next) => {
     });
   }
 };
-
-/**
- * 
- función deleteUser(req, res, next):
-    try:
-        id = extraer ID de usuario de los parámetros de la solicitud
-        usuario = encontrar y eliminar usuario de la base de datos usando el ID
-        
-        si el usuario existe:
-            verificar si el usuario aún existe después de la eliminación (runtime test)
-            
-            procedemos a hacer un TRY por cada referencias de interaciónes:
-            //? se pueden agrupar los trys? 
-               que ha tenido el usuario en la plataforma, y las vamos "eliminando" una a una si existen
-
-              todos los sitios donde ha comentado y/o publicado 
-              - comments
-              - forumOwner
-              - valuedReviews
-              - companyPunctuated
-              - ownerRating
-
-              hacer push en array de claves si hay información, para que se queden lo toggle en "off"?
-              todos los likes que ha podido hacer 
-              - favComments
-              - likedCompany
-              - likedNews
-              - likedForum
-              deshacer todos los follow
-              - forumFollowing
-              - usersFollowed
-              - usersFollowers 
-                    
-                    si el usuario aún existe:
-                        retornar "Error al eliminar usuario" con el código de estado 404
-                    sino:
-                        retornar "Usuario eliminado correctamente" con el código de estado 200
-                catch error:
-                    retornar "Error al actualizar datos de usuario" con el código de estado 404
-
-                    un chatch por cada try arriba
-            catch error:
-                retornar "Error al actualizar datos de <película>" con el código de estado 404
-    catch error:
-        retornar "Se produjo un error durante la eliminación del usuario" con el código de estado 404
-
- */
 
 //-------------------------------*TOOGLE LIKED COMMENTS*-------------------------------------------------------------
 //!QUEDA PENDIENTE CAMBIAR TODOS LOS FAVCOMMENTS A likedComments
@@ -760,16 +855,13 @@ const toggleLikedCompany = async (req, res, nest) => {
           $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("favComments"),
-          comment: await Comment.findById(idComment).populate("likes"),
-        });
-      } catch (error) {
-        return res.status(200).json({
           user: await User.findById(_id).populate("likedCompany"),
           company: await Company.findById(idCompany).populate(
             "userLikedCompany"
           ),
         });
+      } catch (error) {
+        return res.status(404).json(error.message);
       }
     }
   } catch (error) {
@@ -813,7 +905,7 @@ const toggleLikedNews = async (req, res, next) => {
           $push: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedNews"), //!El populate es correcto?
+          user: await User.findById(_id).populate("likedNews"),
           news: await News.findById(idNews).populate("likes"),
         });
       } catch (error) {
@@ -841,11 +933,11 @@ const toggleLikedForum = async (req, res, next) => {
           $pull: { likedForum: idForum },
         });
         await Forum.findByIdAndUpdate(idForum, {
-          $pull: { likedForum: idForum },
+          $pull: { likes: _id },
         });
         return res.status(200).json({
           user: await User.findById(_id).populate("likedForum"),
-          news: await News.findById(idForum).populate("likes"),
+          forum: await Forum.findById(idForum).populate("likes"),
         });
       } catch (error) {
         return res.status(404).json({
@@ -858,7 +950,7 @@ const toggleLikedForum = async (req, res, next) => {
         await User.findByIdAndUpdate(_id, {
           $push: { likedForum: idForum },
         });
-        await News.findByIdAndUpdate(idForum, {
+        await Forum.findByIdAndUpdate(idForum, {
           $push: { likes: _id },
         });
         return res.status(200).json({
