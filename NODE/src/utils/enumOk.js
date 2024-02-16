@@ -1,6 +1,6 @@
 const enumOk = (enumType, word) => {
   const enumGender = ["hombre", "mujer", "otros"];
-  const enumTags = ["Paneles solares", "Energía eólica", "otros"];
+  const enumTags = ["Paneles solares", "Energía eólica", "Otros","Renovables"];
   const enumServices = [
     "Presupuesto de instalación",
     "Presupuesto de placas fotovoltáicas",

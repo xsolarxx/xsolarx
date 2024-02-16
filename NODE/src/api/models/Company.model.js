@@ -18,9 +18,9 @@ const CompanySchema = new Schema(
       type: String,
       required: true,
     },
-    companyServices: [
+    companyServices: 
       {
-        type: String, //! checkear el enum
+        type: String, 
         required: true,
         enum: [
           "Presupuesto de instalación",
@@ -29,10 +29,9 @@ const CompanySchema = new Schema(
           "Mantenimiento",
           "Dimensionado y modelado de la instalación",
           "Estudio de seguridad",
-          "otros",
+          "otros",  //!--- cambiar 
         ],
       },
-    ],
     image: {
       type: String,
       required: true,

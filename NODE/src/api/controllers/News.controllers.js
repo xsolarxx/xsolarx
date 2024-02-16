@@ -116,6 +116,7 @@ const update = async (req, res, next) => {
   await News.syncIndexes();
   let catchImg = req.file?.path;
   try {
+    await News.syncIndexes();
     const { id } = req.params;
     const newsById = await News.findById(id);
     if (newsById) {
@@ -135,6 +136,12 @@ const update = async (req, res, next) => {
           ? req.body?.fullContent
           : newsById.fullContent,
       };
+      if (req.body?.tags){
+        const result = enumOk ("enumTags", req.body?.tags)
+        customBody.tags = result.check 
+        ?req.body?.tags
+        :newsById.tags    
+      }
 
       try {
         await News.findByIdAndUpdate(id, customBody);
