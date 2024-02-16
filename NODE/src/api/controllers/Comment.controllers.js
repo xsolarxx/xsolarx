@@ -114,53 +114,32 @@ const getById = async (req, res, next) => {
   }
 };
 
-//) DELETE COMMENT //!PREGUNTAR A LAURA
-
+//) DELETE COMMENT
+//! en progreso
 const deleteComment = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const comment = await Comment.findByIdAndDelete(id);
-    if (comment) {
-      // Realiza una búsqueda para confirmar si aún sigue existiendo
-      const finByIdComment = await Comment.findById(id);
+    const { idComment } = req.params;
+    const newsCommentExist = await News.findById(idComment);
+    const companyCommentExist = await Company.findById(idComment);
+    const forumCommentExist = await Forum.findById(idComment);
 
-      try {
-        //updateMany actualizará varios elementos del Comment
-        const test = await Comment.updateMany(
-          { comment: id }, //filtra por id
-          { $pull: { comment: id } }
-        );
-        console.log(test);
-
+    if (newsCommentExist) {
+      await News.findByIdAndDelete(idComment);
+      const newsCommentDelete = await News.findById(idComment);
+      if (!newsCommentExist) {
         try {
-          await User.updateMany(
-            { commentFav: id },
-            { $pull: { commentFav: id } }
+          await News.updateMany(
+            { comments: idComment },
+            { $pull: { comments: idComment } }
           );
-
-          return res.status(finByIdComment ? 404 : 200).json({
-            deleteTest: finByIdComment ? false : true,
-          });
-        } catch (error) {
-          return res.status(404).json({
-            error: "error catch update User", //!queda actualizar el error.
-            message: error.message,
-          });
-        }
-      } catch (error) {
-        return res.status(404).json({
-          error: "error catch update Movi", //!queda actualizar este error.
-          message: error.message,
-        });
+        } catch (error) {}
       }
     }
-  } catch (error) {
-    return res.status(404).json(error.message);
-  }
+  } catch (error) {}
 };
-//-------------------------------------------------------------------------------------------------
+
 // ------------------------------ GET BY ALL-------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+
 const getAll = async (req, res, next) => {
   try {
     const allComment = await Comment.find();
