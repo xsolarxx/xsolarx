@@ -72,7 +72,27 @@ const getByName = async (req, res, next) => {
       message: error.message,
     });
   }
-}; //!TEST NO SE HA ENCONTRADO LA COMPAÑÍA
+}; //* TESTEADO POR INES 17 FEB, HA SALIDO OK
+
+// --------------------------------*GET ALL*-------------------------------------------------------------
+
+const getAll = async (req, res, next) => {
+  try {
+    const allCompany = await Company.find().populate("userCompanyReviews");
+    /** el find nos devuelve un array */
+    if (allCompany.length > 0) {
+      return res.status(200).json(allCompany);
+    } else {
+      return res.status(404).json("no se han encontrado las compañías");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "error al buscar - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
+
 // --------------------------------*GET BY ID*-------------------------------------------------------------
 
 const getById = async (req, res, next) => {
@@ -115,4 +135,4 @@ const getByServices = async (req, res, next) => {
 
 // --------------------------------*GET BY LIKES*--------------------------------------------------
 
-module.exports = { createCompany, getById, getByName, getByServices };
+module.exports = { createCompany, getById, getByName, getByServices, getAll };

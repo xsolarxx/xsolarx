@@ -4,6 +4,7 @@ const {
   getByName,
   getById,
   getByServices,
+  getAll,
 } = require("../controllers/Company.controllers");
 const { upload } = require("../../middleware/files.middleware");
 
@@ -18,6 +19,7 @@ CompanyRoutes.post(
   createCompany
 );
 CompanyRoutes.get("/byName", getByName);
+CompanyRoutes.get("/getall", getAll);
 CompanyRoutes.get("/:id", getById);
 CompanyRoutes.get("/companybyservices/services", getByServices);
 
