@@ -5,6 +5,7 @@ const {
   getById,
   update,
   getByTags,
+  deleteNews
 } = require("../controllers/News.controllers");
 const { upload } = require("../../middleware/files.middleware");
 
@@ -15,6 +16,7 @@ NewsRoutes.get("/getall", getAll);
 NewsRoutes.get("/getbyid/:id", getById);
 NewsRoutes.get("/getbytags", getByTags);
 NewsRoutes.patch("/update/:id", update);
+NewsRoutes.delete("/:id", deleteNews);
 
 // NewsRoutes.get("/getbyid/:id", getById);
 
