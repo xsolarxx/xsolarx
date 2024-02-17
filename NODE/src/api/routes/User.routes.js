@@ -43,7 +43,7 @@ UserRoutes.patch("/commentFav/:idComment", [isAuth], toggleFavComments);
 UserRoutes.patch("/likedCompany/:idCompany", [isAuth], toggleLikedCompany);
 UserRoutes.patch("/likedNews/:idNews", [isAuth], toggleLikedNews);
 UserRoutes.patch("/likedForum/:idForum", [isAuth], toggleLikedForum);
-UserRoutes.patch("/followed/:userToFollow", [isAuth], toggleFollow);
+UserRoutes.patch("/follow/:userToFollow", [isAuth], toggleFollow);
 /// ------------------> rutas que pueden ser redirect
 UserRoutes.get("/register/sendMail/:id", sendCode); // :id ---> es el nombre del param
 UserRoutes.patch("/sendPassword/:id", sendPassword);
