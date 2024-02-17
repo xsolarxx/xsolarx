@@ -204,4 +204,44 @@ const update = async (req, res, next) => {
   }
 };
 
-module.exports = { createNews, getAll, getById, update, getByTags };
+
+//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//!································DELETE··································
+//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+const deleteNews = async (req, res, next) => {
+  try {
+    
+    const { id } = req.params;
+    // Validación básica del id
+    if (!id) {
+      // Si no tiene el id devuelve el siguiente error
+      return res.status(400).json({ error: "Id del foro no proporcionado" });
+    }
+    // Se verifica si el comentario se eliminó correctamente
+    const news = await News.findByIdAndDelete(id); // const para buscar y borrar
+    if (!news) {
+      return res.status(400).json({ error: "La notícia no ha sido encontrada" });
+    }
+    await Promise.all([
+      // Elimina las referencias al foro en otras colecciones
+      User.updateMany({ newsOwnerAdmin: id }, { $pull: { forumOwner: id } }),
+      User.updateMany(
+        { likedNews: id },
+        { $pull: { likedNews: id } }),
+      Comment.updateMany({recipientNews: id},
+          {$pull: {recipientNews: id}})
+      
+    ]);
+    return res
+      .status(200)
+      .json({ exito: true, mensaje: "Notícia eliminada correctamente" }); //Spanish) exito y mensaje?
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ error: "Error al eliminar la notícia", message: error.message });
+  }
+};
+
+module.exports = { createNews, getAll, getById, update, getByTags, deleteNews };

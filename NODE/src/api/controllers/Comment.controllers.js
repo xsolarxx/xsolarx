@@ -11,6 +11,7 @@ const createComment = async (req, res, next) => {
     const findNews = await News.findById(idRecipient);
     const findForum = await Forum.findById(idRecipient);
     const findCompany = await Company.findById(idRecipient);
+
     if (findNews) {
       //*ruta autenticada, no cualquier ususario puede hacer un comentario, por eso ponemos req.user que lo coge de middleware
       const newComment = new Comment({
@@ -69,14 +70,16 @@ const createComment = async (req, res, next) => {
       const newComment = new Comment({
         ...req.body,
         owner: req.user._id,
-        recipientCompanies: findCompany,
+        //* corregiod de recipientCompanies a recipientCompany, error detectado testando en insomnia 17 feb
+        recipientCompany: findCompany,
       });
       const saveComment = await newComment.save();
       if (saveComment) {
         try {
           await Company.findByIdAndUpdate(idRecipient, {
-            //*estamos actualizando el array de comentarios en noticias
-            $push: { comments: newComment._id },
+            //*estamos actualizando el array de comentarios en company
+            //* Company model no tienen ninguna clave que se llame "comments", sino "userCompanyReviews", corregiod por Ines
+            $push: { userCompanyReviews: newComment._id },
           });
           await User.findByIdAndUpdate(req.user._id, {
             $push: { comments: newComment._id },
@@ -84,7 +87,7 @@ const createComment = async (req, res, next) => {
           return res.status(200).json({ create: true, saveComment });
         } catch (error) {
           res.status(404).json({
-            error: "error update news and user",
+            error: "error update company and user",
             message: error.message,
           }) && next(error);
         }
@@ -92,7 +95,7 @@ const createComment = async (req, res, next) => {
     }
   } catch (error) {
     res.status(404).json({
-      error: "error crear comentario en news,foro and noticas",
+      error: "error general al crear comentario en noticia, foro o compañia",
       message: error.message,
     }) && next(error);
   }
@@ -170,16 +173,13 @@ const update = async (req, res, next) => {
 
       const customBody = {
         _id: commentById._id,
-        image: req.file?.path ? catchImg : oldImg,
+        content: req.body?.content ? req.body?.content : commentById.content,
         title: req.body?.title ? req.body?.title : commentById.title,
       };
 
       try {
         await Comment.findByIdAndUpdate(id, customBody);
-        if (req.file?.path) {
-          deleteImgCloudinary(oldImg);
-        }
-
+       
         //** ------------------------------------------------------------------- */
         //** VAMOS A TESTEAR EN TIEMPO REAL QUE ESTO SE HAYA HECHO CORRECTAMENTE */
         //** ------------------------------------------------------------------- */
@@ -204,17 +204,9 @@ const update = async (req, res, next) => {
             test[item] = false;
           }
         });
-
-        if (catchImg) {
-          characterByIdUpdate.image === catchImg
-            ? (test = { ...test, file: true })
-            : (test = { ...test, file: false });
-        }
-
         /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
          * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
-         */
-
+        */
         let acc = 0;
         for (clave in test) {
           test[clave] == false && acc++;

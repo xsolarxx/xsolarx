@@ -3,8 +3,7 @@ const Company = require("../models/Company.model");
 const User = require("../models/User.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// ------------------------------*CREATE COMPANY* -------------------------------------------------
-//! LAURA.COMO CREAR UN SORT BY EL QUE MÁS LIKES TIENE. QUIZÁ CON 1º GETALL Y LUEGO EN JS CON SORT METHOD.
+// ------------------------------* CREATE COMPANY *--------------------------------------------------
 
 const createCompany = async (req, res, next) => {
   let catchImg = req.file?.path;
@@ -15,7 +14,7 @@ const createCompany = async (req, res, next) => {
       companyName: req.body.companyName,
     });
     if (companyExist) {
-      return res.status(409).json("Esta empresa ya existe");
+      return res.status(409).json("Esta compañía ya existe");
     }
     const customBody = {
       companyName: req.body?.companyName,
@@ -50,18 +49,21 @@ const createCompany = async (req, res, next) => {
       deleteImgCloudinary(catchImg);
     }
     return res.status(404).json({
-      error: "Error creando la empresa. Imagen ha sido borrada si fue adjunta",
+      error:
+        "Error creando la compañía. La imagen ha sido borrada si fue adjunta",
       message: error.message,
     });
   }
 };
-// -------------------------------*GET BY NAME*--------------------------------------------------------
+
+// -------------------------------* GET BY NAME *--------------------------------------------------------
+
 const getByName = async (req, res, next) => {
   try {
     const { companyName } = req.body;
     const companyByName = await Company.find({ companyName: companyName });
     if (companyByName.length > 0) {
-      //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
+      // Si el array tiene length > 0, indica si existe 1 compañía con este nombre.
       return res.status(200).json(companyByName);
     } else {
       return res.status(404).json("No se ha encontrado la compañía");
@@ -72,8 +74,28 @@ const getByName = async (req, res, next) => {
       message: error.message,
     });
   }
-}; //!TEST NO SE HA ENCONTRADO LA COMPAÑÍA
-// --------------------------------*GET BY ID*-------------------------------------------------------------
+};
+
+// --------------------------------* GET ALL *-------------------------------------------------------------
+
+const getAll = async (req, res, next) => {
+  try {
+    const allCompany = await Company.find().populate("userCompanyReviews");
+    // find devuelve un array
+    if (allCompany.length > 0) {
+      return res.status(200).json(allCompany);
+    } else {
+      return res.status(404).json("No se han encontrado las compañías");
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: "Error durante la búsqueda - lanzado en el catch",
+      message: error.message,
+    });
+  }
+};
+
+// --------------------------------* GET BY ID *-------------------------------------------------------------
 
 const getById = async (req, res, next) => {
   try {
@@ -88,9 +110,8 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
-//--------------------------------*GET BY SERVICES*---------------------------------------------------------
-//!PREGUNTAR COMO APLICAR EL ENUM EN NUESTROS GET BY. TENEMOS QUE REALIZAR 1 EJEMPLO DE UPDATE Y DELETE TAMBIEN
-//!De este array de servicios, de este servicio en particular, dame las compañías que lo tienen.
+
+//--------------------------------* GET BY SERVICES *---------------------------------------------------------
 
 const getByServices = async (req, res, next) => {
   try {
@@ -100,19 +121,181 @@ const getByServices = async (req, res, next) => {
     });
 
     if (newcompanyByService.length > 0) {
-      //si el array tiene length > 0, indica si existe 1 compañía con este nombre.
       return res.status(200).json(newcompanyByService);
     } else {
-      return res.status(404).json("No fue encontrado el service");
+      return res
+        .status(404)
+        .json("No fue encontrada la compañía con ese servicio");
     }
   } catch (error) {
-    return res.status(404).json("Error al buscar el service");
+    return res.status(404).json("Error durante la búsqueda del servicio");
   }
 };
+
+// --------------------------------* GET BY LIKES *--------------------------------------------------
+
+//* 1) Ordena de manera descendente según la cantidad de 'likes'
+
+const getByDescLikes = async (req, res, next) => {
+  try {
+    // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose.
+    // Indica que ordene de manera descendente, para que salgan las valores más altos primero.
+    const companiesSortedByLikes = await Company.find().sort({
+      likesCount: -1,
+    });
+
+    if (companiesSortedByLikes.length > 0) {
+      return res.status(200).json(companiesSortedByLikes);
+    } else {
+      return res.status(404).json("No se han encontrado compañías");
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json("Error enseñando las compañías en orden según cantidad de likes");
+  }
+};
+
+//* 2) Ordena de manera ascendente según la cantidad de 'likes'
+
+const getByAscLikes = async (req, res, next) => {
+  try {
+    // Indica que ordene de manera ascendente, para que salgan las valores más bajos primero.
+    const companiesSortedByLikes = await Company.find().sort({
+      likesCount: 1,
+    });
+
+    if (companiesSortedByLikes.length > 0) {
+      return res.status(200).json(companiesSortedByLikes);
+    } else {
+      return res.status(404).json("No se han encontrado compañías");
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json("Error enseñando las compañías en orden según cantidad de likes");
+  }
+};
+
+// --------------------------------* LIKES COUNT *--------------------------------------------------------
+//?userId value not read
+const likesCount = async (companyId, userId) => {
+  try {
+    //Encuentra Id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB).
+    await Company.findByIdAndUpdate(companyId, { $inc: { likesCount: 1 } });
+    // Añade el user al array de userLikedCompany si se necesita.
+    // Actualiza el array de las compañías gustadas de un user si se necesita.
+    return true;
+  } catch (error) {
+    console.error("Error liking company:", error);
+    return false;
+  }
+};
+
+// --------------------------------* UPDATE COMPANY *--------------------------------------------------------
+
+const updateCompany = async (req, res, next) => {
+  await Company.syncIndexes();
+  let catchImg = req.file?.path;
+  try {
+    await Company.syncIndexes();
+    const { id } = req.params;
+    const companyById = await Company.findById(id);
+    console.log(`got this req ${req}`);
+    if (companyById) {
+      const oldImg = companyById.image;
+
+      console.log(`Got this for req.body.description ${req.body.description}`);
+
+      const customBody = {
+        _id: companyById._id,
+        image: req.file?.path ? catchImg : oldImg,
+        description: req.body?.description
+          ? req.body?.description
+          : companyById.description,
+        companyType: req.body?.companyType
+          ? req.body?.companyType
+          : companyById.companyType,
+      };
+      if (req.body?.companyServices) {
+        const result = enumOk("enumServices", req.body?.companyServices);
+        customBody.companyServices = result.check
+          ? req.body?.companyServices
+          : companyById.companyServices;
+      }
+
+      try {
+        console.log(`sending customBody ${customBody.description} to the DB`);
+        await Company.findByIdAndUpdate(id, customBody);
+        console.log("Did it");
+        if (req.file?.path) {
+          deleteImgCloudinary(oldImg);
+        }
+
+        //Se busca el elemento actualizado vía id.
+        const companyByIdUpdate = await Company.findById(id);
+
+        // Se sacan las claves del req.body para saber qué elementos actualizar.
+        const elementUpdate = Object.keys(req.body);
+
+        // Objeto vacío donde posteriormente se meterán los test.
+        let test = {};
+
+        // Se recorren las claves del body y se crea un objeto con los test.
+        elementUpdate.forEach((item) => {
+          if (req.body[item] === companyByIdUpdate[item]) {
+            test[item] = true;
+          } else {
+            test[item] = false;
+          }
+        });
+
+        if (catchImg) {
+          companyByIdUpdate.image === catchImg
+            ? (test = { ...test, file: true })
+            : (test = { ...test, file: false });
+        }
+
+        // Se comprueba si hay un "false". Hay false --> Se lanza un 404.
+        // Si no hay false --> Se lanza un 200, todo OK.
+
+        let acc = 0;
+        for (clave in test) {
+          test[clave] == false && acc++;
+        }
+
+        if (acc > 0) {
+          return res.status(404).json({
+            dataTest: test,
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+          });
+        }
+      } catch (error) {}
+    } else {
+      return res.status(404).json("Esta compañía no existe");
+    }
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
+
 // --------------------------------*DELETE*--------------------------------------------------------
 
-// --------------------------------*UPDATE*--------------------------------------------------------
+module.exports = {
+  createCompany,
+  getById,
+  getByName,
+  getByServices,
+  getAll,
+  getByDescLikes,
+  getByAscLikes,
+  likesCount,
+  updateCompany,
+};
 
-// --------------------------------*GET BY LIKES*--------------------------------------------------
-
-module.exports = { createCompany, getById, getByName, getByServices };
+// Adición de comentarios junto a correcciones (no el código), hasta update(éste incluido ya).
