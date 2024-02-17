@@ -173,16 +173,13 @@ const update = async (req, res, next) => {
 
       const customBody = {
         _id: commentById._id,
-        image: req.file?.path ? catchImg : oldImg,
+        content: req.body?.content ? req.body?.content : commentById.content,
         title: req.body?.title ? req.body?.title : commentById.title,
       };
 
       try {
         await Comment.findByIdAndUpdate(id, customBody);
-        if (req.file?.path) {
-          deleteImgCloudinary(oldImg);
-        }
-
+       
         //** ------------------------------------------------------------------- */
         //** VAMOS A TESTEAR EN TIEMPO REAL QUE ESTO SE HAYA HECHO CORRECTAMENTE */
         //** ------------------------------------------------------------------- */
@@ -207,17 +204,9 @@ const update = async (req, res, next) => {
             test[item] = false;
           }
         });
-
-        if (catchImg) {
-          characterByIdUpdate.image === catchImg
-            ? (test = { ...test, file: true })
-            : (test = { ...test, file: false });
-        }
-
         /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
          * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
-         */
-
+        */
         let acc = 0;
         for (clave in test) {
           test[clave] == false && acc++;
