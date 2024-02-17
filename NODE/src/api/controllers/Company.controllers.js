@@ -129,10 +129,76 @@ const getByServices = async (req, res, next) => {
     return res.status(404).json("Error al buscar el service");
   }
 };
+// --------------------------------*GET BY LIKES*--------------------------------------------------
+
+//* Ordenar en orden descendente por cantidad de 'Likes'
+
+const getByDescLikes = async (req, res, next) => {
+  try {
+    //* sort() es la función que encontré en el prototype de .prototype.find() en la documentacion de mongoose.
+    //* indica a la función que filter en orden descendente para que salgan las valores más altos primero
+    const companiesSortedByLikes = await Company.find().sort({
+      likesCount: -1,
+    });
+
+    if (companiesSortedByLikes.length > 0) {
+      return res.status(200).json(companiesSortedByLikes);
+    } else {
+      return res.status(404).json("No se han encontrados compañias");
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json("Error haciendo el sort de las compañias por likes");
+  }
+};
+
+//* Ordenar en orden ascendente por cantidad de 'Likes'
+
+const getByAscLikes = async (req, res, next) => {
+  try {
+    const companiesSortedByLikes = await Company.find().sort({
+      likesCount: 1,
+    });
+
+    if (companiesSortedByLikes.length > 0) {
+      return res.status(200).json(companiesSortedByLikes);
+    } else {
+      return res.status(404).json("No se han encontrados compañias");
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json("Error haciendo el sort de las compañias por likes");
+  }
+};
+
+// --------------------------------*LIKES COUNT*--------------------------------------------------------
+
+const likesCount = async (companyId, userId) => {
+  try {
+    // Find the company by ID and update its likesCount inc stands for increment, is a mongoDB operator
+    await Company.findByIdAndUpdate(companyId, { $inc: { likesCount: 1 } });
+    // Add the user to the userLikedCompany array if needed
+    // Update any user's liked companies array if needed
+    return true;
+  } catch (error) {
+    console.error("Error liking company:", error);
+    return false;
+  }
+};
+
 // --------------------------------*DELETE*--------------------------------------------------------
 
 // --------------------------------*UPDATE*--------------------------------------------------------
 
-// --------------------------------*GET BY LIKES*--------------------------------------------------
-
-module.exports = { createCompany, getById, getByName, getByServices, getAll };
+module.exports = {
+  createCompany,
+  getById,
+  getByName,
+  getByServices,
+  getAll,
+  getByDescLikes,
+  getByAscLikes,
+  likesCount,
+};
