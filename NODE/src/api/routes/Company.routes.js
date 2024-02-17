@@ -5,6 +5,8 @@ const {
   getById,
   getByServices,
   getAll,
+  getByDescLikes,
+  getByAscLikes,
 } = require("../controllers/Company.controllers");
 const { upload } = require("../../middleware/files.middleware");
 
@@ -19,6 +21,8 @@ CompanyRoutes.post(
   createCompany
 );
 CompanyRoutes.get("/byName", getByName);
+CompanyRoutes.get("/getByDescLikes", getByDescLikes);
+CompanyRoutes.get("/getByAscLikes", getByAscLikes);
 CompanyRoutes.get("/getall", getAll);
 CompanyRoutes.get("/:id", getById);
 CompanyRoutes.get("/companybyservices/services", getByServices);
