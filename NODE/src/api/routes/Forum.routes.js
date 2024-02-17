@@ -1,9 +1,10 @@
 const { isAuth } = require("../../middleware/auth.middleware");
+
 const {
   createForum,
   getById,
   deleteForum,
-  update
+  update,
 } = require("../controllers/Forum.controllers");
 
 const ForumRoutes = require("express").Router();
@@ -14,3 +15,5 @@ ForumRoutes.delete("/:id", deleteForum);
 ForumRoutes.patch("/update/:id", update);
 
 module.exports = ForumRoutes;
+
+//Ok
