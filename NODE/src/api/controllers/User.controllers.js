@@ -1038,29 +1038,35 @@ const toggleUsersFollowed = async (req, res, next) => {
   } // Error 500 cogerá un error que los catches previos no han cogido
 };  */
 //-------------------------------------------------------------------------------------------------------------------------
-//! error al testar insonmia .... 3h da mañana realmente es dificile
 const toggleFollow = async (req, res, next) => {
   try {
-    const { userToFollow } = req.params; // usuario a seguir o dejar de seguir
-    const { usersFollowed } = req.user; // usuario que quiere seguir
-    //como lo quiero dejar de seguir quito su id del array de los que me siguen
-    if (!usersFollowed) {
-      return res.status(401).json({
-        error: "Não autorizado",
-        message: "Você não está autenticado.",
-      });
-    }
-    if (usersFollowed.includes(userToFollow)) {
+    const { idUserToFollow } = req.params;
+    const { _id, usersFollowed } = req.user; // busco en el arrray de seguidores si le sigo o no este usuario
+
+    if (usersFollowed.includes(idUserToFollow)) {
+      //! si lo incluye, quiere decir lo sigo por lo que lo dejo de seguir
       try {
-        await User.findByIdAndUpdate(req.user._id, {
-          $pull: { usersFollowed: userToFollow },
+        // 1) como lo quiero dejar de seguir quito su id del array de los que me siguen
+
+        await User.findByIdAndUpdate(_id, {
+          $pull: {
+            usersFollowed: idUserToFollow,
+          },
         });
-        //del user que dejo de seguir me tengo que quitar de sus seguidores
         try {
-          await User.findByIdAndUpdate(userToFollow, {
-            $pull: { usersFollowers: req.user._id },
+          // 2) del user que dejo de seguir me tengo que quitar de sus seguidores
+
+          await User.findByIdAndUpdate(idUserToFollow, {
+            $pull: {
+              usersFollowers: _id,
+            },
           });
-          return res.status(200).json("he dejado de seguirlo");
+
+          return res.status(200).json({
+            action: "he dejado de seguirlo",
+            authUser: await User.findById(_id),
+            userToFollow: await User.findById(idUserToFollow),
+          });
         } catch (error) {
           return res.status(404).json({
             error:
@@ -1075,31 +1081,45 @@ const toggleFollow = async (req, res, next) => {
           message: error.message,
         });
       }
-      // si no lo tengo como que lo sigo, lo empiezo a seguir
     } else {
-      //como lo quiero dejar de seguir quito su id del array de los que me siguen
       try {
-        await User.findByIdAndUpdate(req.user._id, {
-          $push: { usersFollowed: userToFollow },
+        await User.findByIdAndUpdate(_id, {
+          $push: {
+            usersFollowed: idUserToFollow,
+          },
         });
         try {
-          await User.findByIdAndUpdate(userToFollow, {
-            $push: { usersFollowers: req.user._id },
+          // 2) del user que dejo de seguir me tengo que quitar de sus seguidores
+
+          await User.findByIdAndUpdate(idUserToFollow, {
+            $push: {
+              usersFollowers: _id,
+            },
+          });
+
+          return res.status(200).json({
+            action: "Lo empiezo a seguir de seguirlo",
+            authUser: await User.findById(_id),
+            userToFollow: await User.findById(idUserToFollow),
           });
         } catch (error) {
-          return res.status(200).json("Lo empiezo a seguir");
+          return res.status(404).json({
+            error:
+              "error catch update quien le sigue al user que recibo por el param",
+            message: error.message,
+          });
         }
       } catch (error) {
         return res.status(404).json({
           error:
-            "error catch update quien le sigue al user que recibo por el param",
+            "error catch update poner de seguidor el id que recibo por el param",
           message: error.message,
         });
       }
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error general",
+    return res.status(404).json({
+      error: "error catch general",
       message: error.message,
     });
   }
