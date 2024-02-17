@@ -110,9 +110,95 @@ const deleteForum = async (req, res, next) => {
   }
 };
 
-module.exports = { createForum, getById, getAll, deleteForum };
-
 //Se han realizado pequeñas correcciones gramaticales tanto en inglés como en español.
 //!----------------------------------------------------------------------------------
 //-----------------------------------UPDATE------------------------------------------
 //!----------------------------------------------------------------------------------
+
+const update = async (req,res, next) => {
+
+  await Forum.syncIndexes();
+  let catchImg = req.file?.path;
+  try {
+    await Forum.syncIndexes();
+    const { id } = req.params;
+    const forumById = await Forum.findById(id);
+    if (forumById){
+      const oldImg = forumById.image;
+
+      const customBody = {
+        _id: forumById._id,
+        image: req.file?.path ? catchImg : oldImg,
+        title: req.body?.title ? req.body?.title : ForumById,
+        author: req.body?.author ? req.body?.author : forumById.author,
+        content: req.body?.content ? req.body?.content : forumById.content,
+      };
+
+        try {
+          await Forum.findByIdAndUpdate(id, customBody);
+          if (req.file?.path) {
+            deleteImgCloudinary(oldImg);
+          }
+          //** ------------------------------------------------------------------- */
+          //** VAMOS A TESTEAR EN TIEMPO REAL QUE ESTO SE HAYA HECHO CORRECTAMENTE */
+          //** ------------------------------------------------------------------- */
+  
+          // ......> VAMOS A BUSCAR EL ELEMENTO ACTUALIZADO POR ID
+  
+          const forumByIdUpdate = await Forum.findById(id);
+  
+          // ......> me cojer el req.body y vamos a sacarle las claves para saber que elementos nos ha dicho de actualizar
+          const elementUpdate = Object.keys(req.body);
+  
+          /** vamos a hacer un objeto vacion donde meteremos los test */
+  
+          let test = {};
+  
+          /** vamos a recorrer las claves del body y vamos a crear un objeto con los test */
+  
+          elementUpdate.forEach((item) => {
+            if (req.body[item] === forumByIdUpdate[item]) {
+              test[item] = true;
+            } else {
+              test[item] = false;
+            }
+          });
+  
+          if (catchImg) {
+            forumByIdUpdate.image === catchImg
+              ? (test = { ...test, file: true })
+              : (test = { ...test, file: false });
+          }
+          /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
+           * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
+           */
+          let acc = 0;
+          for (clave in test) {
+            test[clave] == false && acc++;
+          }
+  
+          if (acc > 0) {
+            return res.status(404).json({
+              dataTest: test,
+              update: false,
+            });
+          } else {
+            return res.status(200).json({
+              dataTest: test,
+              update: true,
+            });
+          }
+        } catch (error) {}
+      } else {
+        return res.status(404).json("este post no existe");
+      }
+    } catch (error) {
+      return res.status(404).json(error);
+    };
+  };
+
+  module.exports = { createForum, getById, getAll, deleteForum, update };
+      
+    
+
+  
