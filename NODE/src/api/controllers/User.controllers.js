@@ -1098,7 +1098,7 @@ const toggleFollow = async (req, res, next) => {
           });
 
           return res.status(200).json({
-            action: "Lo empiezo a seguir de seguirlo",
+            action: "Lo empiezo a seguir ",
             authUser: await User.findById(_id),
             userToFollow: await User.findById(idUserToFollow),
           });
