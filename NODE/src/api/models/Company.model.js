@@ -14,24 +14,22 @@ const CompanySchema = new Schema(
       required: true,
     },
     companyType: {
-      //! debería ser un enum también?
       type: String,
       required: true,
     },
-    companyServices: 
-      {
-        type: String, 
-        required: true,
-        enum: [
-          "Presupuesto de instalación",
-          "Presupuesto de placas fotovoltáicas",
-          "Estudio energético",
-          "Mantenimiento",
-          "Dimensionado y modelado de la instalación",
-          "Estudio de seguridad",
-          "otros",  //!--- cambiar 
-        ],
-      },
+    companyServices: {
+      type: String,
+      required: true,
+      enum: [
+        "Presupuesto de instalación",
+        "Presupuesto de placas fotovoltáicas",
+        "Estudio energético",
+        "Mantenimiento",
+        "Dimensionado y modelado de la instalación",
+        "Estudio de seguridad",
+        "otros",
+      ],
+    },
     image: {
       type: String,
       required: true,
@@ -57,11 +55,16 @@ const CompanySchema = new Schema(
         ref: "User",
       },
     ],
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
 
-// Create Company model
 const Company = mongoose.model("Company", CompanySchema);
 
 module.exports = Company;
+
+//Ok

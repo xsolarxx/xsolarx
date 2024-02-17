@@ -4,6 +4,7 @@ const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
 const enumOk = require("../../utils/enumOk");
+const { likesCount } = require("../controllers/Company.controllers");
 const randomCode = require("../../utils/randomCode");
 const sendEmail = require("../../utils/sendEmail"); //!sendEmail no ha sido llamado aún
 
@@ -818,6 +819,9 @@ const toggleLikedCompany = async (req, res, next) => {
   try {
     const { idCompany } = req.params; // id de la company
     const { _id, likedCompany } = req.user; // usuario y company
+
+    const incrementLikesCount = false;
+
     // una condicional con includes
     if (likedCompany.includes(idCompany)) {
       console.log("liked company includes company ID");
@@ -828,6 +832,10 @@ const toggleLikedCompany = async (req, res, next) => {
         await Company.findByIdAndUpdate(idCompany, {
           $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
+
+        //* call like count function
+        likesCount(idCompany);
+
         return res.status(200).json({
           user: await User.findById(_id).populate("likedCompany"),
           company: await Company.findById(idCompany).populate(
@@ -848,6 +856,10 @@ const toggleLikedCompany = async (req, res, next) => {
         await Company.findByIdAndUpdate(idCompany, {
           $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
+
+        //* call like count function
+        likesCount(idCompany);
+
         return res.status(200).json({
           user: await User.findById(_id).populate("likedCompany"),
           company: await Company.findById(idCompany).populate(
@@ -1038,7 +1050,6 @@ const toggleUsersFollowed = async (req, res, next) => {
   } // Error 500 cogerá un error que los catches previos no han cogido
 };  */
 //-------------------------------------------------------------------------------------------------------------------------
-//! error al testar insonmia .... 3h da mañana realmente es dificile
 const toggleFollow = async (req, res, next) => {
   try {
     const { userToFollow } = req.params; // Usuario que quiere seguir
@@ -1067,8 +1078,10 @@ const toggleFollow = async (req, res, next) => {
       }
     } else {
       try {
-        await User.findByIdAndUpdate(req.user._id, {
-          $push: { usersFollowed: userToFollow },
+        await User.findByIdAndUpdate(_id, {
+          $push: {
+            usersFollowed: idUserToFollow,
+          },
         });
         await User.findByIdAndUpdate(userToFollow, {
           $push: { usersFollowers: req.user._id },
@@ -1087,8 +1100,8 @@ const toggleFollow = async (req, res, next) => {
       }
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error general",
+    return res.status(404).json({
+      error: "error catch general",
       message: error.message,
     });
   }
