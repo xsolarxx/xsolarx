@@ -1,5 +1,5 @@
 //----------------------------------* Middleware and utils *-------------------------------------------------
-
+const middleware = require("../../middleware/auth.middleware");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
@@ -14,6 +14,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
 const setError = require("../../helpers/handle-error");
+const express = require("express");
 
 const User = require("../models/User.model");
 const Forum = require("../models/Forum.model");
@@ -984,20 +985,20 @@ Cuando un user sigue a otro user se tiene que hacer:
 1º El user que hace follow -> Añade a su perfil que está siguiendo a ese user
 2º El user que ha recibido el follow, que está siendo seguido -> 
 Se le añade en su perfil que "x user le está siguiendo" */
-
+/*
 const toggleUsersFollowed = async (req, res, next) => {
   try {
-    const { iduserToFollow } = req.params; // Id de user que voy a seguir
-    const { _id, usersFollowed } = req.user; // Del req.user nos referimos a los user que "yo" ya sigo
+    const { idUserToFollow } = req.params; // Id de user que voy a seguir
+    const { _id, usersFollowed, } = req.user; // Del req.user nos referimos a los user que "yo" ya sigo
 
     // Se requiere el id, los users que "me" siguen y los que "yo" sigo
     // una condicional con includes
-    if (usersFollowed.includes(iduserToFollow)) {
+    if (usersFollowed.includes(idUserToFollow)) {
       try {
         await User.findByIdAndUpdate(_id, {
-          $pull: { usersFollowed: iduserToFollow },
+          $pull: { usersFollowed: idUserToFollow },
         }); /* Se llama al User model, se realiza una búsqueda por id y se extraen de los users que
-         "yo" sigo, sus ids, los cuales serán necesitados */
+         "yo" sigo, sus ids, los cuales serán necesitados 
         return res.status(200).json({
           user: await User.findById(_id).populate("usersFollowed"),
         });
@@ -1007,10 +1008,10 @@ const toggleUsersFollowed = async (req, res, next) => {
           message: error.message,
         });
       }
-    } else if (!usersFollowed.includes(iduserToFollow)) {
+    } else if (!usersFollowed.includes(idUserToFollow)) {
       try {
         await User.findByIdAndUpdate(_id, {
-          $push: { usersFollowed: iduserToFollow },
+          $push: { usersFollowed: idUserToFollow },
         });
         return res.status(200).json({
           user: await User.findById(_id).populate("usersFollowed"),
@@ -1023,7 +1024,7 @@ const toggleUsersFollowed = async (req, res, next) => {
       }
     }
 
-    const userToFollow = await User.findById(_iduserToFollow);
+    const userToFollow = await User.findById(idUserToFollow);
 
     // Hay que actualizar el user que está siendo seguido con su nuevo follower
     // 1º  read the information for user iduserToFollow
@@ -1035,6 +1036,73 @@ const toggleUsersFollowed = async (req, res, next) => {
       message: error.message,
     });
   } // Error 500 cogerá un error que los catches previos no han cogido
+};  */
+//-------------------------------------------------------------------------------------------------------------------------
+//! error al testar insonmia .... 3h da mañana realmente es dificile
+const toggleFollow = async (req, res, next) => {
+  try {
+    const { userToFollow } = req.params; // usuario a seguir o dejar de seguir
+    const { usersFollowed } = req.user; // usuario que quiere seguir
+    //como lo quiero dejar de seguir quito su id del array de los que me siguen
+    if (!usersFollowed) {
+      return res.status(401).json({
+        error: "Não autorizado",
+        message: "Você não está autenticado.",
+      });
+    }
+    if (usersFollowed.includes(userToFollow)) {
+      try {
+        await User.findByIdAndUpdate(req.user._id, {
+          $pull: { usersFollowed: userToFollow },
+        });
+        //del user que dejo de seguir me tengo que quitar de sus seguidores
+        try {
+          await User.findByIdAndUpdate(userToFollow, {
+            $pull: { usersFollowers: req.user._id },
+          });
+          return res.status(200).json("he dejado de seguirlo");
+        } catch (error) {
+          return res.status(404).json({
+            error:
+              "error catch update quien le sigue al user que recibo por el param",
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error:
+            "error catch update borrar de seguidor el id que recibo por el param",
+          message: error.message,
+        });
+      }
+      // si no lo tengo como que lo sigo, lo empiezo a seguir
+    } else {
+      //como lo quiero dejar de seguir quito su id del array de los que me siguen
+      try {
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { usersFollowed: userToFollow },
+        });
+        try {
+          await User.findByIdAndUpdate(userToFollow, {
+            $push: { usersFollowers: req.user._id },
+          });
+        } catch (error) {
+          return res.status(200).json("Lo empiezo a seguir");
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error:
+            "error catch update quien le sigue al user que recibo por el param",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
 };
 
 //-------------------------------------------------------------------------------------------------------------------------
@@ -1057,4 +1125,5 @@ module.exports = {
   toggleLikedCompany,
   toggleLikedNews,
   toggleLikedForum,
+  toggleFollow,
 };
