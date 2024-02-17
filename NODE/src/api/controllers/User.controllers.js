@@ -980,76 +980,7 @@ const toggleLikedForum = async (req, res, next) => {
   }
 };
 
-//------------------------------------* TOGGLE USERS FOLLOWED *-------------------------------------------------------------
-
-//? EN PROCESO, MUY HARDCORE TT__TT
-/* PISTA: Request tiene que tener :
-UserID is triggering the follow action
-UserID of the user who the aforementioned user is FOLLOWING
-Option a: Toggle function which does two actions:
- MAIN TOGGLE FUNCTION CAN RUN BOTH THE BELOW
- THE MAIN FUNTION IS THE ONE WHICH WILL BE TRIGGERED FROM THE ROUTE
- runs togglerUsersFollowers
- runs toggleUsersFollowed */
-/*
-Cuando un user sigue a otro user se tiene que hacer:
-
-1º El user que hace follow -> Añade a su perfil que está siguiendo a ese user
-2º El user que ha recibido el follow, que está siendo seguido -> 
-Se le añade en su perfil que "x user le está siguiendo" */
-/*
-const toggleUsersFollowed = async (req, res, next) => {
-  try {
-    const { idUserToFollow } = req.params; // Id de user que voy a seguir
-    const { _id, usersFollowed, } = req.user; // Del req.user nos referimos a los user que "yo" ya sigo
-
-    // Se requiere el id, los users que "me" siguen y los que "yo" sigo
-    // una condicional con includes
-    if (usersFollowed.includes(idUserToFollow)) {
-      try {
-        await User.findByIdAndUpdate(_id, {
-          $pull: { usersFollowed: idUserToFollow },
-        }); /* Se llama al User model, se realiza una búsqueda por id y se extraen de los users que
-         "yo" sigo, sus ids, los cuales serán necesitados 
-        return res.status(200).json({
-          user: await User.findById(_id).populate("usersFollowed"),
-        });
-      } catch (error) {
-        return res.status(404).json({
-          error: "Error al actualizar a los users que yo sigo",
-          message: error.message,
-        });
-      }
-    } else if (!usersFollowed.includes(idUserToFollow)) {
-      try {
-        await User.findByIdAndUpdate(_id, {
-          $push: { usersFollowed: idUserToFollow },
-        });
-        return res.status(200).json({
-          user: await User.findById(_id).populate("usersFollowed"),
-        });
-      } catch (error) {
-        return res.status(404).json({
-          error: "Error al actualizar los users que yo sigo",
-          message: error.message,
-        });
-      }
-    }
-
-    const userToFollow = await User.findById(idUserToFollow);
-
-    // Hay que actualizar el user que está siendo seguido con su nuevo follower
-    // 1º  read the information for user iduserToFollow
-    // Get "usersFollowers" for iduserToFollow
-    // Check if "usersFollowed" for the above contains _id (the user who has followed it)
-  } catch (error) {
-    return res.status(500).json({
-      error: "Error general",
-      message: error.message,
-    });
-  } // Error 500 cogerá un error que los catches previos no han cogido
-};  */
-//-------------------------------------------------------------------------------------------------------------------------
+//-------------------------------* TOOGLE follow / followed *-------------------------------------------------------------
 const toggleFollow = async (req, res, next) => {
   try {
     const { userToFollow } = req.params; // Usuario que quiere seguir
