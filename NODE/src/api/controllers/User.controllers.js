@@ -4,6 +4,7 @@ const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
 const enumOk = require("../../utils/enumOk");
+const { likesCount } = require("../controllers/Company.controllers");
 const randomCode = require("../../utils/randomCode");
 const sendEmail = require("../../utils/sendEmail"); //!sendEmail no ha sido llamado aún
 
@@ -818,6 +819,9 @@ const toggleLikedCompany = async (req, res, next) => {
   try {
     const { idCompany } = req.params; // id de la company
     const { _id, likedCompany } = req.user; // usuario y company
+
+    const incrementLikesCount = false;
+
     // una condicional con includes
     if (likedCompany.includes(idCompany)) {
       console.log("liked company includes company ID");
@@ -828,6 +832,10 @@ const toggleLikedCompany = async (req, res, next) => {
         await Company.findByIdAndUpdate(idCompany, {
           $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
+
+        //* call like count function
+        likesCount(idCompany);
+
         return res.status(200).json({
           user: await User.findById(_id).populate("likedCompany"),
           company: await Company.findById(idCompany).populate(
@@ -848,6 +856,10 @@ const toggleLikedCompany = async (req, res, next) => {
         await Company.findByIdAndUpdate(idCompany, {
           $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
+
+        //* call like count function
+        likesCount(idCompany);
+
         return res.status(200).json({
           user: await User.findById(_id).populate("likedCompany"),
           company: await Company.findById(idCompany).populate(
