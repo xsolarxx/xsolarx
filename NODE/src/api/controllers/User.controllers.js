@@ -1041,58 +1041,47 @@ const toggleUsersFollowed = async (req, res, next) => {
 //! error al testar insonmia .... 3h da mañana realmente es dificile
 const toggleFollow = async (req, res, next) => {
   try {
-    const { userToFollow } = req.params; // usuario a seguir o dejar de seguir
-    const { usersFollowed } = req.user; // usuario que quiere seguir
-    //como lo quiero dejar de seguir quito su id del array de los que me siguen
-    if (!usersFollowed) {
-      return res.status(401).json({
-        error: "Não autorizado",
-        message: "Você não está autenticado.",
-      });
-    }
+    const { userToFollow } = req.params; // Usuario que quiere seguir
+    const { usersFollowed } = req.user; // usuario yo
+
     if (usersFollowed.includes(userToFollow)) {
       try {
         await User.findByIdAndUpdate(req.user._id, {
           $pull: { usersFollowed: userToFollow },
         });
-        //del user que dejo de seguir me tengo que quitar de sus seguidores
-        try {
-          await User.findByIdAndUpdate(userToFollow, {
-            $pull: { usersFollowers: req.user._id },
-          });
-          return res.status(200).json("he dejado de seguirlo");
-        } catch (error) {
-          return res.status(404).json({
-            error:
-              "error catch update quien le sigue al user que recibo por el param",
-            message: error.message,
-          });
-        }
-      } catch (error) {
-        return res.status(404).json({
-          error:
-            "error catch update borrar de seguidor el id que recibo por el param",
-          message: error.message,
+        await User.findByIdAndUpdate(userToFollow, {
+          $pull: { usersFollowers: req.user._id },
         });
-      }
-      // si no lo tengo como que lo sigo, lo empiezo a seguir
-    } else {
-      //como lo quiero dejar de seguir quito su id del array de los que me siguen
-      try {
-        await User.findByIdAndUpdate(req.user._id, {
-          $push: { usersFollowed: userToFollow },
+
+        return res.status(200).json({
+          acion: "He dejado de seguirlo",
+          authUser: await User.findById(req.user._id),
+          userToFollow: await User.findById(userToFollow),
         });
-        try {
-          await User.findByIdAndUpdate(userToFollow, {
-            $push: { usersFollowers: req.user._id },
-          });
-        } catch (error) {
-          return res.status(200).json("Lo empiezo a seguir");
-        }
       } catch (error) {
         return res.status(404).json({
           error:
             "error catch update quien le sigue al user que recibo por el param",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(req.user._id, {
+          $push: { usersFollowed: userToFollow },
+        });
+        await User.findByIdAndUpdate(userToFollow, {
+          $push: { usersFollowers: req.user._id },
+        });
+
+        return res.status(200).json({
+          action: "Lo empiezo a seguir",
+          authUser: await User.findById(req.user._id),
+          userToFollow: await User.findById(userToFollow),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "error al seguir al usuario",
           message: error.message,
         });
       }
