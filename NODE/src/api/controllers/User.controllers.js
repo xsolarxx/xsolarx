@@ -1064,8 +1064,10 @@ const toggleFollow = async (req, res, next) => {
 
           return res.status(200).json({
             action: "he dejado de seguirlo",
-            authUser: await User.findById(_id),
-            userToFollow: await User.findById(idUserToFollow),
+            authUser: await User.findById(_id).populate("usersFollowed"),
+            userToFollow: await User.findById(idUserToFollow).populate(
+              "usersFollowers"
+            ),
           });
         } catch (error) {
           return res.status(404).json({
@@ -1099,8 +1101,10 @@ const toggleFollow = async (req, res, next) => {
 
           return res.status(200).json({
             action: "Lo empiezo a seguir ",
-            authUser: await User.findById(_id),
-            userToFollow: await User.findById(idUserToFollow),
+            authUser: await User.findById(_id).populate("usersFollowed"),
+            userToFollow: await User.findById(idUserToFollow).populate(
+              "usersFollowers"
+            ),
           });
         } catch (error) {
           return res.status(404).json({
