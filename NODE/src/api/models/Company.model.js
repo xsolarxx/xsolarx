@@ -14,7 +14,6 @@ const CompanySchema = new Schema(
       required: true,
     },
     companyType: {
-      //! debería ser un enum también?
       type: String,
       required: true,
     },
@@ -28,7 +27,7 @@ const CompanySchema = new Schema(
         "Mantenimiento",
         "Dimensionado y modelado de la instalación",
         "Estudio de seguridad",
-        "otros", //!--- cambiar
+        "otros",
       ],
     },
     image: {
@@ -64,7 +63,8 @@ const CompanySchema = new Schema(
   { timestamps: true }
 );
 
-// Create Company model
 const Company = mongoose.model("Company", CompanySchema);
 
 module.exports = Company;
+
+//Ok

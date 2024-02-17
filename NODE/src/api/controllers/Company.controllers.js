@@ -14,7 +14,7 @@ const createCompany = async (req, res, next) => {
       companyName: req.body.companyName,
     });
     if (companyExist) {
-      return res.status(409).json("Esta empresa ya existe");
+      return res.status(409).json("Esta compañía ya existe");
     }
     const customBody = {
       companyName: req.body?.companyName,
@@ -50,7 +50,7 @@ const createCompany = async (req, res, next) => {
     }
     return res.status(404).json({
       error:
-        "Error creando la empresa. La imagen ha sido borrada si fue adjunta",
+        "Error creando la compañía. La imagen ha sido borrada si fue adjunta",
       message: error.message,
     });
   }
@@ -201,8 +201,11 @@ const updateCompany = async (req, res, next) => {
     await Company.syncIndexes();
     const { id } = req.params;
     const companyById = await Company.findById(id);
+    console.log(`got this req ${req}`);
     if (companyById) {
       const oldImg = companyById.image;
+
+      console.log(`Got this for req.body.description ${req.body.description}`);
 
       const customBody = {
         _id: companyById._id,
@@ -214,7 +217,7 @@ const updateCompany = async (req, res, next) => {
           ? req.body?.companyType
           : companyById.companyType,
       };
-      if (req.body?.tags) {
+      if (req.body?.companyServices) {
         const result = enumOk("enumServices", req.body?.companyServices);
         customBody.companyServices = result.check
           ? req.body?.companyServices
@@ -222,7 +225,9 @@ const updateCompany = async (req, res, next) => {
       }
 
       try {
+        console.log(`sending customBody ${customBody.description} to the DB`);
         await Company.findByIdAndUpdate(id, customBody);
+        console.log("Did it");
         if (req.file?.path) {
           deleteImgCloudinary(oldImg);
         }
@@ -292,3 +297,5 @@ module.exports = {
   likesCount,
   updateCompany,
 };
+
+// Adición de comentarios junto a correcciones (no el código), hasta update(éste incluido ya).

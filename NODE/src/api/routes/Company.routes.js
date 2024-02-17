@@ -32,3 +32,5 @@ CompanyRoutes.get("/getByAscLikes", getByAscLikes);
 CompanyRoutes.patch("/update/:id", [isAuthAdmin], updateCompany);
 
 module.exports = CompanyRoutes;
+
+// Adición de comentarios junto a correcciones (no el código)
