@@ -1,3 +1,5 @@
+//* Solo el admin puede crear y actualizar compañías
+
 const { isAuthAdmin } = require("../../middleware/auth.middleware");
 const {
   createCompany,
@@ -7,13 +9,14 @@ const {
   getAll,
   getByDescLikes,
   getByAscLikes,
+  updateCompany,
 } = require("../controllers/Company.controllers");
+
 const { upload } = require("../../middleware/files.middleware");
 
 const CompanyRoutes = require("express").Router();
 
-//* upload.single("image") y upload middleware para poder subir imagenes por media
-
+//* upload.single("image") y upload middleware --> Para subir img
 CompanyRoutes.post(
   "/create",
   [isAuthAdmin],
@@ -21,11 +24,11 @@ CompanyRoutes.post(
   createCompany
 );
 CompanyRoutes.get("/byName", getByName);
-CompanyRoutes.get("/getByDescLikes", getByDescLikes);
-CompanyRoutes.get("/getByAscLikes", getByAscLikes);
 CompanyRoutes.get("/getall", getAll);
 CompanyRoutes.get("/:id", getById);
 CompanyRoutes.get("/companybyservices/services", getByServices);
+CompanyRoutes.get("/getByDescLikes", getByDescLikes);
+CompanyRoutes.get("/getByAscLikes", getByAscLikes);
+CompanyRoutes.patch("/update/:id", [isAuthAdmin], updateCompany);
 
-//!Preguntar al grupo si se quiere que users no registrados puedan buscar por nombre compañías
 module.exports = CompanyRoutes;
