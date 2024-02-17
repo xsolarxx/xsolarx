@@ -204,4 +204,33 @@ const update = async (req, res, next) => {
   }
 };
 
-module.exports = { createNews, getAll, getById, update, getByTags };
+
+//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//!································DELETE··································
+//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+const deleteNews = async (req, res, next) => {
+try {
+  const {id} = req.params
+  const News = await News.findbyIdAndDelete(id);
+  if(!id) {
+    return res.status(400).json({error: "no se encontró ID de la notícia"})
+  }
+  if(!News) {
+    return res.status(400).json ({error: "no se encontró la notícia"})
+  }
+  await Promise.all([
+    User.updateMany({newsOwnerAdmin: id }, {$pull: { newsOwnerAdmin: id} }),
+    Comment.updateMany({recipientNews: id}, {$pull: { recipientNews: id}}),
+  ]);
+  return res.status(200).json({exito: true, message: "Notícia borrada correctamente"})
+
+
+} catch (error) {
+  return res.status(400).json({error: "Error al eliminar la notícia", message: error.message});
+  
+}
+};
+
+module.exports = { createNews, getAll, getById, update, getByTags, deleteNews };
