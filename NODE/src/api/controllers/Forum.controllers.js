@@ -89,7 +89,7 @@ const deleteForum = async (req, res, next) => {
     }
     // Se verifica si el comentario se eliminó correctamente
     const forum = await Forum.findByIdAndDelete(id); // const para buscar y borrar
-    if (!Forum) {
+    if (!forum) {
       return res.status(400).json({ error: "El foro no ha sido encontrado" });
     }
     await Promise.all([
