@@ -31,12 +31,11 @@ UserRoutes.post("/login", login);
 UserRoutes.post("/login/autologin", autoLogin);
 UserRoutes.get("/getall", getAll);
 UserRoutes.get("/getbyid/:id", getById);
-
 UserRoutes.patch("/forgotpassword", changePassword);
-UserRoutes.delete("/:id", [isAuth], deleteUser);
 
 //! ---------------- endPoints con auth ---------------------------------------
 
+UserRoutes.delete("/:id", [isAuth], deleteUser);
 UserRoutes.patch("/changepassword", [isAuth], modifyPassword);
 UserRoutes.patch("/update/update", [isAuth], upload.single("image"), update);
 UserRoutes.patch("/commentFav/:idComment", [isAuth], toggleFavComments);
