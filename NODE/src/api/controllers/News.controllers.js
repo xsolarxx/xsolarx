@@ -112,6 +112,7 @@ const getByTags = async (req, res, next) => {
 };
 
 //------------------------------------* UPDATE NEWS *----------------------------------------------------
+
 const update = async (req, res, next) => {
   await News.syncIndexes();
   let catchImg = req.file?.path;
@@ -121,13 +122,12 @@ const update = async (req, res, next) => {
     if (newsById) {
       const oldImg = newsById.image;
 
+      // Construye el objeto de campos personalizado para la actualización
       const customBody = {
         _id: newsById._id,
         image: req.file?.path ? catchImg : oldImg,
         title: req.body?.title ? req.body?.title : newsById.title,
         author: req.body?.author ? req.body?.author : newsById.author,
-        //?Por que cuando ponemos tags en el custom body e intentamos hacer el update nos sale error en el imsonia???
-        //*tags: req.body?.tags ? req.body?.tags : newsById.tags,
         shortContent: req.body?.shortContent
           ? req.body?.shortContent
           : newsById.shortContent,
@@ -135,29 +135,32 @@ const update = async (req, res, next) => {
           ? req.body?.fullContent
           : newsById.fullContent,
       };
+
+      // Verifica si hay etiquetas en la solicitud y las valida
       if (req.body?.tags) {
         const result = enumOk("enumTags", req.body?.tags);
         customBody.tags = result.check ? req.body?.tags : newsById.tags;
       }
 
       try {
+        // Actualiza la noticia por su ID con los campos personalizados
         await News.findByIdAndUpdate(id, customBody);
         if (req.file?.path) {
           deleteImgCloudinary(oldImg);
         }
-        // ......> VAMOS A BUSCAR EL ELEMENTO ACTUALIZADO POR ID
 
+        //----------------------* Test *----------------------------------------------------------------
+
+        //Se busca el elemento actualizado vía id
         const newsByIdUpdate = await News.findById(id);
 
-        // ......> me cojer el req.body y vamos a sacarle las claves para saber que elementos nos ha dicho de actualizar
+        // Se sacan las claves del req.body para saber qué elementos actualizar
         const elementUpdate = Object.keys(req.body);
 
-        /** vamos a hacer un objeto vacion donde meteremos los test */
-
+        // Objeto vacío donde posteriormente se meterán los test
         let test = {};
 
-        /** vamos a recorrer las claves del body y vamos a crear un objeto con los test */
-
+        // Se recorren las claves del body y se crea un objeto con los test
         elementUpdate.forEach((item) => {
           if (req.body[item] === newsByIdUpdate[item]) {
             test[item] = true;
@@ -172,9 +175,8 @@ const update = async (req, res, next) => {
             : (test = { ...test, file: false });
         }
 
-        /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
-         * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
-         */
+        // Se comprueba si hay un "false". Hay false --> Se lanza un 404.
+        // Si no hay false --> Se lanza un 200, todo OK.
 
         let acc = 0;
         for (clave in test) {
@@ -201,9 +203,7 @@ const update = async (req, res, next) => {
   }
 };
 
-//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-//!································DELETE··································
-//?||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//------------------------------------* DELETE *----------------------------------------------------
 
 const deleteNews = async (req, res, next) => {
   try {
@@ -222,6 +222,7 @@ const deleteNews = async (req, res, next) => {
         .json({ error: "La notícia no ha sido encontrada" });
     }
     deleteImgCloudinary(news.image);
+
     await Promise.all([
       // Elimina las referencias al foro en otras colecciones
       User.updateMany({ newsOwnerAdmin: id }, { $pull: { forumOwner: id } }),
@@ -241,4 +242,8 @@ const deleteNews = async (req, res, next) => {
   }
 };
 
+//---------------------------------------------------------------------------------------------------
+
 module.exports = { createNews, getAll, getById, update, getByTags, deleteNews };
+
+// Ok except Del

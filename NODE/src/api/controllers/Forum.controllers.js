@@ -1,6 +1,8 @@
 const User = require("../models/User.model");
 const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
+const News = require("../models/News.model");
+const Company = require("../models/Company.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 // -----------------------------* CREATE POST/FORUM *-------------------------------------------------
@@ -166,6 +168,7 @@ const deleteForum = async (req, res, next) => {
     // Elimina el foro
     await Forum.findByIdAndDelete(idComment);
     console.log("ID del comentario eliminado:", idComment);
+
     // Actualiza las referencias de los modelos de datos
     await Promise.all([
       User.updateMany(
