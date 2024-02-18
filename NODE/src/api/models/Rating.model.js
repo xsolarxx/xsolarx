@@ -27,4 +27,4 @@ const RatingSchema = new Schema(
 const Rating = mongoose.model("Rating", RatingSchema);
 module.exports = Rating;
 
-// Adición de comentarios junto a correcciones (no el código)
+// Ok
