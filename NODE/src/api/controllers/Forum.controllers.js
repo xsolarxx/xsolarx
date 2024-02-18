@@ -89,9 +89,11 @@ const deleteForum = async (req, res, next) => {
     }
     // Se verifica si el comentario se eliminó correctamente
     const forum = await Forum.findByIdAndDelete(id); // const para buscar y borrar
+    const existForum = await Forum.findById(id)
     if (!forum) {
       return res.status(400).json({ error: "El foro no ha sido encontrado" });
     }
+    deleteImgCloudinary(Forum.image);
     await Promise.all([
       // Elimina las referencias al foro en otras colecciones
       User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
@@ -102,7 +104,7 @@ const deleteForum = async (req, res, next) => {
     ]);
     return res
       .status(200)
-      .json({ exito: true, mensaje: "Foro eliminado correctamente" }); //Spanish) exito y mensaje?
+      .json({ delete: true, mensaje: "Foro eliminado correctamente" }); //Spanish) exito y mensaje?
   } catch (error) {
     return res
       .status(400)
