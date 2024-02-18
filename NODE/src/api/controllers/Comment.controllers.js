@@ -4,7 +4,6 @@ const Forum = require("../models/Forum.model");
 const Company = require("../models/Company.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
-
 const createComment = async (req, res, next) => {
   try {
     const { idRecipient } = req.params;
@@ -121,24 +120,54 @@ const getById = async (req, res, next) => {
 //! en progreso
 const deleteComment = async (req, res, next) => {
   try {
+    // ID del comentario a ser borrado
     const { idComment } = req.params;
-    const newsCommentExist = await News.findById(idComment);
-    const companyCommentExist = await Company.findById(idComment);
-    const forumCommentExist = await Forum.findById(idComment);
+    const userId = req.user ? req.user._id : null;
 
-    if (newsCommentExist) {
-      await News.findByIdAndDelete(idComment);
-      const newsCommentDelete = await News.findById(idComment);
-      if (!newsCommentExist) {
-        try {
-          await News.updateMany(
-            { comments: idComment },
-            { $pull: { comments: idComment } }
-          );
-        } catch (error) {}
-      }
+    // Verificar si el usuario está autenticado
+    if (!userId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
     }
-  } catch (error) {}
+
+    // Encontrar el comentario a eliminar
+    const deleteComment = await Comment.findOne({
+      _id: idComment,
+      owner: userId,
+    });
+
+    // Verificar si el comentario existe
+    if (!deleteComment) {
+      return res.status(404).json({ message: "Comentario no encontrado" });
+    }
+
+    // Eliminar el comentario y actualizar las referencias
+    await Promise.all([
+      User.updateMany(
+        { favComments: idComment },
+        { $pull: { favComments: idComment } }
+      ),
+      Comment.deleteOne({ _id: idComment }),
+      News.updateOne(
+        { comments: idComment },
+        { $pull: { comments: idComment } }
+      ),
+      Company.updateOne(
+        { userCompanyReviews: idComment },
+        { $pull: { userCompanyReviews: idComment } }
+      ),
+      Forum.updateOne(
+        { comments: idComment },
+        { $pull: { comments: idComment } }
+      ),
+    ]);
+
+    return res.status(200).json({ message: "Comentario borrado" });
+  } catch (error) {
+    console.error("Error al borrar el comentario:", error);
+    return res
+      .status(500)
+      .json({ message: "Ocurrió un error al borrar el comentario" });
+  }
 };
 
 // ------------------------------ GET BY ALL-------------------------------------------------------
@@ -179,7 +208,7 @@ const update = async (req, res, next) => {
 
       try {
         await Comment.findByIdAndUpdate(id, customBody);
-       
+
         //** ------------------------------------------------------------------- */
         //** VAMOS A TESTEAR EN TIEMPO REAL QUE ESTO SE HAYA HECHO CORRECTAMENTE */
         //** ------------------------------------------------------------------- */
@@ -206,7 +235,7 @@ const update = async (req, res, next) => {
         });
         /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
          * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
-        */
+         */
         let acc = 0;
         for (clave in test) {
           test[clave] == false && acc++;
