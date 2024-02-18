@@ -120,33 +120,21 @@ const getById = async (req, res, next) => {
 //! en progreso
 const deleteComment = async (req, res, next) => {
   try {
-    // ID del comentario a ser borrado
     const { idComment } = req.params;
-    const userId = req.user ? req.user._id : null;
 
-    // Verificar si el usuario está autenticado
-    if (!userId) {
-      return res.status(401).json({ message: "Usuario no autenticado" });
-    }
-
-    // Encontrar el comentario a eliminar
-    const deleteComment = await Comment.findOne({
-      _id: idComment,
-      owner: userId,
-    });
-
-    // Verificar si el comentario existe
-    if (!deleteComment) {
-      return res.status(404).json({ message: "Comentario no encontrado" });
-    }
-
-    // Eliminar el comentario y actualizar las referencias
+    // Eliminar el comentario
+    await Comment.findByIdAndDelete(idComment);
+    console.log("ID del comentario eliminado:", idComment);
+    // Actualizar las referencias de los modelos de datos
     await Promise.all([
       User.updateMany(
         { favComments: idComment },
         { $pull: { favComments: idComment } }
       ),
-      Comment.deleteOne({ _id: idComment }),
+      Comment.updateOne(
+        { likes: idComment },
+        { $pull: { likes: idComment } } // eliminar el ID del comentario de la lista de likes
+      ),
       News.updateOne(
         { comments: idComment },
         { $pull: { comments: idComment } }
@@ -161,14 +149,55 @@ const deleteComment = async (req, res, next) => {
       ),
     ]);
 
-    return res.status(200).json({ message: "Comentario borrado" });
-  } catch (error) {
-    console.error("Error al borrar el comentario:", error);
     return res
-      .status(500)
-      .json({ message: "Ocurrió un error al borrar el comentario" });
+      .status(200)
+      .json({ message: "Comentario eliminado correctamente" });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error eliminando el comentario",
+      message: error.message,
+    });
   }
 };
+/*const deleteComment = async (req, res, next) => {
+  try {
+    const { idComment } = req.params;
+    const CommentExist = await Comment.findById(idComment);
+    if (CommentExist) {
+      await Comment.findByIdAndDelete(idComment);
+    }
+    try {
+      await User.updateMany(
+        { favComments: idComment },
+        { $pull: { favComments: idComment } }
+      ),
+        await Comment.updateMany(
+          { likes: idComment },
+          { $pull: { likes: userId } }
+        ),
+        await News.findOne(
+          { comments: idComment },
+          { $pull: { comments: idComment } }
+        );
+      await Company.updateOne(
+        { userCompanyReviews: idComment },
+        { $pull: { userCompanyReviews: idComment } }
+      );
+      await Forum.updateOne(
+        { comments: idComment },
+        { $pull: { comments: idComment } }
+      );
+      try {
+        await Comment.deleteMany({});
+      } catch (error) {}
+    } catch (error) {}
+  } catch (error) {
+    return res.status(404).json({
+      error: "Error eliminando el comentario",
+      message: error.message,
+    });
+  }
+};*/
 
 // ------------------------------ GET BY ALL-------------------------------------------------------
 
