@@ -1,6 +1,6 @@
 const enumOk = (enumType, word) => {
-  const enumGender = ["hombre", "mujer", "otros"];
-  const enumTags = ["Paneles solares", "Energía eólica", "Otros","Renovables"];
+  const enumGender = ["Hombre", "Mujer", "Otros"];
+  const enumTags = ["Paneles solares", "Energía eólica", "Otros"];
   const enumServices = [
     "Presupuesto de instalación",
     "Presupuesto de placas fotovoltáicas",
@@ -8,7 +8,7 @@ const enumOk = (enumType, word) => {
     "Mantenimiento",
     "Dimensionado y modelado de la instalación",
     "Estudio de seguridad",
-    "otros",
+    "Otros",
   ];
   switch (enumType) {
     case "enumGender":

@@ -29,7 +29,7 @@ const createCompany = async (req, res, next) => {
       const resultEnum = enumOk("enumServices", req.body?.companyServices);
       newCompany.companyServices = resultEnum.check
         ? req.body?.companyServices
-        : "otros";
+        : "Otros";
     }
     const savedCompany = await newCompany.save();
     if (savedCompany) {
@@ -40,8 +40,7 @@ const createCompany = async (req, res, next) => {
         return res.status(200).json(newCompany);
       } catch (error) {
         return res.status(404).json({
-          error:
-            "Se ha encontrado error catch al crear la compañía por el admin",
+          error: "Error tipo catch al crear la compañía por el admin",
           message: error.message,
         });
       }
@@ -83,7 +82,6 @@ const getByName = async (req, res, next) => {
 const getAll = async (req, res, next) => {
   try {
     const allCompany = await Company.find().populate("userCompanyReviews");
-    // find devuelve un array
     if (allCompany.length > 0) {
       return res.status(200).json(allCompany);
     } else {
@@ -140,8 +138,8 @@ const getByServices = async (req, res, next) => {
 
 const getByDescLikes = async (req, res, next) => {
   try {
-    // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose.
-    // Indica que ordene de manera descendente, para que salgan las valores más altos primero.
+    // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose
+    // Indica que ordene de manera descendente, para que salgan las valores más altos primero
     const companiesSortedByLikes = await Company.find().sort({
       likesCount: -1,
     });
@@ -162,7 +160,7 @@ const getByDescLikes = async (req, res, next) => {
 
 const getByAscLikes = async (req, res, next) => {
   try {
-    // Indica que ordene de manera ascendente, para que salgan las valores más bajos primero.
+    // Indica que ordene de manera ascendente, para que salgan las valores más bajos primero
     const companiesSortedByLikes = await Company.find().sort({
       likesCount: 1,
     });
@@ -183,7 +181,7 @@ const getByAscLikes = async (req, res, next) => {
 
 const UpdatelikesCount = async (companyId, increment) => {
   try {
-    //Encuentra Id de la compañía y actualiza su UpdatelikesCount con un incremento( inc -> operador mongoDB).
+    //Encuentra id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB)
     await Company.findByIdAndUpdate(companyId, {
       $inc: { likesCount: increment },
     });
@@ -201,12 +199,9 @@ const updateCompany = async (req, res, next) => {
     await Company.syncIndexes();
     const { id } = req.params;
     const companyById = await Company.findById(id);
-    console.log(`got this req ${req}`);
+
     if (companyById) {
       const oldImg = companyById.image;
-
-      console.log(`Got this for req.body.description ${req.body.description}`);
-
       const customBody = {
         _id: companyById._id,
         image: req.file?.path ? catchImg : oldImg,
@@ -225,23 +220,23 @@ const updateCompany = async (req, res, next) => {
       }
 
       try {
-        console.log(`sending customBody ${customBody.description} to the DB`);
         await Company.findByIdAndUpdate(id, customBody);
-        console.log("Did it");
         if (req.file?.path) {
           deleteImgCloudinary(oldImg);
         }
 
-        //Se busca el elemento actualizado vía id.
+        //----------------------* Test *----------------------------------------------------------------
+
+        //Se busca el elemento actualizado vía id
         const companyByIdUpdate = await Company.findById(id);
 
-        // Se sacan las claves del req.body para saber qué elementos actualizar.
+        // Se sacan las claves del req.body para saber qué elementos actualizar
         const elementUpdate = Object.keys(req.body);
 
-        // Objeto vacío donde posteriormente se meterán los test.
+        // Objeto vacío donde posteriormente se meterán los test
         let test = {};
 
-        // Se recorren las claves del body y se crea un objeto con los test.
+        // Se recorren las claves del body y se crea un objeto con los test
         elementUpdate.forEach((item) => {
           if (req.body[item] === companyByIdUpdate[item]) {
             test[item] = true;
@@ -284,11 +279,11 @@ const updateCompany = async (req, res, next) => {
   }
 };
 
-// --------------------------------*DELETE*--------------------------------------------------------
+// --------------------------------* DELETE *--------------------------------------------------------
 
 const deleteCompany = async (req, res, next) => {
   try {
-    // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
+    // Extraer el id de la compañía de los parámetros de la solicitud HTTP
     const { id } = req.params;
     // Verificar si la compañía existe antes de eliminarla
     const companyExist = await Company.findById(id);
@@ -342,7 +337,7 @@ const deleteCompany = async (req, res, next) => {
         }
       } else {
         return res.status(404).json({
-          error: "Compañia no existe",
+          error: "La compañía no existe",
         });
       }
     }
@@ -351,11 +346,13 @@ const deleteCompany = async (req, res, next) => {
       .json({ success: true, message: "Compañía eliminada correctamente" });
   } catch (error) {
     return res.status(404).json({
-      error: "Error eliminando la compañia",
+      error: "Error eliminando la compañía",
       message: error.message,
     });
   }
 };
+
+//---------------------------------------------------------------------------------------------------
 
 module.exports = {
   createCompany,
@@ -370,4 +367,4 @@ module.exports = {
   deleteCompany,
 };
 
-// Adición de comentarios junto a correcciones (no el código), hasta update(éste incluido ya).
+// Ok except Del

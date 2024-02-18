@@ -1,6 +1,7 @@
 //Se requiere mongoose y nos traemos el esquema de datos
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+
 const NewsSchema = new Schema(
   {
     title: {
@@ -22,31 +23,30 @@ const NewsSchema = new Schema(
       type: String,
       required: true,
     },
-    tags: 
-      {
-        type: String,
-        enum: ["Paneles solares", "Energía eólica", "otros", "renovables"],
-        required: true,
-      },
-    //array para poner la noticia en 1 o más tags diferentes de enum.
+    tags: {
+      type: String,
+      enum: ["Paneles solares", "Energía eólica", "Otros"],
+      required: true,
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", //tiene que tener el mismo nombre que el model para poder popular
+        ref: "User", // Tiene que tener el mismo nombre que el model para poder popular
       }, //array de los users que le han dado a "like" gracias a la populación del esquema de mongoose del User.model
     ],
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment",
-      }, //array de los comentarios hechos por los users del Comment.model, según su ObjectId.
+      }, // Array de los comentarios hechos por los users del Comment.model, según su ObjectId.
     ],
     ownerAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
 
-// Create Company model
 const News = mongoose.model("News", NewsSchema);
 
 module.exports = News;
+
+//Ok
