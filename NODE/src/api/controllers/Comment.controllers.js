@@ -4,6 +4,10 @@ const Forum = require("../models/Forum.model");
 const Company = require("../models/Company.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+//
+//
+
+// --------------------------------* CREATE COMMENT *--------------------------------------------------------------------
 const createComment = async (req, res, next) => {
   try {
     const { idRecipient } = req.params;
@@ -100,7 +104,7 @@ const createComment = async (req, res, next) => {
   }
 };
 
-// ) GET BY ID
+//--------------------------------* GET BY ID *--------------------------------------------------------------------
 
 const getById = async (req, res, next) => {
   try {
@@ -116,8 +120,8 @@ const getById = async (req, res, next) => {
   }
 };
 
-//) DELETE COMMENT
-//! en progreso
+//)
+// ------------------------------* DELETE COMMENT *-------------------------------------------------------
 const deleteComment = async (req, res, next) => {
   try {
     const { idComment } = req.params;
@@ -159,45 +163,6 @@ const deleteComment = async (req, res, next) => {
     });
   }
 };
-/*const deleteComment = async (req, res, next) => {
-  try {
-    const { idComment } = req.params;
-    const CommentExist = await Comment.findById(idComment);
-    if (CommentExist) {
-      await Comment.findByIdAndDelete(idComment);
-    }
-    try {
-      await User.updateMany(
-        { favComments: idComment },
-        { $pull: { favComments: idComment } }
-      ),
-        await Comment.updateMany(
-          { likes: idComment },
-          { $pull: { likes: userId } }
-        ),
-        await News.findOne(
-          { comments: idComment },
-          { $pull: { comments: idComment } }
-        );
-      await Company.updateOne(
-        { userCompanyReviews: idComment },
-        { $pull: { userCompanyReviews: idComment } }
-      );
-      await Forum.updateOne(
-        { comments: idComment },
-        { $pull: { comments: idComment } }
-      );
-      try {
-        await Comment.deleteMany({});
-      } catch (error) {}
-    } catch (error) {}
-  } catch (error) {
-    return res.status(404).json({
-      error: "Error eliminando el comentario",
-      message: error.message,
-    });
-  }
-};*/
 
 // ------------------------------ GET BY ALL-------------------------------------------------------
 
