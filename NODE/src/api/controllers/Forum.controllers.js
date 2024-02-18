@@ -15,8 +15,13 @@ const createForum = async (req, res, next) => {
     };
 
     const newForum = new Forum(customBody);
+    if (req.file) {
+      newForum.image = req.file.path;
+    } else {
+      newForum.image =
+        "https://res.cloudinary.com/dwmvkaxhd/image/upload/v1707990858/ivdtdpxscvnggdzr2hgt.jpg";
+    }
     const savedForum = await newForum.save();
-
     if (savedForum) {
       try {
         await User.findByIdAndUpdate(req.user._id, {
@@ -58,7 +63,7 @@ const getById = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allForum = await Forum.find().populate("comment");
+    const allForum = await Forum.find();
     /* El find nos devuelve un array */
     if (allForum.length > 0) {
       // Verifica si se encontraron foros
@@ -77,40 +82,60 @@ const getAll = async (req, res, next) => {
 
 // -------------------------------*DELETE POST/FORUM*-----------------------------------------------
 
-//! testar en insonmia
 const deleteForum = async (req, res, next) => {
   try {
-    // Se extrae el id del comentario de los parametros de la solicitud http
+    // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
     const { id } = req.params;
-    // Validación básica del id
-    if (!id) {
-      // Si no tiene el id devuelve el siguiente error
-      return res.status(400).json({ error: "Id del foro no proporcionado" });
+    // Verificar si la compañía existe antes de eliminarla
+    const forumExist = await Forum.findById(id);
+
+    if (forumExist) {
+      await Forum.findByIdAndDelete(id);
+      const forumDelete = await Forum.findById(id);
+
+      if (!forumDelete) {
+        deleteImgCloudinary(forumExist.image);
+
+        try {
+          await Promise.all([
+            // Elimina las referencias al foro en otras colecciones
+            User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
+            User.updateMany(
+              { forumFollowing: id },
+              { $pull: { forumFollowing: id } }),
+            Comment.updateMany(
+                { recipientForum: id },
+                { $pull: { recipientForum: id } }),
+            User.updateMany(
+                  { likedForum: id },
+                  { $pull: { likedForum: id } })
+          ]);
+      
+        } catch (error) {
+          return res.status(404).json({
+            error:
+              "Error al actualizar referencias del usuario relacionadas con la compañía borrada",
+            message: error.message,
+          });
+        }
+      } else {
+        return res.status(404).json({
+          error: "Compañia no existe",
+        });
+      }
     }
-    // Se verifica si el comentario se eliminó correctamente
-    const forum = await Forum.findByIdAndDelete(id); // const para buscar y borrar
-    const existForum = await Forum.findById(id)
-    if (!forum) {
-      return res.status(400).json({ error: "El foro no ha sido encontrado" });
-    }
-    deleteImgCloudinary(Forum.image);
-    await Promise.all([
-      // Elimina las referencias al foro en otras colecciones
-      User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
-      User.updateMany(
-        { forumFollowing: id },
-        { $pull: { forumFollowing: id } }
-      ),
-    ]);
     return res
       .status(200)
-      .json({ delete: true, mensaje: "Foro eliminado correctamente" }); //Spanish) exito y mensaje?
+      .json({ success: true, message: "Compañía eliminada correctamente" });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ error: "Error al eliminar el foro", message: error.message });
+    return res.status(404).json({
+      error: "Error eliminando la compañia",
+      message: error.message,
+    });
   }
 };
+
+
 
 //Se han realizado pequeñas correcciones gramaticales tanto en inglés como en español.
 //!----------------------------------------------------------------------------------

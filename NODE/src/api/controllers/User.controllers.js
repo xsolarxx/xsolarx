@@ -731,7 +731,7 @@ const getById = async (req, res, next) => {
     if (userById) {
       return res.status(200).json(userById);
     } else {
-      return res.status(404).json("no se ha encontrado el comentario");
+      return res.status(404).json("no se ha encontrado el usuario");
     }
   } catch (error) {
     return res.status(404).json(error.message);
