@@ -1,5 +1,10 @@
 const mongoose = require("mongoose"); // para interactuar con la base de datos de mongodb
-const Schema = mongoose.Schema; //
+const Schema = mongoose.Schema;
+const multer = require("multer");
+
+// Configuración de multer para manejar la carga de imágenes
+const storage = multer.memoryStorage(); // Almacenamiento en memoria para este ejemplo
+const upload = multer({ storage: storage }); //
 
 const CommentSchema = new Schema(
   {
