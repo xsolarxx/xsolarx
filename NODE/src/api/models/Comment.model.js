@@ -1,11 +1,9 @@
-const mongoose = require("mongoose"); // para interactuar con la base de datos de mongodb
+//Se requiere mongoose(para interactuar con la base de datos de mongodb) y el esquema de datos
+
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const multer = require("multer");
 
-// Configuración de multer para manejar la carga de imágenes
-const storage = multer.memoryStorage(); // Almacenamiento en memoria para este ejemplo
-const upload = multer({ storage: storage }); //
-
+//----------------------------------------------------------------------------------------------------
 const CommentSchema = new Schema(
   {
     title: {
@@ -13,7 +11,7 @@ const CommentSchema = new Schema(
       required: true,
     },
     owner: {
-      type: mongoose.Schema.Types.ObjectId, //*cuando hacemos referencia de user tenemos que poner el id en el imsonia
+      type: mongoose.Schema.Types.ObjectId, // Referencia de user --> Se pone id en Insomnia
       ref: "User",
       required: true,
     },
@@ -47,4 +45,7 @@ const CommentSchema = new Schema(
 
 const Comment = mongoose.model("Comment", CommentSchema);
 
+//-------------------Exportación del modelo para su uso en otros archivos------------------------------------
 module.exports = Comment;
+
+//Ok

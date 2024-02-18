@@ -1,7 +1,9 @@
-//Se requiere mongoose y nos traemos el esquema de datos
+//Se requiere mongoose(para interactuar con la base de datos de mongodb) y el esquema de datos
+
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+//------------------------------------------------------------------------------------------------------
 const NewsSchema = new Schema(
   {
     title: {
@@ -47,6 +49,7 @@ const NewsSchema = new Schema(
 
 const News = mongoose.model("News", NewsSchema);
 
+//---------------------------------------------------------------------------------------------------------------------
 module.exports = News;
 
 //Ok

@@ -1,9 +1,10 @@
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 //--------------------------------------------------------------------------------------
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new Schema(
   {
     userName: {
       type: String,
@@ -82,6 +83,8 @@ UserSchema.pre("save", async function (next) {
   }
 });
 const User = mongoose.model("User", UserSchema);
+
+//-------------------Exportación del modelo para su uso en otros archivos------------------------------------
 module.exports = User;
 
 // Ok
