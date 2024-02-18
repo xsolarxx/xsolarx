@@ -1,5 +1,3 @@
-//* Solo el admin puede crear y actualizar compañías
-
 const { isAuthAdmin } = require("../../middleware/auth.middleware");
 const {
   createCompany,
@@ -10,26 +8,38 @@ const {
   getByDescLikes,
   getByAscLikes,
   updateCompany,
+  deleteCompany,
 } = require("../controllers/Company.controllers");
 
 const { upload } = require("../../middleware/files.middleware");
-
 const CompanyRoutes = require("express").Router();
 
-//* upload.single("image") y upload middleware --> Para subir img
+//! ---------------- endPoints sin auth ---------------------------------------
+
+CompanyRoutes.get("/byName", getByName);
+CompanyRoutes.get("/getall", getAll);
+CompanyRoutes.get("/:id", getById);
+CompanyRoutes.get("/companybyservices/services", getByServices);
+CompanyRoutes.get("/getByDescLikes/likes", getByDescLikes);
+CompanyRoutes.get("/getByAscLikes/likes", getByAscLikes);
+
+//! ---------------- endPoints con auth ---------------------------------------
+//* Solo el admin puede crear, actualizar y borrar compañías
+//* Si hacemos multi part necesitamos que en la ruta ponga upload.single(image)
+
 CompanyRoutes.post(
   "/create",
   [isAuthAdmin],
   upload.single("image"),
   createCompany
 );
-CompanyRoutes.get("/byName", getByName);
-CompanyRoutes.get("/getall", getAll);
-CompanyRoutes.get("/:id", getById);
-CompanyRoutes.get("/companybyservices/services", getByServices);
-CompanyRoutes.get("/getByDescLikes", getByDescLikes);
-CompanyRoutes.get("/getByAscLikes", getByAscLikes);
-CompanyRoutes.patch("/update/:id", [isAuthAdmin], updateCompany);
+CompanyRoutes.patch(
+  "/update/:id",
+  [isAuthAdmin],
+  upload.single("image"),
+  updateCompany
+);
+CompanyRoutes.delete("/:id", [isAuthAdmin], deleteCompany);
 
 module.exports = CompanyRoutes;
 

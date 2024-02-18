@@ -70,6 +70,9 @@ const createRating = async (req, res, next) => {
     });
   }
 };
+
+// --------------------------------* GET ALL *-------------------------------------------------------------
+
 const getAll = async (req, res, next) => {
   try {
     const allRating = await Rating.find();
