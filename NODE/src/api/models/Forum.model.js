@@ -1,12 +1,8 @@
 const mongoose = require("mongoose");
-const multer = require("multer");
+const Schema = mongoose.Schema;
 
-// Configuración de multer para manejar la carga de imágenes
-const storage = multer.memoryStorage(); // Almacenamiento en memoria para este ejemplo
-const upload = multer({ storage: storage });
-
-// Esquema para los posts
-const PostSchema = new mongoose.Schema(
+//------------------------ Esquema para los posts--------------------------------------------------------------
+const PostSchema = new Schema(
   {
     title: {
       type: String,
@@ -26,11 +22,12 @@ const PostSchema = new mongoose.Schema(
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     followed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true } //! todos los timestamps así(comment.model corregido yA)
+  { timestamps: true }
 );
 
-// Modelo del forum que agrupa preguntas
 const Forum = mongoose.model("Forum", PostSchema);
 
-// Exportar el modelo para su uso en otros archivos
+//----------------Exportación del modelo para su uso en otros archivos------------------------------------
 module.exports = Forum;
+
+//Ok
