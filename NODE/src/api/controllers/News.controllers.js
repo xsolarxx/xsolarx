@@ -205,41 +205,38 @@ const update = async (req, res, next) => {
 
 //------------------------------------* DELETE *----------------------------------------------------
 
-const deleteNews = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    // Validación básica del id
-    if (!id) {
-      // Si no tiene el id devuelve el siguiente error
-      return res.status(400).json({ error: "Id del foro no proporcionado" });
-    }
-    // Se verifica si el comentario se eliminó correctamente
-    const news = await News.findByIdAndDelete(id);
-    // const para buscar y borrar
-    if (!news) {
-      return res
-        .status(400)
-        .json({ error: "La notícia no ha sido encontrada" });
-    }
-    deleteImgCloudinary(news.image);
+//! SOLO CONSEGUIMOS QUE BORRE LA NOTICIA Y EL LIKE DEL USUARIO, PERO SI EL USUARIO HA COMENTADO LA NOTICIA EL COMENTARIO NO SONSEGUIMOS CORRARLO
+//! SEGURAMENTE NO TIENE MANERA DE SABER QUE USUARIO HA PUESTO EL COMENTARIO, NO? YA QUE ESTA EN UN MODELO QUE NO ES EL DE USER, MIENTRAS QUE EL LIKE ESTA EN EL MODELO DE USER
 
-    await Promise.all([
-      // Elimina las referencias al foro en otras colecciones
-      User.updateMany({ newsOwnerAdmin: id }, { $pull: { forumOwner: id } }),
-      User.updateMany({ likedNews: id }, { $pull: { likedNews: id } }),
-      Comment.updateMany(
-        { recipientNews: id },
-        { $pull: { recipientNews: id } }
-      ),
-    ]);
-    return res
-      .status(200)
-      .json({ delete: true, message: "Notícia eliminada correctamente" }); //Spanish) exito y mensaje?
-  } catch (error) {
-    return res
-      .status(400)
-      .json({ error: "Error al eliminar la notícia", message: error.message });
+const deleteNews = async (req, res, next) => {
+  // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
+  const { id } = req.params;
+  // Verificar si la compañía existe antes de eliminarla
+  const NewsExist = await News.findById(id);
+
+  if (NewsExist) {
+    await News.findByIdAndDelete(id);
+    const newsDelete = await News.findById(id);
+
+    if (!newsDelete) {
+      deleteImgCloudinary(NewsExist.image);
+
+      await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
+      //! ESTA PRTE NO FUNCIONA
+      await Promise.all([
+        User.updateMany({ comments: id }, { $pull: { comments: id } }),
+        News.deleteMany({ comments: id }),
+      ]);
+      //! --------------------
+    } else {
+      return res.status(404).json({
+        error: "News no existe",
+      });
+    }
   }
+  return res
+    .status(200)
+    .json({ success: true, message: "News eliminada correctamente" });
 };
 
 //---------------------------------------------------------------------------------------------------
