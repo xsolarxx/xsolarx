@@ -137,6 +137,7 @@ const getByServices = async (req, res, next) => {
 //* 1) Ordena de manera descendente según la cantidad de 'likes'
 
 const getByDescLikes = async (req, res, next) => {
+  console.log("🚀 ~ getByDescLikes ~ req, res, next):", req, res);
   try {
     // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose.
     // Indica que ordene de manera descendente, para que salgan las valores más altos primero.
@@ -178,17 +179,19 @@ const getByAscLikes = async (req, res, next) => {
 };
 
 // --------------------------------* LIKES COUNT *--------------------------------------------------------
-//?userId value not read
-const likesCount = async (companyId, userId) => {
+
+const UpdatelikesCount = async (companyId, increment) => {
   try {
-    //Encuentra Id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB).
-    await Company.findByIdAndUpdate(companyId, { $inc: { likesCount: 1 } });
+    // using company id access array of userLiked company and count
+
+    //Encuentra Id de la compañía y actualiza su UpdatelikesCount con un incremento( inc -> operador mongoDB).
+    await Company.findByIdAndUpdate(companyId, {
+      $inc: { likesCount: increment },
+    });
     // Añade el user al array de userLikedCompany si se necesita.
     // Actualiza el array de las compañías gustadas de un user si se necesita.
-    return true;
   } catch (error) {
     console.error("Error liking company:", error);
-    return false;
   }
 };
 
@@ -294,7 +297,7 @@ module.exports = {
   getAll,
   getByDescLikes,
   getByAscLikes,
-  likesCount,
+  UpdatelikesCount,
   updateCompany,
 };
 
