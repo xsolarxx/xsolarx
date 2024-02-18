@@ -1,7 +1,9 @@
 const enumOk = require("../../utils/enumOk");
+const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const Company = require("../models/Company.model");
 const User = require("../models/User.model");
-const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+const Rating = require("../models/Rating.model");
+const Comment = require("../models/Comment.model");
 
 // ------------------------------* CREATE COMPANY *--------------------------------------------------
 
@@ -137,7 +139,6 @@ const getByServices = async (req, res, next) => {
 //* 1) Ordena de manera descendente según la cantidad de 'likes'
 
 const getByDescLikes = async (req, res, next) => {
-  console.log("🚀 ~ getByDescLikes ~ req, res, next):", req, res);
   try {
     // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose.
     // Indica que ordene de manera descendente, para que salgan las valores más altos primero.
@@ -182,14 +183,10 @@ const getByAscLikes = async (req, res, next) => {
 
 const UpdatelikesCount = async (companyId, increment) => {
   try {
-    // using company id access array of userLiked company and count
-
     //Encuentra Id de la compañía y actualiza su UpdatelikesCount con un incremento( inc -> operador mongoDB).
     await Company.findByIdAndUpdate(companyId, {
       $inc: { likesCount: increment },
     });
-    // Añade el user al array de userLikedCompany si se necesita.
-    // Actualiza el array de las compañías gustadas de un user si se necesita.
   } catch (error) {
     console.error("Error liking company:", error);
   }
@@ -289,6 +286,77 @@ const updateCompany = async (req, res, next) => {
 
 // --------------------------------*DELETE*--------------------------------------------------------
 
+const deleteCompany = async (req, res, next) => {
+  try {
+    // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
+    const { id } = req.params;
+    // Verificar si la compañía existe antes de eliminarla
+    const companyExist = await Company.findById(id);
+
+    if (companyExist) {
+      await Company.findByIdAndDelete(id);
+      const companyDelete = await Company.findById(id);
+
+      if (!companyDelete) {
+        deleteImgCloudinary(companyExist.image);
+
+        try {
+          await User.updateMany(
+            { companyOwnerAdmin: id },
+            { $pull: { companyOwnerAdmin: id } }
+          );
+          await User.updateMany(
+            { likedCompany: id },
+            { $pull: { likedCompany: id } }
+          );
+          await User.updateMany(
+            { companyPunctuated: id },
+            { $pull: { companyPunctuated: id } }
+          );
+
+          try {
+            // borramos comentarios dirigidos hacia la compañia que estamos borrando
+            await Comment.deleteMany({ recipientCompany: id });
+
+            try {
+              // borramos valoraciones dirigidos hacia la compañia que estamos borrando
+              await Rating.deleteMany({ companyPunctuated: id });
+            } catch (error) {
+              return res.status(404).json({
+                error: "Error borrando valoraciones dirigidas a esta compañia",
+                message: error.message,
+              });
+            }
+          } catch (error) {
+            return res.status(404).json({
+              error: "Error borrando comentarios dirigidos a esta compañia",
+              message: error.message,
+            });
+          }
+        } catch (error) {
+          return res.status(404).json({
+            error:
+              "Error al actualizar referencias del usuario relacionadas con la compañía borrada",
+            message: error.message,
+          });
+        }
+      } else {
+        return res.status(404).json({
+          error: "Compañia no existe",
+        });
+      }
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Compañía eliminada correctamente" });
+  } catch (error) {
+    return res.status(404).json({
+      error: "Error eliminando la compañia",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createCompany,
   getById,
@@ -299,6 +367,7 @@ module.exports = {
   getByAscLikes,
   UpdatelikesCount,
   updateCompany,
+  deleteCompany,
 };
 
 // Adición de comentarios junto a correcciones (no el código), hasta update(éste incluido ya).
