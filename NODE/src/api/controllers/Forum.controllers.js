@@ -63,12 +63,12 @@ const getById = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allForum = await Forum.find();
-    if (allForum.length > 0) {
+    const allForums = await Forum.find();
+    if (allForums.length > 0) {
       // Verifica si se encontraron los foros
-      return res.status(200).json(allForum);
+      return res.status(200).json(allForums);
     } else {
-      return res.status(404).json("No se encontraron foros");
+      return res.status(404).json("No se encontraron los foros");
     }
   } catch (error) {
     return res.status(404).json({
@@ -85,7 +85,6 @@ const update = async (req, res, next) => {
   await Forum.syncIndexes();
   let catchImg = req.file?.path;
   try {
-    await Forum.syncIndexes();
     const { id } = req.params;
     const forumById = await Forum.findById(id);
     if (forumById) {
@@ -95,7 +94,6 @@ const update = async (req, res, next) => {
         _id: forumById._id,
         image: req.file?.path ? catchImg : oldImg,
         title: req.body?.title ? req.body?.title : forumById,
-        author: req.body?.author ? req.body?.author : forumById.author,
         content: req.body?.content ? req.body?.content : forumById.content,
       };
 
@@ -163,54 +161,47 @@ const update = async (req, res, next) => {
 
 const deleteForum = async (req, res, next) => {
   try {
-    // Extraer el id de los parámetros de la solicitud HTTP
-    //const { id } = req.params;
-    // Verificar si la compañía existe antes de eliminarla
-    //const forumExist = await Forum.findById(id);
+    const { idForum } = req.params;
 
-    if (forumExist) {
-      await Forum.findByIdAndDelete(id);
-      const forumDelete = await Forum.findById(id);
+    // Elimina el foro
+    await Forum.findByIdAndDelete(idComment);
+    console.log("ID del comentario eliminado:", idComment);
+    // Actualiza las referencias de los modelos de datos
+    await Promise.all([
+      User.updateMany(
+        { favComments: idComment },
+        { $pull: { favComments: idComment } }
+      ),
+      Comment.updateOne(
+        { likes: idComment },
+        { $pull: { likes: idComment } } // Elimina id del comentario de la lista de likes
+      ),
+      News.updateOne(
+        { comments: idComment },
+        { $pull: { comments: idComment } }
+      ),
+      Company.updateOne(
+        { userCompanyReviews: idComment },
+        { $pull: { userCompanyReviews: idComment } }
+      ),
+      Forum.updateOne(
+        { comments: idComment },
+        { $pull: { comments: idComment } }
+      ),
+    ]);
 
-      if (!forumDelete) {
-        deleteImgCloudinary(forumExist.image);
-
-        try {
-          await Promise.all([
-            // Elimina las referencias al foro en otras colecciones
-            User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
-            User.updateMany(
-              { forumFollowing: id },
-              { $pull: { forumFollowing: id } }
-            ),
-            Comment.updateMany(
-              { recipientForum: id },
-              { $pull: { recipientForum: id } }
-            ),
-            User.updateMany({ likedForum: id }, { $pull: { likedForum: id } }),
-          ]);
-        } catch (error) {
-          return res.status(404).json({
-            error:
-              "Error al actualizar referencias del usuario relacionadas con la compañía borrada",
-            message: error.message,
-          });
-        }
-      } else {
-        return res.status(404).json({
-          error: "Compañia no existe",
-        });
-      }
-    }
     return res
       .status(200)
-      .json({ success: true, message: "Compañía eliminada correctamente" });
+      .json({ message: "Comentario eliminado correctamente" });
   } catch (error) {
-    return res.status(404).json({
-      error: "Error eliminando la compañia",
+    return res.status(500).json({
+      error: "Error eliminando el comentario",
       message: error.message,
     });
   }
 };
 
-module.exports = { createForum, getById, getAll, deleteForum, update };
+//------------------------------------------------------------------------------
+module.exports = { createForum, getById, getAll, update, deleteForum };
+
+//Ok except delete

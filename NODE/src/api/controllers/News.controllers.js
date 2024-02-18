@@ -116,7 +116,6 @@ const update = async (req, res, next) => {
   await News.syncIndexes();
   let catchImg = req.file?.path;
   try {
-    await News.syncIndexes();
     const { id } = req.params;
     const newsById = await News.findById(id);
     if (newsById) {
