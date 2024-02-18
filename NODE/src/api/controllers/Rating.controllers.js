@@ -101,12 +101,11 @@ const getById = async (req, res, next) => {
 };
 
 // --------------------------------* UPDATE *--------------------------------------------------------
-//Para que el user pueda modificar su rating hecho
+//Para que el user pueda modificar su rating previamente puesto a una compañía
 
 const update = async (req, res, next) => {
   await Rating.syncIndexes();
   try {
-    await Rating.syncIndexes();
     const { id } = req.params;
     const ratingById = await Rating.findById(id);
     if (ratingById) {
@@ -116,17 +115,17 @@ const update = async (req, res, next) => {
       try {
         await Rating.findByIdAndUpdate(id, customBody);
 
-        //-----------------------* TEST * -------------------------------------------------------
-        //Se busca el elemento actualizado vía id.
+        //-----------------------* Test * -------------------------------------------------------
+        //Se busca el elemento actualizado vía id
         const ratingByIdUpdate = await Rating.findById(id);
 
-        // Se sacan las claves del req.body para saber qué elementos actualizar.
+        // Se sacan las claves del req.body para saber qué elementos actualizar
         const elementUpdate = Object.keys(req.body);
 
-        // Objeto vacío donde posteriormente se meterán los test.
+        // Objeto vacío donde posteriormente se meterán los test
         let test = {};
 
-        // Se recorren las claves del body y se crea un objeto con los test.
+        // Se recorren las claves del body y se crea un objeto con los test
         elementUpdate.forEach((item) => {
           if (req.body[item] === ratingByIdUpdate[item]) {
             test[item] = true;
@@ -162,6 +161,7 @@ const update = async (req, res, next) => {
   }
 };
 
+//------------------------------------------------------------------------------------------
 module.exports = { createRating, getAll, getById, update };
 
 //Ok
