@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["hombre", "mujer", "otros"],
+      enum: ["Hombre", "Mujer", "Otros"],
       required: true,
     },
     rol: {
@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
     check: {
       type: Boolean,
       default: false,
-    }, //!SE TIENE QUE HACER UN TOGGLE CON FORUM FOLLOWING
+    },
     userToFollow: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users que el usuario en particular sigue
     favComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // Comentarios en los que el user ha dado "like"
     ownerRating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }], // User que puntúa a una compañía
@@ -84,4 +84,4 @@ UserSchema.pre("save", async function (next) {
 const User = mongoose.model("User", UserSchema);
 module.exports = User;
 
-// Adición de comentarios junto a correcciones (no el código)
+// Ok

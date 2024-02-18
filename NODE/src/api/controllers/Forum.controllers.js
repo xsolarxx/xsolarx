@@ -3,7 +3,7 @@ const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
-// -----------------------------*CREATE POST/FORUM*-------------------------------------------------
+// -----------------------------* CREATE POST/FORUM *-------------------------------------------------
 
 const createForum = async (req, res, next) => {
   try {
@@ -43,7 +43,7 @@ const createForum = async (req, res, next) => {
   }
 };
 
-// -------------------------------*GET BY ID*--------------------------------------------------------
+// -------------------------------* GET BY ID *--------------------------------------------------------
 
 const getById = async (req, res, next) => {
   try {
@@ -59,35 +59,114 @@ const getById = async (req, res, next) => {
   }
 };
 
-// -------------------------------*GET ALL*-------------------------------------------------------
+//---------------------------------* GET ALL *-------------------------------------------------------
 
 const getAll = async (req, res, next) => {
   try {
     const allForum = await Forum.find();
-    /* El find nos devuelve un array */
     if (allForum.length > 0) {
-      // Verifica si se encontraron foros
+      // Verifica si se encontraron los foros
       return res.status(200).json(allForum);
     } else {
       return res.status(404).json("No se encontraron foros");
     }
   } catch (error) {
     return res.status(404).json({
-      // Si ocurre un error durante la búsqueda de foros, devuelve una respuesta con estado 500 y el mensaje de error
+      // Si ocurre un error durante la búsqueda de foros, devuelve un 500 y el mensaje de error
       error: "Error en la búsqueda. Lanzado en el catch",
       message: error.message,
     });
   }
 };
 
-// -------------------------------*DELETE POST/FORUM*-----------------------------------------------
+//-----------------------------------* UPDATE *-------------------------------------------
+
+const update = async (req, res, next) => {
+  await Forum.syncIndexes();
+  let catchImg = req.file?.path;
+  try {
+    await Forum.syncIndexes();
+    const { id } = req.params;
+    const forumById = await Forum.findById(id);
+    if (forumById) {
+      const oldImg = forumById.image;
+
+      const customBody = {
+        _id: forumById._id,
+        image: req.file?.path ? catchImg : oldImg,
+        title: req.body?.title ? req.body?.title : forumById,
+        author: req.body?.author ? req.body?.author : forumById.author,
+        content: req.body?.content ? req.body?.content : forumById.content,
+      };
+
+      try {
+        await Forum.findByIdAndUpdate(id, customBody);
+        if (req.file?.path) {
+          deleteImgCloudinary(oldImg);
+        }
+
+        //----------------------* Test *----------------------------------------------------------------
+
+        //Se busca el elemento actualizado vía id
+        const forumByIdUpdate = await Forum.findById(id);
+
+        // Se sacan las claves del req.body para saber qué elementos actualizar
+        const elementUpdate = Object.keys(req.body);
+
+        // Objeto vacío donde posteriormente se meterán los test
+        let test = {};
+
+        // Se recorren las claves del body y se crea un objeto con los test
+        elementUpdate.forEach((item) => {
+          if (req.body[item] === forumByIdUpdate[item]) {
+            test[item] = true;
+          } else {
+            test[item] = false;
+          }
+        });
+
+        if (catchImg) {
+          forumByIdUpdate.image === catchImg
+            ? (test = { ...test, file: true })
+            : (test = { ...test, file: false });
+        }
+
+        // Se comprueba si hay un "false". Hay false --> Se lanza un 404.
+        // Si no hay false --> Se lanza un 200, todo OK.
+
+        let acc = 0;
+        for (clave in test) {
+          test[clave] == false && acc++;
+        }
+
+        if (acc > 0) {
+          return res.status(404).json({
+            dataTest: test,
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+          });
+        }
+      } catch (error) {}
+    } else {
+      return res.status(404).json("Este foro no existe");
+    }
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
+
+// -------------------------------* DELETE POST/FORUM *-----------------------------------------------
 
 const deleteForum = async (req, res, next) => {
   try {
-    // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
-    const { id } = req.params;
+    // Extraer el id de los parámetros de la solicitud HTTP
+    //const { id } = req.params;
     // Verificar si la compañía existe antes de eliminarla
-    const forumExist = await Forum.findById(id);
+    //const forumExist = await Forum.findById(id);
 
     if (forumExist) {
       await Forum.findByIdAndDelete(id);
@@ -102,15 +181,14 @@ const deleteForum = async (req, res, next) => {
             User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
             User.updateMany(
               { forumFollowing: id },
-              { $pull: { forumFollowing: id } }),
+              { $pull: { forumFollowing: id } }
+            ),
             Comment.updateMany(
-                { recipientForum: id },
-                { $pull: { recipientForum: id } }),
-            User.updateMany(
-                  { likedForum: id },
-                  { $pull: { likedForum: id } })
+              { recipientForum: id },
+              { $pull: { recipientForum: id } }
+            ),
+            User.updateMany({ likedForum: id }, { $pull: { likedForum: id } }),
           ]);
-      
         } catch (error) {
           return res.status(404).json({
             error:
@@ -135,97 +213,4 @@ const deleteForum = async (req, res, next) => {
   }
 };
 
-
-
-//Se han realizado pequeñas correcciones gramaticales tanto en inglés como en español.
-//!----------------------------------------------------------------------------------
-//-----------------------------------UPDATE------------------------------------------
-//!----------------------------------------------------------------------------------
-
-const update = async (req,res, next) => {
-
-  await Forum.syncIndexes();
-  let catchImg = req.file?.path;
-  try {
-    await Forum.syncIndexes();
-    const { id } = req.params;
-    const forumById = await Forum.findById(id);
-    if (forumById){
-      const oldImg = forumById.image;
-
-      const customBody = {
-        _id: forumById._id,
-        image: req.file?.path ? catchImg : oldImg,
-        title: req.body?.title ? req.body?.title : ForumById,
-        author: req.body?.author ? req.body?.author : forumById.author,
-        content: req.body?.content ? req.body?.content : forumById.content,
-      };
-
-        try {
-          await Forum.findByIdAndUpdate(id, customBody);
-          if (req.file?.path) {
-            deleteImgCloudinary(oldImg);
-          }
-          //** ------------------------------------------------------------------- */
-          //** VAMOS A TESTEAR EN TIEMPO REAL QUE ESTO SE HAYA HECHO CORRECTAMENTE */
-          //** ------------------------------------------------------------------- */
-  
-          // ......> VAMOS A BUSCAR EL ELEMENTO ACTUALIZADO POR ID
-  
-          const forumByIdUpdate = await Forum.findById(id);
-  
-          // ......> me cojer el req.body y vamos a sacarle las claves para saber que elementos nos ha dicho de actualizar
-          const elementUpdate = Object.keys(req.body);
-  
-          /** vamos a hacer un objeto vacion donde meteremos los test */
-  
-          let test = {};
-  
-          /** vamos a recorrer las claves del body y vamos a crear un objeto con los test */
-  
-          elementUpdate.forEach((item) => {
-            if (req.body[item] === forumByIdUpdate[item]) {
-              test[item] = true;
-            } else {
-              test[item] = false;
-            }
-          });
-  
-          if (catchImg) {
-            forumByIdUpdate.image === catchImg
-              ? (test = { ...test, file: true })
-              : (test = { ...test, file: false });
-          }
-          /** vamos a ver que no haya ningun false. Si hay un false lanzamos un 404,
-           * si no hay ningun false entonces lanzamos un 200 porque todo esta correcte
-           */
-          let acc = 0;
-          for (clave in test) {
-            test[clave] == false && acc++;
-          }
-  
-          if (acc > 0) {
-            return res.status(404).json({
-              dataTest: test,
-              update: false,
-            });
-          } else {
-            return res.status(200).json({
-              dataTest: test,
-              update: true,
-            });
-          }
-        } catch (error) {}
-      } else {
-        return res.status(404).json("este post no existe");
-      }
-    } catch (error) {
-      return res.status(404).json(error);
-    };
-  };
-
-  module.exports = { createForum, getById, getAll, deleteForum, update };
-      
-    
-
-  
+module.exports = { createForum, getById, getAll, deleteForum, update };
