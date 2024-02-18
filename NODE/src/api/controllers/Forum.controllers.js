@@ -63,12 +63,12 @@ const getById = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allForum = await Forum.find();
-    if (allForum.length > 0) {
+    const allForums = await Forum.find();
+    if (allForums.length > 0) {
       // Verifica si se encontraron los foros
-      return res.status(200).json(allForum);
+      return res.status(200).json(allForums);
     } else {
-      return res.status(404).json("No se encontraron foros");
+      return res.status(404).json("No se encontraron los foros");
     }
   } catch (error) {
     return res.status(404).json({
@@ -85,7 +85,6 @@ const update = async (req, res, next) => {
   await Forum.syncIndexes();
   let catchImg = req.file?.path;
   try {
-    await Forum.syncIndexes();
     const { id } = req.params;
     const forumById = await Forum.findById(id);
     if (forumById) {
@@ -95,7 +94,6 @@ const update = async (req, res, next) => {
         _id: forumById._id,
         image: req.file?.path ? catchImg : oldImg,
         title: req.body?.title ? req.body?.title : forumById,
-        author: req.body?.author ? req.body?.author : forumById.author,
         content: req.body?.content ? req.body?.content : forumById.content,
       };
 
@@ -160,57 +158,56 @@ const update = async (req, res, next) => {
 };
 
 // -------------------------------* DELETE POST/FORUM *-----------------------------------------------
-
+//? NO ESTA BIEN. Solo borra el foro, no los likes dentro del user que le dio like a un comentario dentro del foro
 const deleteForum = async (req, res, next) => {
   try {
-    // Extraer el id de los parámetros de la solicitud HTTP
-    //const { id } = req.params;
-    // Verificar si la compañía existe antes de eliminarla
-    //const forumExist = await Forum.findById(id);
+    const { id } = req.params;
 
-    if (forumExist) {
-      await Forum.findByIdAndDelete(id);
-      const forumDelete = await Forum.findById(id);
+    // Elimina el foro
+    await Forum.findByIdAndDelete(id);
+    console.log("ID del foro eliminado:", id);
 
-      if (!forumDelete) {
-        deleteImgCloudinary(forumExist.image);
+    // Get the IDs of all the comments that were made in a given forum
+    const commentsLinkedToForum = await Comment.find(
+      {
+        recipientForum: id,
+      },
+      "_id"
+    );
+    console.log(`Got commentsLinkedToForum ${commentsLinkedToForum}`);
 
-        try {
-          await Promise.all([
-            // Elimina las referencias al foro en otras colecciones
-            User.updateMany({ forumOwner: id }, { $pull: { forumOwner: id } }),
-            User.updateMany(
-              { forumFollowing: id },
-              { $pull: { forumFollowing: id } }
-            ),
-            Comment.updateMany(
-              { recipientForum: id },
-              { $pull: { recipientForum: id } }
-            ),
-            User.updateMany({ likedForum: id }, { $pull: { likedForum: id } }),
-          ]);
-        } catch (error) {
-          return res.status(404).json({
-            error:
-              "Error al actualizar referencias del usuario relacionadas con la compañía borrada",
-            message: error.message,
-          });
+    // Actualiza las referencias de los modelos de datos
+    await Promise.all([
+      // Using the comment IDs linked to forum
+      // try to delete ($pull) from the array of favComments
+      // NOTE, THIS MAY NOT WORK BY PASSING AN ARRAY AS THE ARGUMENT TO
+      // $PULL, NEED TO TEST IT.
+      User.updateMany(
+        // If the user has a commentID found in the commentsLinkedToForum
+        { favComments: { $in: commentsLinkedToForum } },
+        // Delete it
+        {
+          $pull: { favComments: commentsLinkedToForum },
         }
-      } else {
-        return res.status(404).json({
-          error: "Compañia no existe",
-        });
-      }
-    }
-    return res
-      .status(200)
-      .json({ success: true, message: "Compañía eliminada correctamente" });
+      ),
+      // Go over deleteMany goes over every comment
+      // if the key 'recipientForum' is equal to idForum
+      // delete that comment
+      Comment.deleteMany({
+        recipentForum: id,
+      }),
+    ]);
+
+    return res.status(200).json({ message: "Foro eliminado correctamente" });
   } catch (error) {
-    return res.status(404).json({
-      error: "Error eliminando la compañia",
+    return res.status(500).json({
+      error: "Error eliminando el Foro",
       message: error.message,
     });
   }
 };
 
-module.exports = { createForum, getById, getAll, deleteForum, update };
+//------------------------------------------------------------------------------
+module.exports = { createForum, getById, getAll, update, deleteForum };
+
+//Ok excepto delete

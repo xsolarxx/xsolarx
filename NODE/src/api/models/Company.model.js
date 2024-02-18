@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+//------------------------------------------------------------------------------------------------
 const CompanySchema = new Schema(
   {
     companyName: {
@@ -27,7 +28,7 @@ const CompanySchema = new Schema(
         "Mantenimiento",
         "Dimensionado y modelado de la instalación",
         "Estudio de seguridad",
-        "otros",
+        "Otros",
       ],
     },
     image: {
@@ -65,6 +66,7 @@ const CompanySchema = new Schema(
 
 const Company = mongoose.model("Company", CompanySchema);
 
+//-------------------Exportación del modelo para su uso en otros archivos------------------------------------
 module.exports = Company;
 
 //Ok
