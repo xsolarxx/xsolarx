@@ -39,7 +39,7 @@ CompanyRoutes.patch(
   upload.single("image"),
   updateCompany
 );
-CompanyRoutes.delete("/:id", [isAuthAdmin], deleteCompany);
+CompanyRoutes.delete("/:idCompany", [isAuthAdmin], deleteCompany);
 
 module.exports = CompanyRoutes;
 

@@ -280,78 +280,56 @@ const updateCompany = async (req, res, next) => {
 };
 
 // --------------------------------* DELETE *--------------------------------------------------------
-
+//! los comentarios / likes se borran, pero en usuario los ownerRating no.
 const deleteCompany = async (req, res, next) => {
   try {
-    // Extraer el id de la compañía de los parámetros de la solicitud HTTP
-    const { id } = req.params;
-    // Verificar si la compañía existe antes de eliminarla
-    const companyExist = await Company.findById(id);
+    const { idCompany } = req.params;
 
-    if (companyExist) {
-      await Company.findByIdAndDelete(id);
-      const companyDelete = await Company.findById(id);
+    // Eliminar la compañía
+    const companyToDelete = await Company.findByIdAndDelete(idCompany);
 
-      if (!companyDelete) {
-        deleteImgCloudinary(companyExist.image);
-
-        try {
-          await User.updateMany(
-            { companyOwnerAdmin: id },
-            { $pull: { companyOwnerAdmin: id } }
-          );
-          await User.updateMany(
-            { likedCompany: id },
-            { $pull: { likedCompany: id } }
-          );
-          await User.updateMany(
-            { companyPunctuated: id },
-            { $pull: { companyPunctuated: id } }
-          );
-
-          try {
-            // borramos comentarios dirigidos hacia la compañia que estamos borrando
-            await Comment.deleteMany({ recipientCompany: id });
-
-            try {
-              // borramos valoraciones dirigidos hacia la compañia que estamos borrando
-              await Rating.deleteMany({ companyPunctuated: id });
-            } catch (error) {
-              return res.status(404).json({
-                error: "Error borrando valoraciones dirigidas a esta compañia",
-                message: error.message,
-              });
-            }
-          } catch (error) {
-            return res.status(404).json({
-              error: "Error borrando comentarios dirigidos a esta compañia",
-              message: error.message,
-            });
-          }
-        } catch (error) {
-          return res.status(404).json({
-            error:
-              "Error al actualizar referencias del usuario relacionadas con la compañía borrada",
-            message: error.message,
-          });
-        }
-      } else {
-        return res.status(404).json({
-          error: "La compañía no existe",
-        });
-      }
+    if (!companyToDelete) {
+      return res.status(404).json({ error: "Compañía no existe" });
     }
+
+    // Eliminar la imagen asociada a la compañía desde Cloudinary
+    deleteImgCloudinary(companyToDelete.image);
+
+    // Buscar y eliminar las referencias a la compañía eliminada en los documentos de usuario
+    await User.updateMany(
+      {
+        $or: [
+          { companyOwnerAdmin: idCompany },
+          { likedCompany: idCompany },
+          { companyPunctuated: idCompany },
+          { ownerRating: { $elemMatch: { $eq: idCompany } } }, // Usar $elemMatch para buscar documentos donde el array ownerRating contiene al menos un elemento igual a idCompany
+        ],
+      },
+      {
+        $pull: {
+          companyOwnerAdmin: idCompany,
+          likedCompany: idCompany,
+          companyPunctuated: idCompany,
+          ownerRating: idCompany,
+        },
+      }
+    );
+
+    // Eliminar comentarios dirigidos a la compañía que estamos borrando
+    await Comment.deleteMany({ recipientCompany: idCompany });
+
+    // Eliminar valoraciones dirigidas a la compañía que estamos borrando
+    await Rating.deleteMany({ companyPunctuated: idCompany });
+
     return res
       .status(200)
       .json({ success: true, message: "Compañía eliminada correctamente" });
   } catch (error) {
-    return res.status(404).json({
-      error: "Error eliminando la compañía",
-      message: error.message,
-    });
+    return res
+      .status(500)
+      .json({ error: "Error eliminando la compañía", message: error.message });
   }
 };
-
 //---------------------------------------------------------------------------------------------------
 
 module.exports = {
