@@ -1,18 +1,14 @@
-//! In progress!! It´s not ready yet.
-
 const User = require("../models/User.model");
 const Rating = require("../models/Rating.model");
 const Company = require("../models/Company.model");
-//const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 //------------------------------------* CREATE RATING *----------------------------------------------------
-//! CHEQUEAR ESTA ESTRUCTURA, HAY DUDAS.
+
 const createRating = async (req, res, next) => {
   try {
     await Rating.syncIndexes();
 
     if (req.user.companyPunctuated.includes(req.body.companyPunctuated)) {
-      //
       return res.status(404).json("Este usuario ya ha puntuado la empresa ");
     }
 
@@ -53,20 +49,19 @@ const createRating = async (req, res, next) => {
       } catch (error) {
         return res.status(404).json({
           error: "Error catch al actualizar el user",
-          message: error.message, // Comunica info sobre el error que se capturó
+          message: error.message,
         });
       }
     } else {
       return res.status(404).json({
         error: "Rating no guardado",
-        // Comunica info sobre el error que se capturó
       });
     }
     // 1)   Runtime test
   } catch (error) {
     return res.status(404).json({
       error: "Error catch al crear el rating",
-      message: error.message, // Comunica info sobre el error que se capturó
+      message: error.message,
     });
   }
 };
@@ -76,15 +71,14 @@ const createRating = async (req, res, next) => {
 const getAll = async (req, res, next) => {
   try {
     const allRating = await Rating.find();
-    /** el find nos devuelve un array */
     if (allRating.length > 0) {
       return res.status(200).json(allRating);
     } else {
-      return res.status(404).json("no se han encontrado ratings");
+      return res.status(404).json("No se han encontrado ratings");
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error al buscar - lanzado en el catch",
+      error: "Error durante la búsqueda - lanzado en el catch",
       message: error.message,
     });
   }
@@ -96,64 +90,78 @@ const getById = async (req, res, next) => {
     if (ratingById) {
       return res.status(200).json(ratingById);
     } else {
-      return res.status(404).json("no se ha encontrado el rating");
+      return res.status(404).json("No se ha encontrado el rating");
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error al buscar - lanzado en el catch",
+      error: "Error durante la búsqueda - lanzado en el catch",
       message: error.message,
     });
   }
 };
-module.exports = { createRating, getAll, getById };
-//!EN NOTION SALE GET BY ID PERO CREO QUE NO ES NECESARIO. HAY QUE CONFIRMAR.
-//! PONER GET BY ALL CON LA INTENCIÓN DE ORDENAR POSTERIORMENTE LOS RATINGS DE MAYOR A MENOR.
 
-// ---------------------------------------* UPDATE *---------Para que User pueda modificar su rating hecho---------------------------------------------
-//solo estructura copiada , no completo.
+// --------------------------------* UPDATE *--------------------------------------------------------
+//Para que el user pueda modificar su rating hecho
 
-/*const update = async (req, res, next) => {
-  await Comment.syncIndexes();
-  let catchImg = req.file?.path;
+const update = async (req, res, next) => {
+  await Rating.syncIndexes();
   try {
+    await Rating.syncIndexes();
     const { id } = req.params;
-    const commentById = await Comment.findById(id);
-    if (commentById) {
-      const oldImg = commentById.image;
-
+    const ratingById = await Rating.findById(id);
+    if (ratingById) {
       const customBody = {
-        _id: commentById._id,
-        image: req.file?.path ? catchImg : oldImg,
-        title: req.body?.title ? req.body?.title : commentById.title,
+        punctuation: req.body?.punctuation ? req.body?.punctuation : ratingById,
       };
+      try {
+        await Rating.findByIdAndUpdate(id, customBody);
 
+        //-----------------------* TEST * -------------------------------------------------------
+        //Se busca el elemento actualizado vía id.
+        const ratingByIdUpdate = await Rating.findById(id);
 
-        //------------------*TEST EN TIEMPO REAL PARA COMPROBAR QUE SE HA HECHO CORRECTAMENTE *-------------------
-
-        /* Se busca el elemento actualizado por el ID
-        const commentByIdUpdate = await Comment.findById(id);
-
-        // ......> me cojer el req.body y vamos a sacarle las claves para saber que elementos nos ha dicho de actualizar
+        // Se sacan las claves del req.body para saber qué elementos actualizar.
         const elementUpdate = Object.keys(req.body);
 
-        /* vamos a hacer un objeto vacion donde meteremos los test */
+        // Objeto vacío donde posteriormente se meterán los test.
+        let test = {};
 
-//*let test = {};
-
-/* vamos a recorrer las claves del body y vamos a crear un objeto con los test
-
+        // Se recorren las claves del body y se crea un objeto con los test.
         elementUpdate.forEach((item) => {
-          if (req.body[item] === commentByIdUpdate[item]) {
+          if (req.body[item] === ratingByIdUpdate[item]) {
             test[item] = true;
           } else {
             test[item] = false;
           }
         });
+        // Se comprueba si hay un "false". Hay false --> Se lanza un 404.
+        // Si no hay false --> Se lanza un 200, todo OK.
 
-        if (catchImg) {
-          characterByIdUpdate.image === catchImg
-            //* (test = { ...test, file: true })
-            : (test = { ...test, file: false });
-        }  */
+        let acc = 0;
+        for (clave in test) {
+          test[clave] == false && acc++;
+        }
 
-// ----------------------------* BORRAR RATING DE COMPAÑÍA--------------------------------------------
+        if (acc > 0) {
+          return res.status(404).json({
+            dataTest: test,
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+          });
+        }
+      } catch (error) {}
+    } else {
+      return res.status(404).json("Este rating no existe");
+    }
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
+
+module.exports = { createRating, getAll, getById, update };
+
+//Ok
