@@ -1,8 +1,6 @@
 const User = require("../models/User.model");
 const Forum = require("../models/Forum.model");
 const Comment = require("../models/Comment.model");
-const News = require("../models/News.model");
-const Company = require("../models/Company.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 // -----------------------------* CREATE POST/FORUM *-------------------------------------------------
@@ -160,45 +158,50 @@ const update = async (req, res, next) => {
 };
 
 // -------------------------------* DELETE POST/FORUM *-----------------------------------------------
-
+//? NO ESTA BIEN. Solo borra el foro, no los likes dentro del user que le dio like a un comentario dentro del foro
 const deleteForum = async (req, res, next) => {
   try {
-    const { idForum } = req.params;
+    const { id } = req.params;
 
     // Elimina el foro
-    await Forum.findByIdAndDelete(idComment);
-    console.log("ID del comentario eliminado:", idComment);
+    await Forum.findByIdAndDelete(id);
+    console.log("ID del foro eliminado:", id);
+
+    // Get the IDs of all the comments that were made in a given forum
+    const commentsLinkedToForum = await Comment.find(
+      {
+        recipientForum: id,
+      },
+      "_id"
+    );
+    console.log(`Got commentsLinkedToForum ${commentsLinkedToForum}`);
 
     // Actualiza las referencias de los modelos de datos
     await Promise.all([
+      // Using the comment IDs linked to forum
+      // try to delete ($pull) from the array of favComments
+      // NOTE, THIS MAY NOT WORK BY PASSING AN ARRAY AS THE ARGUMENT TO
+      // $PULL, NEED TO TEST IT.
       User.updateMany(
-        { favComments: idComment },
-        { $pull: { favComments: idComment } }
+        // If the user has a commentID found in the commentsLinkedToForum
+        { favComments: { $in: commentsLinkedToForum } },
+        // Delete it
+        {
+          $pull: { favComments: commentsLinkedToForum },
+        }
       ),
-      Comment.updateOne(
-        { likes: idComment },
-        { $pull: { likes: idComment } } // Elimina id del comentario de la lista de likes
-      ),
-      News.updateOne(
-        { comments: idComment },
-        { $pull: { comments: idComment } }
-      ),
-      Company.updateOne(
-        { userCompanyReviews: idComment },
-        { $pull: { userCompanyReviews: idComment } }
-      ),
-      Forum.updateOne(
-        { comments: idComment },
-        { $pull: { comments: idComment } }
-      ),
+      // Go over deleteMany goes over every comment
+      // if the key 'recipientForum' is equal to idForum
+      // delete that comment
+      Comment.deleteMany({
+        recipentForum: id,
+      }),
     ]);
 
-    return res
-      .status(200)
-      .json({ message: "Comentario eliminado correctamente" });
+    return res.status(200).json({ message: "Foro eliminado correctamente" });
   } catch (error) {
     return res.status(500).json({
-      error: "Error eliminando el comentario",
+      error: "Error eliminando el Foro",
       message: error.message,
     });
   }
@@ -207,4 +210,4 @@ const deleteForum = async (req, res, next) => {
 //------------------------------------------------------------------------------
 module.exports = { createForum, getById, getAll, update, deleteForum };
 
-//Ok except delete
+//Ok excepto delete
