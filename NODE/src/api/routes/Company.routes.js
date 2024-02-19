@@ -24,7 +24,6 @@ CompanyRoutes.get("/getByDescLikes/likes", getByDescLikes);
 CompanyRoutes.get("/getByAscLikes/likes", getByAscLikes);
 
 //! ---------------- endPoints con auth ---------------------------------------
-//* Solo el admin puede crear, actualizar y borrar compañías
 //* Si hacemos multi part necesitamos que en la ruta ponga upload.single(image)
 
 CompanyRoutes.post(
