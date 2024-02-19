@@ -221,12 +221,15 @@ const deleteNews = async (req, res, next) => {
     if (!newsDelete) {
       deleteImgCloudinary(NewsExist.image);
 
-      await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
-      //! ESTA PRTE NO FUNCIONA
-      await Promise.all([
-        User.updateMany({ comments: id }, { $pull: { comments: id } }),
-        News.deleteMany({ comments: id }),
-      ]);
+      try {
+        await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
+        await User.updateMany({ comments: id }, { $pull: { comments: id } });
+        await News.deleteMany({ comments: id });
+      } catch (error) {
+        return res.status(404).json({
+          error: "News no ha sido borrado",
+        });
+      }
       //! --------------------
     } else {
       return res.status(404).json({
