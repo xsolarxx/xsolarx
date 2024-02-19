@@ -1037,6 +1037,57 @@ const toggleFollow = async (req, res, next) => {
   }
 };
 
+//-------------------------------* TOOGLE forum *-------------------------------------------------------------
+
+const togglefollowedForum = async (req, res, next) => {
+  try {
+    const { idForum } = req.params;
+    const { _id, forumFollowing } = req.user;
+    if (forumFollowing.includes(idForum)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { forumFollowing: idForum },
+        });
+        await Forum.findByIdAndUpdate(idForum, {
+          $pull: { followed: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("forumFollowing"),
+          forum: await Forum.findById(idForum).populate("followed"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el follow del foro",
+          message: error.message,
+        });
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { forumFollowing: idForum },
+        });
+        await Forum.findByIdAndUpdate(idForum, {
+          $push: { followed: _id },
+        });
+        return res.status(200).json({
+          user: await User.findById(_id).populate("forumFollowing"),
+          forum: await Forum.findById(idForum).populate("followed"),
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error al actualizar el follow del foro",
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
+
 //-------------------------------------------------------------------------------------------------------------------------
 
 module.exports = {
@@ -1058,4 +1109,5 @@ module.exports = {
   toggleLikedNews,
   toggleLikedForum,
   toggleFollow,
+  togglefollowedForum,
 };
