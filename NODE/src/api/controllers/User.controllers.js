@@ -1000,9 +1000,9 @@ const toggleFollow = async (req, res, next) => {
       }
     } else {
       try {
-        await User.findByIdAndUpdate(_id, {
+        await User.findByIdAndUpdate(req.user._id, {
           $push: {
-            usersFollowed: idUserToFollow,
+            usersFollowed: userToFollow,
           },
         });
         await User.findByIdAndUpdate(userToFollow, {
