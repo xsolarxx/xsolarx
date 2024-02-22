@@ -221,17 +221,11 @@ const deleteNews = async (req, res, next) => {
     try {
       await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
       try {
-        await Comment.updateMany(
-          { recipientNews: id },
-          { $pull: { recipientNews: id } }
-        );
-        console.log("🚀 ~ recipientNewsPull:", recipientNews);
-        console.log("🚀 ~ recipientNewsPullid:", recipientNews);
+        //! comentarios lau -> cambiar de .updateMany a deleteMany() y recorrer con un map. para sacar el id del comentario borrado y usarlo para borrarlo
+        await Comment.deleteMany({ recipientNews: id }, { recipientNews: id });
 
         try {
           await User.updateMany({ comments: id }, { $pull: { comments: id } });
-          console.log("🚀 ~ comments id:", comments);
-          console.log("🚀 ~ pulled comments:", comments);
 
           // try {
           //   await News.deleteMany({ comments: id });
