@@ -205,45 +205,52 @@ const update = async (req, res, next) => {
 
 //------------------------------------* DELETE *----------------------------------------------------
 
-//! SOLO CONSEGUIMOS QUE BORRE LA NOTICIA Y EL LIKE DEL USUARIO, PERO SI EL USUARIO HA COMENTADO LA NOTICIA EL COMENTARIO NO SONSEGUIMOS CORRARLO
-//! SEGURAMENTE NO TIENE MANERA DE SABER QUE USUARIO HA PUESTO EL COMENTARIO, NO? YA QUE ESTA EN UN MODELO QUE NO ES EL DE USER, MIENTRAS QUE EL LIKE ESTA EN EL MODELO DE USER
-
 const deleteNews = async (req, res, next) => {
-  // Extraer el ID de la compañía de los parámetros de la solicitud HTTP
   const { id } = req.params;
-  // Verificar si la compañía existe antes de eliminarla
-  const NewsExist = await News.findById(id);
+  await News.findByIdAndDelete(id);
+  console.log("🚀 ~ deleteNews ~ id:", id);
+  await News.findById(id);
 
-  if (NewsExist) {
-    await News.findByIdAndDelete(id);
-    const newsDelete = await News.findById(id);
+  if (await News.findById(id)) {
+    return res.status(404).json("not deleted");
+  } else {
+    //   eventDeleteImgs.forEach((image) => {
+    //     deleteImgCloudinary(image);
+    //   });
 
-    if (!newsDelete) {
-      deleteImgCloudinary(NewsExist.image);
-
+    try {
+      await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
       try {
-        await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
-        await User.updateMany({ comments: id }, { $pull: { comments: id } });
-        await News.deleteMany({ comments: id });
-      } catch (error) {
-        return res.status(404).json({
-          error: "News no ha sido borrado",
-        });
-      }
-      //! --------------------
-    } else {
-      return res.status(404).json({
-        error: "News no existe",
-      });
-    }
-  }
-  return res
-    .status(200)
-    .json({ success: true, message: "News eliminada correctamente" });
-};
+        await Comment.updateMany(
+          { recipientNews: id },
+          { $pull: { recipientNews: id } }
+        );
+        console.log("🚀 ~ recipientNewsPull:", recipientNews);
+        console.log("🚀 ~ recipientNewsPullid:", recipientNews);
 
+        try {
+          await User.updateMany({ comments: id }, { $pull: { comments: id } });
+          console.log("🚀 ~ comments id:", comments);
+          console.log("🚀 ~ pulled comments:", comments);
+
+          // try {
+          //   await News.deleteMany({ comments: id });
+          //   console.log("🚀 ~ deleteNews ~ comments:", comments, "comment in news model");
+          // } catch (error) {
+          // }
+        } catch (error) {
+          return res.status(404).json("comments in comment model not deleted");
+        }
+      } catch (error) {
+        return res.status(404).json("comments in user model not deleted");
+      }
+    } catch (error) {
+      return res.status(404).json("likedNews not deleted");
+    }
+    return res.status(200).json("deleted successfully");
+  }
+};
+//
 //---------------------------------------------------------------------------------------------------
 
 module.exports = { createNews, getAll, getById, update, getByTags, deleteNews };
-
-// Ok except Del
