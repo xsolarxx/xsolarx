@@ -223,16 +223,16 @@ const deleteNews = async (req, res, next) => {
   // recorremos cada id de comentario
   await Promise.all(
     commentIds.map(async (commentId) => {
-      await Comment.findByIdAndUpdate(
-        commentId,
-        { $pull: { userId: req.user._id } }
-      );
+      await Comment.findByIdAndUpdate(commentId, {
+        $pull: { userId: req.user._id },
+      });
       await User.updateMany(
         { likedNews: newsId },
         { $pull: { likedNews: newsId } }
       );
     })
   );
+};
 //
 //---------------------------------------------------------------------------------------------------
 
