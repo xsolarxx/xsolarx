@@ -207,43 +207,32 @@ const update = async (req, res, next) => {
 
 const deleteNews = async (req, res, next) => {
   const { id } = req.params;
-  await News.findByIdAndDelete(id);
-  console.log("🚀 ~ deleteNews ~ id:", id);
-  await News.findById(id);
+  const news = await News.findById(id);
 
-  if (await News.findById(id)) {
-    return res.status(404).json("not deleted");
-  } else {
-    //   eventDeleteImgs.forEach((image) => {
-    //     deleteImgCloudinary(image);
-    //   });
-
-    try {
-      await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
-      try {
-        //! comentarios lau -> cambiar de .updateMany a deleteMany() y recorrer con un map. para sacar el id del comentario borrado y usarlo para borrarlo
-        await Comment.deleteMany({ recipientNews: id }, { recipientNews: id });
-
-        try {
-          await User.updateMany({ comments: id }, { $pull: { comments: id } });
-
-          // try {
-          //   await News.deleteMany({ comments: id });
-          //   console.log("🚀 ~ deleteNews ~ comments:", comments, "comment in news model");
-          // } catch (error) {
-          // }
-        } catch (error) {
-          return res.status(404).json("comments in comment model not deleted");
-        }
-      } catch (error) {
-        return res.status(404).json("comments in user model not deleted");
-      }
-    } catch (error) {
-      return res.status(404).json("likedNews not deleted");
-    }
-    return res.status(200).json("deleted successfully");
+  if (!news) {
+    return res.status(404).json("Noticia no encontrada");
   }
-};
+
+  // Borramos el documento de la noticia
+  await News.findByIdAndDelete(id);
+  const userComments = news.comments.filter(
+    (comment) => comment.userId === req.user._id
+  );
+  const commentIds = userComments.map((comment) => comment._id);
+
+  // recorremos cada id de comentario
+  await Promise.all(
+    commentIds.map(async (commentId) => {
+      await Comment.findByIdAndUpdate(
+        commentId,
+        { $pull: { userId: req.user._id } }
+      );
+      await User.updateMany(
+        { likedNews: newsId },
+        { $pull: { likedNews: newsId } }
+      );
+    })
+  );
 //
 //---------------------------------------------------------------------------------------------------
 
