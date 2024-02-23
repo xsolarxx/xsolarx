@@ -53,3 +53,4 @@ const News = mongoose.model("News", NewsSchema);
 module.exports = News;
 
 //Ok
+//*Tenemos qu recoger los ids de las noticias y recoger los c
