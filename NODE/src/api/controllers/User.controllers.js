@@ -567,7 +567,6 @@ const deleteUser = async (req, res, next) => {
       userExists.comments.forEach((item) => {
         allCommentsAllRatings.push(item);
       });
-      console.log("userDelete", userDelete);
       if (!userDelete) {
         // lo que ejecutas opcion 1. req.User.image 2. userExists.image
         deleteImgCloudinary(userExists.image);
