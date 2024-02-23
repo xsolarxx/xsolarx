@@ -102,7 +102,7 @@ const update = async (req, res, next) => {
         if (req.file?.path) {
           deleteImgCloudinary(oldImg);
         }
-
+        //*forumowner ,,recipienforum comment , forum following, forum follower, likes forum ( 3 de user y uno de comment)
         //----------------------* Test *----------------------------------------------------------------
 
         //Se busca el elemento actualizado vía id
@@ -160,42 +160,87 @@ const update = async (req, res, next) => {
 // -------------------------------* DELETE POST/FORUM *-----------------------------------------------
 //? NO ESTA BIEN. Solo borra el foro, no los likes dentro del user que le dio like a un comentario dentro del foro
 const deleteForum = async (req, res, next) => {
+  try {
+    const { idForum } = req.params;
+    // Elimina el comentario
+    await Forum.findByIdAndDelete(idForum);
+    console.log("ID del Foro eliminado:", idForum);
+    // Actualiza las referencias de los modelos de datos
     try {
-      const { idForum } = req.params;
-      // Elimina el comentario
-      await Forum.findByIdAndDelete(idForum);
-      console.log("ID del Foro eliminado:", idForum);
-      // Actualiza las referencias de los modelos de datos
-      await Promise.all([
-        User.updateMany(
-          { likedForum: idForum },
-          { $pull: { likedForum: idForum } }
-        ),
-        Comment.updateMany(
-          { recipientForum: idForum },
-          { $pull: { recipientForum: idForum } } 
-        ),
-        User.updateMany(
+      await User.updateMany(
+        { likedForum: idForum },
+        { $pull: { likedForum: idForum } }
+      );
+      try {
+        await User.updateMany(
           { forumFollowing: idForum },
           { $pull: { forumFollowing: idForum } }
-        ),
-        User.updateMany(
-          { forumOwner: idForum },
-          { $pull: { forumOwner: idForum } }
-        ),
-      ]);
-  
-      return res
-        .status(200)
-        .json({ message: "Foro eliminado correctamente" });
+        );
+        try {
+          await User.updateOne(
+            { forumOwner: idForum },
+            { $pull: { forumOwner: idForum } }
+          );
+          try {
+            await Comment.updateMany(
+              { recipientForum: idForum },
+              { $pull: { recipientForum: idForum } }
+            );
+            await Forum.deleteMany({ forumOwner: idForum });
+
+            Promise.all(
+              User.updateMany(
+                { likedForum: idForum },
+                { $pull: { likedForum: idForum } }
+              ),
+              Comment.updateMany(
+                { recipientForum: idForum },
+                { $pull: { recipientForum: idForum } }
+              ),
+              User.updateMany(
+                { forumFollowing: idForum },
+                { $pull: { forumFollowing: idForum } }
+              ),
+              User.updateMany(
+                { forumOwner: idForum },
+                { $pull: { forumOwner: idForum } }
+              )
+            ).then(async () => {
+              console.log("entro");
+              // si sale bien la promesa
+              return res.status(200).json("forum borrado");
+            });
+          } catch (error) {
+            return res.status(404).json({
+              error: "Error eliminando comentario del forum",
+              message: error.message,
+            });
+          }
+        } catch (error) {
+          return res.status(404).json({
+            error: "Error eliminando el owner del forum ",
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: "Error eliminando el following del Forum ",
+          message: error.message,
+        });
+      }
     } catch (error) {
-      return res.status(500).json({
-        error: "Error eliminando el Foro",
+      return res.status(404).json({
+        error: "Error eliminando el like del Forum",
         message: error.message,
       });
     }
-  };
-  
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error general",
+      message: error.message,
+    });
+  }
+};
 
 //------------------------------------------------------------------------------
 module.exports = { createForum, getById, getAll, update, deleteForum };
