@@ -163,7 +163,7 @@ const deleteForum = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Verifica si id está definido
+    // Verifica si id está definido, si no está, lanza error.
     if (!id) {
       throw new Error("Id de foro no proporcionado");
     }
@@ -173,63 +173,49 @@ const deleteForum = async (req, res, next) => {
     console.log("ID del Foro eliminado:", id);
 
     // Busca todos los comentarios del foro
+    //
     const allComentsInForum = await Comment.find({ recipientForum: id });
     const commentIds = allComentsInForum.map((comment) => comment._id);
 
     // Actualiza las referencias de los modelos de datos
-    try {
-      await User.updateMany({ likedForum: id }, { $pull: { likedForum: id } });
-      try {
+    await User.updateMany({ likedForum: id }, { $pull: { likedForum: id } });
+
+    await User.updateMany(
+      { forumFollowing: id },
+      { $pull: { forumFollowing: id } }
+    );
+
+    await User.updateOne({ forumOwner: id }, { $pull: { forumOwner: id } });
+
+    await Comment.deleteMany({ recipientForum: id });
+
+    await Promise.all(
+      //! Por qué estás haciendo un loop de commentIds, pasándoles idElement el cual hace referenia a commentId a todos los demás?
+      commentIds.map(async (idElement) => {
         await User.updateMany(
-          { forumFollowing: id },
-          { $pull: { forumFollowing: id } }
+          { likedForum: idElement },
+          { $pull: { likedForum: idElement } }
         );
-        try {
-          await User.updateOne(
-            { forumOwner: id },
-            { $pull: { forumOwner: id } }
-          );
-          try {
-            await Comment.deleteMany({ recipientForum: id });
-            await Promise.all(
-              commentIds.map(async (idElement) => {
-                await User.updateMany(
-                  { likedForum: idElement },
-                  { $pull: { likedForum: idElement } }
-                );
-                await Comment.updateMany(
-                  { recipientForum: idElement },
-                  { $pull: { recipientForum: idElement } }
-                );
-                await User.updateMany(
-                  { forumFollowing: idElement },
-                  { $pull: { forumFollowing: idElement } }
-                );
-                await User.updateOne(
-                  { forumOwner: idElement },
-                  { $pull: { forumOwner: idElement } }
-                );
-              })
-            );
-            console.log("Entro");
-            return res
-              .status(200)
-              .json("Forum y sus dependencias eliminados correctamente");
-          } catch (error) {
-            throw new Error("Error eliminando comentarios y dependencias");
-          }
-        } catch (error) {
-          throw new Error("Error eliminando el owner del forum ");
-        }
-      } catch (error) {
-        throw new Error("Error eliminando el following del Forum ");
-      }
-    } catch (error) {
-      throw new Error("Error eliminando el like del Forum");
-    }
+        await Comment.updateMany(
+          { recipientForum: idElement },
+          { $pull: { recipientForum: idElement } }
+        );
+        await User.updateMany(
+          { forumFollowing: idElement },
+          { $pull: { forumFollowing: idElement } }
+        );
+        await User.updateOne(
+          { forumOwner: idElement },
+          { $pull: { forumOwner: idElement } }
+        );
+      })
+    );
+    return res
+      .status(200)
+      .json({ message: "Foro y sus dependencias eliminados correctamente" });
   } catch (error) {
     return res.status(500).json({
-      error: "Error general",
+      error: "Error eliminando el foro",
       message: error.message,
     });
   }
