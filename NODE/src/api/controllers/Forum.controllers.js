@@ -102,7 +102,7 @@ const update = async (req, res, next) => {
         if (req.file?.path) {
           deleteImgCloudinary(oldImg);
         }
-        //*forumowner ,,recipienforum comment , forum following, forum follower, likes forum ( 3 de user y uno de comment)
+
         //----------------------* Test *----------------------------------------------------------------
 
         //Se busca el elemento actualizado vía id
@@ -162,57 +162,49 @@ const update = async (req, res, next) => {
 const deleteForum = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    // Verifica si id está definido, si no está, lanza error.
+    // Verifica si id está definido, si no está, lanza error
     if (!id) {
       throw new Error("Id de foro no proporcionado");
     }
 
-    // Elimina el foro
-    await Forum.findByIdAndDelete(id);
-    console.log("ID del Foro eliminado:", id);
+    // Se crea un array vacío para encontrar posteriormente los comentarios hechos en ese foro
+    const commentIds = [];
+    /* Se buscan todos los comentarios que viven en ese foro, para que luego(.then) usando la response, se recorran todos 
+    ellos. Finalmente se añaden los ids de esos commentarios a la lista de array vacía (commentIds) */
+    await Comment.find({ recipientForum: id }).then((res) => {
+      res.forEach((comment) => {
+        commentIds.push(comment._id);
+      });
+    });
 
-    // Busca todos los comentarios del foro
-    //
-    const allComentsInForum = await Comment.find({ recipientForum: id });
-    const commentIds = allComentsInForum.map((comment) => comment._id);
-
-    // Actualiza las referencias de los modelos de datos
+    // Se actualizan las referencias de los modelos de datos
     await User.updateMany({ likedForum: id }, { $pull: { likedForum: id } });
-
     await User.updateMany(
       { forumFollowing: id },
       { $pull: { forumFollowing: id } }
     );
-
     await User.updateOne({ forumOwner: id }, { $pull: { forumOwner: id } });
 
     await Comment.deleteMany({ recipientForum: id });
 
-    await Promise.all(
-      //! Por qué estás haciendo un loop de commentIds, pasándoles idElement el cual hace referenia a commentId a todos los demás?
-      commentIds.map(async (idElement) => {
-        await User.updateMany(
-          { likedForum: idElement },
-          { $pull: { likedForum: idElement } }
-        );
-        await Comment.updateMany(
-          { recipientForum: idElement },
-          { $pull: { recipientForum: idElement } }
-        );
-        await User.updateMany(
-          { forumFollowing: idElement },
-          { $pull: { forumFollowing: idElement } }
-        );
-        await User.updateOne(
-          { forumOwner: idElement },
-          { $pull: { forumOwner: idElement } }
-        );
-      })
+    // Por cada user sacamos su favComments(Los comments que el user ha dado like) que se encuentra dentro($in) de la lista commentIds
+    await User.updateMany(
+      {}, // Objecto vacío para realizar la operación en todos los usuarios
+      { $pull: { favComments: { $in: commentIds } } }
     );
-    return res
-      .status(200)
-      .json({ message: "Foro y sus dependencias eliminados correctamente" });
+    // delete users comments
+    await User.updateMany(
+      {}, // Objecto vacío para realizar la operación en todos los usuarios
+      { $pull: { comments: { $in: commentIds } } }
+    );
+
+    // Finalmente se elimina el foro después de eliminar todas sus dependencias
+    await Forum.findByIdAndDelete(id);
+    console.log("ID del foro eliminado:", id);
+
+    return res.status(200).json({
+      message: "El foro y sus dependencias han sido eliminados correctamente",
+    });
   } catch (error) {
     return res.status(500).json({
       error: "Error eliminando el foro",
@@ -224,4 +216,4 @@ const deleteForum = async (req, res, next) => {
 //------------------------------------------------------------------------------
 module.exports = { createForum, getById, getAll, update, deleteForum };
 
-//Ok excepto delete
+//Ok todo
