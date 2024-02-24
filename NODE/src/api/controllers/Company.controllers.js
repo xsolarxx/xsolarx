@@ -319,7 +319,7 @@ const deleteCompany = async (req, res, next) => {
       );
       await Rating.findByIdAndDelete(ratingId);
     }),
-    await User.updateMany(
+    await User.deleteOne(
       { likedCompany: idCompany },
       { $pull: { likedCompany: idCompany } }
     ),
