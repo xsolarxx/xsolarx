@@ -218,15 +218,17 @@ const deleteNews = async (req, res, next) => {
   // Obtenemos los comentarios asociados con la noticia a eliminar y lo guardamos en una variable
   const commentsToDelete = await newsToDelete.comments;
   // Iteramos con un foreach sobre cada 'commentId' en los comentarios a eliminar
-  commentsToDelete.forEach(async (commentId) => {
-    // actualizamos, mediante un updatemanu (mongoose method), el comment array del User model
-    const user = await User.updateMany(
-      // Filtra por 'commentId' en el array de comentarios del User
-      { comments: commentId },
-      //* 2 PULL COMMENTID FROM USER - Elimina el 'commentId' del array de comentario, mediante un $pull
-      { $pull: { comments: commentId } }
-    );
-  });
+
+  //
+  await Promise.all(
+    commentsToDelete.map(async (commentId) => {
+      const user = await User.updateMany(
+        { comments: commentId },
+        { $pull: { comments: commentId } }
+      );
+      await Comment.findByIdAndDelete(commentId);
+    })
+  );
 
   commentsToDelete.forEach(async (commentId) => {
     //* 3 DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
