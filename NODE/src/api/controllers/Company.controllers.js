@@ -290,10 +290,21 @@ const deleteCompany = async (req, res, next) => {
       return res.status(404).json("Compañia no encontrada");
     }
 
+    /**
+     * Cuando tenemos la ref(controllers)
+     */
     const reviewToDelete = companyToDelete.userCompanyReviews;
     const ratingToDelete = companyToDelete.userCompanyRatings;
+
+    /**
+     * Cuando no tenemos la ref, accendiemos con la propriedade
+     * de User
+     */
     const usersToUpdate = await User.find({
       companyPunctuated: companyToDelete._id,
+    });
+    const OwnerAdminToDeletw = await User.find({
+      companyOwnerAdmin: companyToDelete._id,
     });
 
     await Promise.all([
@@ -313,6 +324,10 @@ const deleteCompany = async (req, res, next) => {
       }),
       usersToUpdate.map(async (user) => {
         user.companyPunctuated.pull(companyToDelete._id);
+        await user.save();
+      }),
+      OwnerAdminToDeletw.map(async (user) => {
+        user.companyOwnerAdmin.pull(companyToDelete._id);
         await user.save();
       }),
       // Remove references to companyToDelete from likedCompany in User model
@@ -347,72 +362,3 @@ module.exports = {
   updateCompany,
   deleteCompany,
 };
-
-// likeToDelete.map(async (likeId) => {
-//   const user = await User.updateMany(
-//     { likedCompany: likeId },
-//     { $pull: { likedCompany: likeId } }
-//   );
-
-// })
-
-// await User.updateMany(
-
-//   { likedCompany: companyId },
-//   { $pull: { likedCompany: companyId } }
-// ),
-// console.log("entro", companyId),
-
-/*const deleteCompany = async (req, res, next) => {
-  const { idCompany } = req.params;
-  console.log("entro", idCompany);
-  const companyToDelete = await Company.findById(idCompany);
-
-  if (!companyToDelete) {
-    return res.status(404).json("Compañia no encontrada");
-  }
-
-  const reviewToDelete = await companyToDelete.userCompanyReviews; // -> id de comments
-  console.log(
-    "🚀 ~ newDeleteCompany ~ companyToDelete.userCompanyReviews:",
-    companyToDelete.userCompanyReviews
-  );
-  const ratingToDelete = await companyToDelete.userCompanyRatings; // -> id de rating
-  console.log(
-    "🚀 ~ newDeleteCompany ~ companyToDelete.userCompanyRatings:",
-    companyToDelete.userCompanyRatings
-  );
-
-  const likeToDelete = await companyToDelete.userLikedCompany;
-
-  await Promise.all(
-    reviewToDelete.map(async (reviewId) => {
-      const user = await User.updateMany(
-        // Recuerda, comments es el nombre de la clave en el modelo de usuario para la revisión de la empresa
-        { comments: reviewId },
-        { $pull: { comments: reviewId } }
-      );
-      // Encontrar el comentario por id en el modelo de comentarios y borrarlo
-      await Comment.findByIdAndDelete(reviewId);
-    }),
-    ratingToDelete.map(async (ratingId) => {
-      const user = await User.updateMany(
-        { ownerRating: ratingId },
-        { $pull: { ownerRating: ratingId } }
-      );
-      await Rating.findByIdAndDelete(ratingId);
-    }),
-    await User.deleteMany(
-      { likedCompany: companyToDelete },
-      { $pull: { likedCompany: companyToDelete } }
-    ),
-    await User.deleteMany(
-      { companyPunctuated: companyToDelete },
-      { $pull: { companyPunctuated: companyToDelete } }
-    )
-  );
-
-  // await Company.findByIdAndDelete(id);
-
-  res.status(200).json("Noticia eliminada correctamente");
-};*/
