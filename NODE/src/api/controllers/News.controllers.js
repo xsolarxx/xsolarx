@@ -207,32 +207,36 @@ const update = async (req, res, next) => {
 
 const deleteNews = async (req, res, next) => {
   const { id } = req.params;
-  const news = await News.findById(id);
+  const newsToDelete = await News.findById(id);
 
-  if (!news) {
+  if (!id) {
     return res.status(404).json("Noticia no encontrada");
   }
 
+  const commentsToDelete = await newsToDelete.comments;
+
+  commentsToDelete.forEach(async (commentId) => {
+    const user = await User.updateMany(
+      // filtering by comments. Looking for a user where there is in the comment field something that correponds to commemt id
+      { comments: commentId },
+      // update method , because is an array
+      { $pull: { comments: commentId } }
+    );
+  });
+
+  commentsToDelete.forEach(async (commentId) => {
+    await Comment.findByIdAndDelete(commentId);
+  });
+
+  // Remove the likedNews reference from users
+  await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
+
   // Borramos el documento de la noticia
   await News.findByIdAndDelete(id);
-  const userComments = news.comments.filter(
-    (comment) => comment.userId === req.user._id
-  );
-  const commentIds = userComments.map((comment) => comment._id);
 
-  // recorremos cada id de comentario
-  await Promise.all(
-    commentIds.map(async (commentId) => {
-      await Comment.findByIdAndUpdate(commentId, {
-        $pull: { userId: req.user._id },
-      });
-      await User.updateMany(
-        { likedNews: newsId },
-        { $pull: { likedNews: newsId } }
-      );
-    })
-  );
+  res.status(200).json("Noticia eliminada exitosamente");
 };
+
 //
 //---------------------------------------------------------------------------------------------------
 
