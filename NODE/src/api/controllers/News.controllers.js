@@ -207,34 +207,38 @@ const update = async (req, res, next) => {
 
 const deleteNews = async (req, res, next) => {
   const { id } = req.params;
+  // Busca la noticia a eliminar en la base de datos usando el 'id' y un método de mongoose
   const newsToDelete = await News.findById(id);
 
+  // comprobramos si el id de la noticia existe
   if (!id) {
     return res.status(404).json("Noticia no encontrada");
   }
 
+  // Obtenemos los comentarios asociados con la noticia a eliminar y lo guardamos en una variable
   const commentsToDelete = await newsToDelete.comments;
-  //! aquí la clave
+  // Iteramos con un foreach sobre cada 'commentId' en los comentarios a eliminar
   commentsToDelete.forEach(async (commentId) => {
+    // actualizamos, mediante un updatemanu (mongoose method), el comment array del User model
     const user = await User.updateMany(
-      // filtering by comments. Looking for a user where there is in the comment field something that correponds to commemt id
+      // Filtra por 'commentId' en el array de comentarios del User
       { comments: commentId },
-      // update method , because is an array
+      //* 2 PULL COMMENTID FROM USER - Elimina el 'commentId' del array de comentario, mediante un $pull
       { $pull: { comments: commentId } }
     );
   });
 
   commentsToDelete.forEach(async (commentId) => {
+    //* 3 DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
     await Comment.findByIdAndDelete(commentId);
   });
-  //! aquí la clave
-  // Remove the likedNews reference from users
+  //* 1 PULL LIKE FROM USER - Elimina el id del news en el 'likednews' array, mediante un $pull
   await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
 
   // Borramos el documento de la noticia
   await News.findByIdAndDelete(id);
 
-  res.status(200).json("Noticia eliminada exitosamente");
+  res.status(200).json("Noticia eliminada correctamente");
 };
 
 //
