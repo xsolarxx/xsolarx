@@ -280,55 +280,54 @@ const updateCompany = async (req, res, next) => {
 };
 
 // --------------------------------* DELETE *--------------------------------------------------------
-//! los comentarios / likes se borran, pero en usuario los ownerRating no.
 const deleteCompany = async (req, res, next) => {
-  try {
-    const { idCompany } = req.params;
+  const { idCompany } = req.params;
+  console.log("entro", idCompany);
+  const companyToDelete = await Company.findById(idCompany);
 
-    // Eliminar la compañía
-    const companyToDelete = await Company.findByIdAndDelete(idCompany);
-
-    if (!companyToDelete) {
-      return res.status(404).json({ error: "Compañía no existe" });
-    }
-
-    // Eliminar la imagen asociada a la compañía desde Cloudinary
-    deleteImgCloudinary(companyToDelete.image);
-
-    // Buscar y eliminar las referencias a la compañía eliminada en los documentos de usuario
-    await User.updateMany(
-      {
-        $or: [
-          { companyOwnerAdmin: idCompany },
-          { likedCompany: idCompany },
-          { companyPunctuated: idCompany },
-          { ownerRating: { $elemMatch: { $eq: idCompany } } }, // Usar $elemMatch para buscar documentos donde el array ownerRating contiene al menos un elemento igual a idCompany
-        ],
-      },
-      {
-        $pull: {
-          companyOwnerAdmin: idCompany,
-          likedCompany: idCompany,
-          companyPunctuated: idCompany,
-          ownerRating: idCompany,
-        },
-      }
-    );
-
-    // Eliminar comentarios dirigidos a la compañía que estamos borrando
-    await Comment.deleteMany({ recipientCompany: idCompany });
-
-    // Eliminar valoraciones dirigidas a la compañía que estamos borrando
-    await Rating.deleteMany({ companyPunctuated: idCompany });
-
-    return res
-      .status(200)
-      .json({ success: true, message: "Compañía eliminada correctamente" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Error eliminando la compañía", message: error.message });
+  if (!companyToDelete) {
+    return res.status(404).json("Compañia no encontrada");
   }
+
+  const reviewToDelete = await companyToDelete.userCompanyReviews; // -> id de comments
+  console.log(
+    "🚀 ~ newDeleteCompany ~ companyToDelete.userCompanyReviews:",
+    companyToDelete.userCompanyReviews
+  );
+  const ratingToDelete = await companyToDelete.userCompanyRatings; // -> id de rating
+  console.log(
+    "🚀 ~ newDeleteCompany ~ companyToDelete.userCompanyRatings:",
+    companyToDelete.userCompanyRatings
+  );
+
+  const likeToDelete = await companyToDelete.userLikedCompany;
+
+  await Promise.all([
+    reviewToDelete.map(async (reviewId) => {
+      const user = await User.updateMany(
+        // Recuerda, comments es el nombre de la clave en el modelo de usuario para la revisión de la empresa
+        { comments: reviewId },
+        { $pull: { comments: reviewId } }
+      );
+      // Encontrar el comentario por id en el modelo de comentarios y borrarlo
+      await Comment.findByIdAndDelete(reviewId);
+    }),
+    ratingToDelete.map(async (ratingId) => {
+      const user = await User.updateMany(
+        { ownerRating: ratingId },
+        { $pull: { ownerRating: ratingId } }
+      );
+      await Rating.findByIdAndDelete(ratingId);
+    }),
+    await User.updateMany(
+      { likedCompany: idCompany },
+      { $pull: { likedCompany: idCompany } }
+    ),
+  ]);
+
+  // await Company.findByIdAndDelete(id);
+
+  res.status(200).json("Noticia eliminada correctamente");
 };
 //---------------------------------------------------------------------------------------------------
 
@@ -345,4 +344,10 @@ module.exports = {
   deleteCompany,
 };
 
-// Ok except Del
+// likeToDelete.map(async (likeId) => {
+//   const user = await User.updateMany(
+//     { likedCompany: likeId },
+//     { $pull: { likedCompany: likeId } }
+//   );
+
+// })
