@@ -214,7 +214,7 @@ const deleteNews = async (req, res, next) => {
   }
 
   const commentsToDelete = await newsToDelete.comments;
-
+  //! aquí la clave
   commentsToDelete.forEach(async (commentId) => {
     const user = await User.updateMany(
       // filtering by comments. Looking for a user where there is in the comment field something that correponds to commemt id
@@ -227,7 +227,7 @@ const deleteNews = async (req, res, next) => {
   commentsToDelete.forEach(async (commentId) => {
     await Comment.findByIdAndDelete(commentId);
   });
-
+  //! aquí la clave
   // Remove the likedNews reference from users
   await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
 
