@@ -158,81 +158,74 @@ const update = async (req, res, next) => {
 };
 
 // -------------------------------* DELETE POST/FORUM *-----------------------------------------------
-//? NO ESTA BIEN. Solo borra el foro, no los likes dentro del user que le dio like a un comentario dentro del foro
+
 const deleteForum = async (req, res, next) => {
   try {
-    const { idForum } = req.params;
-    // Elimina el comentario
-    await Forum.findByIdAndDelete(idForum);
-    console.log("ID del Foro eliminado:", idForum);
+    const { id } = req.params;
+
+    // Verifica si id está definido
+    if (!id) {
+      throw new Error("Id de foro no proporcionado");
+    }
+
+    // Elimina el foro
+    await Forum.findByIdAndDelete(id);
+    console.log("ID del Foro eliminado:", id);
+
+    // Busca todos los comentarios del foro
+    const allComentsInForum = await Comment.find({ recipientForum: id });
+    const commentIds = allComentsInForum.map((comment) => comment._id);
+
     // Actualiza las referencias de los modelos de datos
     try {
-      await User.updateMany(
-        { likedForum: idForum },
-        { $pull: { likedForum: idForum } }
-      );
+      await User.updateMany({ likedForum: id }, { $pull: { likedForum: id } });
       try {
         await User.updateMany(
-          { forumFollowing: idForum },
-          { $pull: { forumFollowing: idForum } }
+          { forumFollowing: id },
+          { $pull: { forumFollowing: id } }
         );
         try {
           await User.updateOne(
-            { forumOwner: idForum },
-            { $pull: { forumOwner: idForum } }
+            { forumOwner: id },
+            { $pull: { forumOwner: id } }
           );
           try {
-            await Comment.updateMany(
-              { recipientForum: idForum },
-              { $pull: { recipientForum: idForum } }
+            await Comment.deleteMany({ recipientForum: id });
+            await Promise.all(
+              commentIds.map(async (idElement) => {
+                await User.updateMany(
+                  { likedForum: idElement },
+                  { $pull: { likedForum: idElement } }
+                );
+                await Comment.updateMany(
+                  { recipientForum: idElement },
+                  { $pull: { recipientForum: idElement } }
+                );
+                await User.updateMany(
+                  { forumFollowing: idElement },
+                  { $pull: { forumFollowing: idElement } }
+                );
+                await User.updateOne(
+                  { forumOwner: idElement },
+                  { $pull: { forumOwner: idElement } }
+                );
+              })
             );
-            await Forum.deleteMany({ forumOwner: idForum });
-
-            Promise.all(
-              User.updateMany(
-                { likedForum: idForum },
-                { $pull: { likedForum: idForum } }
-              ),
-              Comment.updateMany(
-                { recipientForum: idForum },
-                { $pull: { recipientForum: idForum } }
-              ),
-              User.updateMany(
-                { forumFollowing: idForum },
-                { $pull: { forumFollowing: idForum } }
-              ),
-              User.updateMany(
-                { forumOwner: idForum },
-                { $pull: { forumOwner: idForum } }
-              )
-            ).then(async () => {
-              console.log("entro");
-              // si sale bien la promesa
-              return res.status(200).json("forum borrado");
-            });
+            console.log("Entro");
+            return res
+              .status(200)
+              .json("Forum y sus dependencias eliminados correctamente");
           } catch (error) {
-            return res.status(404).json({
-              error: "Error eliminando comentario del forum",
-              message: error.message,
-            });
+            throw new Error("Error eliminando comentarios y dependencias");
           }
         } catch (error) {
-          return res.status(404).json({
-            error: "Error eliminando el owner del forum ",
-            message: error.message,
-          });
+          throw new Error("Error eliminando el owner del forum ");
         }
       } catch (error) {
-        return res.status(404).json({
-          error: "Error eliminando el following del Forum ",
-          message: error.message,
-        });
+        throw new Error("Error eliminando el following del Forum ");
       }
     } catch (error) {
-      return res.status(404).json({
-        error: "Error eliminando el like del Forum",
-        message: error.message,
-      });
+      throw new Error("Error eliminando el like del Forum");
     }
   } catch (error) {
     return res.status(500).json({
