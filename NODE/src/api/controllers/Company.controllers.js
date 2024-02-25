@@ -64,7 +64,7 @@ const getByName = async (req, res, next) => {
     const { companyName } = req.body;
     const companyByName = await Company.find({ companyName: companyName });
     if (companyByName.length > 0) {
-      // Si el array tiene length > 0, indica si existe 1 compañía con este nombre.
+      // Si el array tiene length > 0, indica si existe 1 compañía con este nombre
       return res.status(200).json(companyByName);
     } else {
       return res.status(404).json("No se ha encontrado la compañía");
@@ -116,12 +116,12 @@ const getById = async (req, res, next) => {
 const getByServices = async (req, res, next) => {
   try {
     const { companyServices } = req.body;
-    const newcompanyByService = await Company.find({
+    const newCompanyByService = await Company.find({
       companyServices: companyServices,
     });
 
-    if (newcompanyByService.length > 0) {
-      return res.status(200).json(newcompanyByService);
+    if (newCompanyByService.length > 0) {
+      return res.status(200).json(newCompanyByService);
     } else {
       return res
         .status(404)
@@ -196,12 +196,12 @@ const updateCompany = async (req, res, next) => {
   await Company.syncIndexes();
   let catchImg = req.file?.path;
   try {
-    await Company.syncIndexes();
     const { id } = req.params;
     const companyById = await Company.findById(id);
-
     if (companyById) {
       const oldImg = companyById.image;
+
+      // Se construye el objeto de campos personalizado para la actualización
       const customBody = {
         _id: companyById._id,
         image: req.file?.path ? catchImg : oldImg,
@@ -279,31 +279,29 @@ const updateCompany = async (req, res, next) => {
   }
 };
 
-// --------------------------------* DELETE *--------------------------------------------------------
+// --------------------------------* DELETE COMPANY *--------------------------------------------------------
+
 const deleteCompany = async (req, res, next) => {
   const { idCompany } = req.params;
-
+  // Busca la compañía a eliminar en la base de datos usando el id
   try {
     const companyToDelete = await Company.findById(idCompany);
 
+    // Se comprueba si el id de la compañía existe
     if (!companyToDelete) {
       return res.status(404).json("Compañia no encontrada");
     }
 
-    /**
-     * Cuando tenemos la ref(controllers)
-     */
+    /*Con referencia a la dependencia -> Se busca en la BD
+    para encontrar users y datos asociados a la compañía que se va a eliminar */
     const reviewToDelete = companyToDelete.userCompanyReviews;
     const ratingToDelete = companyToDelete.userCompanyRatings;
 
-    /**
-     * Cuando no tenemos la ref, accendiemos con la propriedade
-     * de User
-     */
+    // Sin referencia a la dependencia -> Se accede a través del user
     const usersToUpdate = await User.find({
       companyPunctuated: companyToDelete._id,
     });
-    const OwnerAdminToDeletw = await User.find({
+    const OwnerAdminToDelete = await User.find({
       companyOwnerAdmin: companyToDelete._id,
     });
 
@@ -326,11 +324,11 @@ const deleteCompany = async (req, res, next) => {
         user.companyPunctuated.pull(companyToDelete._id);
         await user.save();
       }),
-      OwnerAdminToDeletw.map(async (user) => {
+      OwnerAdminToDelete.map(async (user) => {
         user.companyOwnerAdmin.pull(companyToDelete._id);
         await user.save();
       }),
-      // Remove references to companyToDelete from likedCompany in User model
+      // Se eliminan las referencias del likedCompany dentro del User model
       User.updateMany(
         { likedCompany: companyToDelete._id },
         { $pull: { likedCompany: companyToDelete._id } }
@@ -339,7 +337,7 @@ const deleteCompany = async (req, res, next) => {
 
     await Company.findByIdAndDelete(idCompany);
 
-    return res.status(200).json("Compañia eliminada correctamente");
+    return res.status(200).json("Compañía eliminada correctamente");
   } catch (error) {
     return res
       .status(500)
@@ -347,9 +345,7 @@ const deleteCompany = async (req, res, next) => {
   }
 };
 
-module.exports = deleteCompany;
 //---------------------------------------------------------------------------------------------------
-
 module.exports = {
   createCompany,
   getById,
@@ -362,3 +358,5 @@ module.exports = {
   updateCompany,
   deleteCompany,
 };
+
+//Ok todo
