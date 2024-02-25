@@ -217,28 +217,27 @@ const deleteNews = async (req, res, next) => {
 
   // Obtenemos los comentarios asociados con la noticia a eliminar y lo guardamos en una variable
   const commentsToDelete = await newsToDelete.comments;
-  // Iteramos con un foreach sobre cada 'commentId' en los comentarios a eliminar
 
-  //
+  // Iteramos sobre cada 'commentId' dentro del user, que queremos borrar y hacemos el pull , despues borramos
   await Promise.all(
     commentsToDelete.map(async (commentId) => {
       const user = await User.updateMany(
         { comments: commentId },
         { $pull: { comments: commentId } }
       );
+      //* DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
       await Comment.findByIdAndDelete(commentId);
+      console.log("🚀 ~ commentsToDelete.map ~ commentId:", commentId);
     })
   );
 
-  commentsToDelete.forEach(async (commentId) => {
-    //* 3 DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
-    await Comment.findByIdAndDelete(commentId);
-  });
-  //* 1 PULL LIKE FROM USER - Elimina el id del news en el 'likednews' array, mediante un $pull
+  //* PULL LIKE FROM USER - Elimina el id del news en el 'likednews' array, mediante un $pull
   await User.updateMany({ likedNews: id }, { $pull: { likedNews: id } });
 
-  // Borramos el documento de la noticia
+  // Borramos el documento de la noticia y la imagen
   await News.findByIdAndDelete(id);
+  await deleteImgCloudinary(newsToDelete.image);
+  console.log("🚀 ~ deleteNews ~ newsToDelete.image:", newsToDelete.image);
 
   res.status(200).json("Noticia eliminada correctamente");
 };
