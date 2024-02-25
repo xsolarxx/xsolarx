@@ -79,7 +79,7 @@ const getAll = async (req, res, next) => {
   }
 };
 
-//-----------------------------------* UPDATE *-------------------------------------------
+//-----------------------------------* UPDATE FORUM *-------------------------------------------
 
 const update = async (req, res, next) => {
   await Forum.syncIndexes();
@@ -90,6 +90,7 @@ const update = async (req, res, next) => {
     if (forumById) {
       const oldImg = forumById.image;
 
+      // Se construye el objeto de campos personalizado para la actualización
       const customBody = {
         _id: forumById._id,
         image: req.file?.path ? catchImg : oldImg,
@@ -192,7 +193,7 @@ const deleteForum = async (req, res, next) => {
       {}, // Objecto vacío para realizar la operación en todos los usuarios
       { $pull: { favComments: { $in: commentIds } } }
     );
-    // delete users comments
+    // Se eliminan los users comments
     await User.updateMany(
       {}, // Objecto vacío para realizar la operación en todos los usuarios
       { $pull: { comments: { $in: commentIds } } }
