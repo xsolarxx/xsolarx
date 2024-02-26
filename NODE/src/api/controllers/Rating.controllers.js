@@ -83,6 +83,10 @@ const getAll = async (req, res, next) => {
     });
   }
 };
+
+//---------------------------------------* GET BY ID *---------------------------------------------------------
+
+
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
