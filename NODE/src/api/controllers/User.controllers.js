@@ -1030,7 +1030,7 @@ const toggleFollow = async (req, res, next) => {
 
 //-------------------------------* TOOGLE FOLLOW FORUM *-------------------------------------------------------------
 
-const togglefollowedForum = async (req, res, next) => {
+const toggleFollowedForum = async (req, res, next) => {
   try {
     const { idForum } = req.params;
     const { _id, forumFollowing } = req.user;
@@ -1100,5 +1100,5 @@ module.exports = {
   toggleLikedNews,
   toggleLikedForum,
   toggleFollow,
-  togglefollowedForum,
+  toggleFollowedForum,
 };
