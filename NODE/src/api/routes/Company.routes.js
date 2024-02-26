@@ -14,7 +14,7 @@ const {
 const { upload } = require("../../middleware/files.middleware");
 const CompanyRoutes = require("express").Router();
 
-//! ---------------- endPoints sin auth ---------------------------------------
+// ----------------* endPoints sin auth *---------------------------------------
 
 CompanyRoutes.get("/byName", getByName);
 CompanyRoutes.get("/getall", getAll);
@@ -23,8 +23,9 @@ CompanyRoutes.get("/companybyservices/services", getByServices);
 CompanyRoutes.get("/getByDescLikes/likes", getByDescLikes);
 CompanyRoutes.get("/getByAscLikes/likes", getByAscLikes);
 
-//! ---------------- endPoints con auth ---------------------------------------
-//* Si hacemos multi part necesitamos que en la ruta ponga upload.single(image)
+// ----------------* endPoints con auth *---------------------------------------
+
+// Si hacemos multi part se necesita que en la ruta ponga upload.single(image)
 
 CompanyRoutes.post(
   "/create",
@@ -42,4 +43,4 @@ CompanyRoutes.delete("/company/:idCompany", [isAuthAdmin], deleteCompany);
 
 module.exports = CompanyRoutes;
 
-// Adición de comentarios junto a correcciones (no el código)
+//Ok
