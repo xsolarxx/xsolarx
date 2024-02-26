@@ -211,7 +211,7 @@ const deleteNews = async (req, res, next) => {
   const newsToDelete = await News.findById(id);
 
   // comprobramos si el id de la noticia existe
-  if (!id) {
+  if (!newsToDelete) {
     return res.status(404).json("Noticia no encontrada");
   }
 
@@ -225,9 +225,8 @@ const deleteNews = async (req, res, next) => {
         { comments: commentId },
         { $pull: { comments: commentId } }
       );
-      //* DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
+      // DELETE COMMENT - Eliminamos el comentarios de la base de datos, mediante otra funcion de mongoose
       await Comment.findByIdAndDelete(commentId);
-      console.log("🚀 ~ commentsToDelete.map ~ commentId:", commentId);
     })
   );
 
@@ -236,8 +235,9 @@ const deleteNews = async (req, res, next) => {
 
   // Borramos el documento de la noticia y la imagen
   await News.findByIdAndDelete(id);
-  await deleteImgCloudinary(newsToDelete.image);
-  console.log("🚀 ~ deleteNews ~ newsToDelete.image:", newsToDelete.image);
+  if (newsToDelete.image) {
+    deleteImgCloudinary(newsToDelete.image);
+  }
 
   res.status(200).json("Noticia eliminada correctamente");
 };
