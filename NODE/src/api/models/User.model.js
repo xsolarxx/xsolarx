@@ -27,7 +27,7 @@ const UserSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ["Hombre", "Mujer", "Otros"],
+      enum: ["Male", "Female", "Others"],
       required: true,
     },
     rol: {
