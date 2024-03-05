@@ -27,7 +27,7 @@ const NewsSchema = new Schema(
     },
     tags: {
       type: String,
-      enum: ["Paneles solares", "Energía eólica", "Otros"],
+      enum: ["Solar panels", "Wind power", "Others"],
       required: true,
     },
     likes: [
