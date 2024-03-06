@@ -85,7 +85,7 @@ const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const NewsById = await News.findById(id);
+    const NewsById = await News.findById(id).populate("comments");
     if (NewsById) {
       return res.status(200).json(NewsById);
     } else {
