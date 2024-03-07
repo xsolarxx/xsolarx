@@ -48,7 +48,7 @@ const createForum = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const forumById = await Forum.findById(id);
+    const forumById = await Forum.findById(id).populate("owner");
     if (forumById) {
       return res.status(200).json(forumById);
     } else {
@@ -63,7 +63,7 @@ const getById = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allForums = await Forum.find();
+    const allForums = await Forum.find().populate("owner");
     if (allForums.length > 0) {
       // Verifica si se encontraron los foros
       return res.status(200).json(allForums);
