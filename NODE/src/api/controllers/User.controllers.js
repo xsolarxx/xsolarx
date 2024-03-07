@@ -827,7 +827,7 @@ const toggleLikedCompany = async (req, res, next) => {
         UpdatelikesCount(idCompany, -1);
 
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedCompany"),
+          user: await User.findById(_id),
           company: await Company.findById(idCompany).populate(
             "userLikedCompany"
           ),
@@ -851,7 +851,7 @@ const toggleLikedCompany = async (req, res, next) => {
         UpdatelikesCount(idCompany, 1);
 
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedCompany"),
+          user: await User.findById(_id),
           company: await Company.findById(idCompany).populate(
             "userLikedCompany"
           ),
