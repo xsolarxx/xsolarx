@@ -245,19 +245,19 @@ const getByRecipient = async (req, res, next) => {
 
     let comments;
     if (recipientType === "Forum") {
-      comments = await Comment.find({ recipientForum: id }).populate(
-        "owner recipientForum"
-      );
+      comments = await Comment.find({ recipientForum: id })
+        .sort({ createdAt: -1 })
+        .populate("owner recipientForum");
       return res.status(200).json(comments);
     } else if (recipientType === "News") {
-      comments = await Comment.find({ recipientNews: id }).populate(
-        "owner recipientNews"
-      );
+      comments = await Comment.find({ recipientNews: id })
+        .sort({ createdAt: -1 })
+        .populate("owner recipientNews");
       return res.status(200).json(comments);
     } else if (recipientType === "Company") {
-      comments = await Comment.find({ recipientCompany: id }).populate(
-        "owner recipientCompany"
-      );
+      comments = await Comment.find({ recipientCompany: id })
+        .sort({ createdAt: -1 })
+        .populate("owner recipientCompany");
       return res.status(200).json(comments);
     } else {
       return res.status(404).json({
