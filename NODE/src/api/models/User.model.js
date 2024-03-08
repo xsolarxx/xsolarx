@@ -52,7 +52,7 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    userToFollow: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users que el usuario en particular sigue
+
     favComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], // Comentarios en los que el user ha dado "like"
     ownerRating: [{ type: mongoose.Schema.Types.ObjectId, ref: "Rating" }], // User que puntúa a una compañía
     usersFollowed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users que el usuario en particular sigue
@@ -70,6 +70,7 @@ const UserSchema = new Schema(
     companyPunctuated: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
     ], // Compañía que recibe una puntuación
+    blockedByApp: { type: Boolean, default: false },
   },
   { timestamps: true } //Refleja el momento exacto de la modificación
 );
