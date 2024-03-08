@@ -8,7 +8,6 @@ const CommentSchema = new Schema(
   {
     title: {
       type: String,
-      required: true,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId, // Referencia de user --> Se pone id en Insomnia
