@@ -237,7 +237,38 @@ const deleteComment = async (req, res, next) => {
   }
 };
 
-// ------------------------------* GET BY  *------------------------------------------------------
+// ------------------------------* GET BY RECIPIENT *------------------------------------------------------
+
+const getByRecipient = async (req, res, next) => {
+  try {
+    const { recipientType, id } = req.params;
+
+    let comments;
+    if (recipientType === "Forum") {
+      comments = await Comment.find({ recipientForum: id }).populate(
+        "owner recipientForum"
+      );
+      return res.status(200).json(comments);
+    } else if (recipientType === "News") {
+      comments = await Comment.find({ recipientNews: id }).populate(
+        "owner recipientNews"
+      );
+      return res.status(200).json(comments);
+    } else if (recipientType === "Company") {
+      comments = await Comment.find({ recipientCompany: id }).populate(
+        "owner recipientCompany"
+      );
+      return res.status(200).json(comments);
+    } else {
+      return res.status(404).json({
+        error:
+          "Invalid recipient type. It must be either 'Forum', 'News' or 'Company'.",
+      });
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
 
 //---------------------------------------------------------------------------------------------------------------
 module.exports = {
@@ -246,6 +277,7 @@ module.exports = {
   getById,
   update,
   deleteComment,
+  getByRecipient,
 };
 
 //Ok

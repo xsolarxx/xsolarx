@@ -5,6 +5,7 @@ const {
   getAll,
   getById,
   update,
+  getByRecipient,
 } = require("../controllers/Comment.controllers");
 
 const CommentRoutes = require("express").Router();
@@ -14,5 +15,6 @@ CommentRoutes.delete("/comments/:idComment", [isAuth], deleteComment);
 CommentRoutes.get("/getall", getAll);
 CommentRoutes.get("/getbyid/:id", getById);
 CommentRoutes.patch("/update/:id", update);
+CommentRoutes.get("/:recipientType/:id", getByRecipient);
 
 module.exports = CommentRoutes;
