@@ -769,7 +769,7 @@ const toggleFavComments = async (req, res, next) => {
           $pull: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("favComments"),
+          user: await User.findById(_id),
           comment: await Comment.findById(idComment).populate("likes"),
         });
       } catch (error) {
@@ -787,7 +787,7 @@ const toggleFavComments = async (req, res, next) => {
           $push: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("favComments"),
+          user: await User.findById(_id),
           comment: await Comment.findById(idComment).populate("likes"),
         });
       } catch (error) {
@@ -823,15 +823,20 @@ const toggleLikedCompany = async (req, res, next) => {
           $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
 
-        //* substracting one from count related to company
-        UpdatelikesCount(idCompany, -1);
-
-        return res.status(200).json({
-          user: await User.findById(_id),
-          company: await Company.findById(idCompany).populate(
-            "userLikedCompany"
-          ),
-        });
+        try {
+          //Encuentra id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB)
+          await Company.findByIdAndUpdate(idCompany, {
+            $inc: { likesCount: -1 },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            company: await Company.findById(idCompany).populate(
+              "userLikedCompany"
+            ),
+          });
+        } catch (error) {
+          console.error("Error liking company:", error);
+        }
       } catch (error) {
         return res.status(404).json({
           error: "Error al actualizar el like a la compañía",
@@ -847,15 +852,23 @@ const toggleLikedCompany = async (req, res, next) => {
           $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
         });
 
-        //* adding one from count related to company
-        UpdatelikesCount(idCompany, 1);
-
-        return res.status(200).json({
-          user: await User.findById(_id),
-          company: await Company.findById(idCompany).populate(
-            "userLikedCompany"
-          ),
-        });
+        try {
+          //Encuentra id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB)
+          await Company.findByIdAndUpdate(idCompany, {
+            $inc: { likesCount: +1 },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            company: await Company.findById(idCompany).populate(
+              "userLikedCompany"
+            ),
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: "Error al actualizar el like a la compañía",
+            message: error.message,
+          });
+        }
       } catch (error) {
         return res.status(404).json(error.message);
       }
@@ -883,7 +896,7 @@ const toggleLikedNews = async (req, res, next) => {
           $pull: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedNews"),
+          user: await User.findById(_id),
           news: await News.findById(idNews).populate("likes"),
         });
       } catch (error) {
@@ -901,7 +914,7 @@ const toggleLikedNews = async (req, res, next) => {
           $push: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedNews"),
+          user: await User.findById(_id),
           news: await News.findById(idNews).populate("likes"),
         });
       } catch (error) {
@@ -934,7 +947,7 @@ const toggleLikedForum = async (req, res, next) => {
           $pull: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedForum"),
+          user: await User.findById(_id),
           forum: await Forum.findById(idForum).populate("likes"),
         });
       } catch (error) {
@@ -952,7 +965,7 @@ const toggleLikedForum = async (req, res, next) => {
           $push: { likes: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("likedForum"),
+          user: await User.findById(_id),
           forum: await Forum.findById(idForum).populate("likes"),
         });
       } catch (error) {
@@ -1043,7 +1056,7 @@ const toggleFollowedForum = async (req, res, next) => {
           $pull: { followed: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("forumFollowing"),
+          user: await User.findById(_id),
           forum: await Forum.findById(idForum).populate("followed"),
         });
       } catch (error) {
@@ -1061,7 +1074,7 @@ const toggleFollowedForum = async (req, res, next) => {
           $push: { followed: _id },
         });
         return res.status(200).json({
-          user: await User.findById(_id).populate("forumFollowing"),
+          user: await User.findById(_id),
           forum: await Forum.findById(idForum).populate("followed"),
         });
       } catch (error) {
