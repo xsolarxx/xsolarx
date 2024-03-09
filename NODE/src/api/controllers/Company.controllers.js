@@ -29,7 +29,7 @@ const createCompany = async (req, res, next) => {
       const resultEnum = enumOk("enumServices", req.body?.companyServices);
       newCompany.companyServices = resultEnum.check
         ? req.body?.companyServices
-        : "Otros";
+        : "Others";
     }
     const savedCompany = await newCompany.save();
     if (savedCompany) {
