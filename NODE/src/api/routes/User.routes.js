@@ -20,6 +20,7 @@ const {
   toggleLikedForum,
   toggleFollow,
   toggleFollowedForum,
+  getByIdPopulate,
 } = require("../controllers/User.controllers");
 const express = require("express");
 const UserRoutes = express.Router();
@@ -32,6 +33,7 @@ UserRoutes.post("/login", login);
 UserRoutes.post("/login/autologin", autoLogin);
 UserRoutes.get("/getall", getAll);
 UserRoutes.get("/getbyid/:id", getById);
+UserRoutes.get("/getByIdPopulate/:id", getByIdPopulate);
 UserRoutes.patch("/forgotpassword", changePassword);
 
 //! ---------------- endPoints con auth ---------------------------------------

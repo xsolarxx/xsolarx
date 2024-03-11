@@ -728,6 +728,25 @@ const getById = async (req, res, next) => {
     return res.status(404).json(error.message);
   }
 };
+
+//-------------------------------*GET BY ID*-------------------------------------------------------------
+
+const getByIdPopulate = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id).populate(
+      "favComments usersFollowed usersFollowers likedCompany likedNews likedForum forumFollowing"
+    );
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("no se ha encontrado el usuario");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+
 //--------------------------------*GET ALL*-------------------------------------------------------------
 
 const getAll = async (req, res, next) => {
@@ -1113,4 +1132,5 @@ module.exports = {
   toggleLikedForum,
   toggleFollow,
   toggleFollowedForum,
+  getByIdPopulate,
 };
