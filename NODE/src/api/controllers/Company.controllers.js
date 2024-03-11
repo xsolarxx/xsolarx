@@ -4,7 +4,7 @@ const Company = require("../models/Company.model");
 const User = require("../models/User.model");
 const Rating = require("../models/Rating.model");
 const Comment = require("../models/Comment.model");
-
+const validator = require("validator");
 // ------------------------------* CREATE COMPANY *--------------------------------------------------
 
 const createCompany = async (req, res, next) => {
@@ -23,6 +23,8 @@ const createCompany = async (req, res, next) => {
       description: req.body?.description,
       companyType: req.body?.companyType,
       image: req.file?.path,
+      phoneNumber: req.body?.phoneNumber,
+      email: req.body?.email,
     };
     const newCompany = new Company(customBody);
     if (req.body?.companyServices) {
