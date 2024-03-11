@@ -231,6 +231,8 @@ const updateCompany = async (req, res, next) => {
         companyType: req.body?.companyType
           ? req.body?.companyType
           : companyById.companyType,
+        phoneNumber: req.body?.phoneNumber,
+        email: req.body?.email,
       };
       if (req.body?.companyServices) {
         const result = enumOk("enumServices", req.body?.companyServices);
