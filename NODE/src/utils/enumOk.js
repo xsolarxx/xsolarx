@@ -41,23 +41,24 @@ const enumOk = (enumType, word) => {
         return acc == word.length ? { check: true } : { check: false };
       }
     case "enumServices":
-        acc = 0;
-        console.log("ENTRO EN ENUM", word, word.length);
-        if (word.length > 0) {
-          word.forEach((element) => {
-            console.log(enumTags.includes(element));
-            enumTags.forEach((item) => {
-              if (item === element) {
-                acc++;
-              }
-            });
-            // if (enumTags.includes(element)) {
-            //   console.log(enumTags.includes(element));
-            //   acc++;
-            // }
+      acc = 0;
+      console.log("ENTRO EN ENUM", word, word.length);
+      if (word.length > 0) {
+        word.forEach((element) => {
+          console.log(enumServices.includes(element));
+          enumServices.forEach((item) => {
+            if (item === element) {
+              acc++;
+            }
           });
-          console.log(acc == word.length ? { check: true } : { check: false });
-          return acc == word.length ? { check: true } : { check: false };
+          // if (enumTags.includes(element)) {
+          //   console.log(enumTags.includes(element));
+          //   acc++;
+          // }
+        });
+        console.log(acc == word.length ? { check: true } : { check: false });
+        return acc == word.length ? { check: true } : { check: false };
+      }
   }
 };
 
