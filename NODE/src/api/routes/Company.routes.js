@@ -9,6 +9,7 @@ const {
   getByAscLikes,
   updateCompany,
   deleteCompany,
+  getByIdPopulate,
 } = require("../controllers/Company.controllers");
 
 const { upload } = require("../../middleware/files.middleware");
@@ -19,6 +20,7 @@ const CompanyRoutes = require("express").Router();
 CompanyRoutes.get("/byName", getByName);
 CompanyRoutes.get("/getall", getAll);
 CompanyRoutes.get("/:id", getById);
+CompanyRoutes.get("/getByIdPopulate/:id", getByIdPopulate);
 CompanyRoutes.get("/companybyservices/services", getByServices);
 CompanyRoutes.get("/getByDescLikes/likes", getByDescLikes);
 CompanyRoutes.get("/getByAscLikes/likes", getByAscLikes);
