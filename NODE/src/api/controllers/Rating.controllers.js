@@ -33,7 +33,10 @@ const createRating = async (req, res, next) => {
           await Company.findByIdAndUpdate(req.body.companyPunctuated, {
             $push: { userCompanyRatings: savedRating._id },
           });
-          return res.status(200).json(await Rating.findById(savedRating._id));
+          return res.status(200).json({
+            rating: await Rating.findById(savedRating._id),
+            user: await User.findById(req.user._id),
+          });
         } catch (error) {
           return res.status(404).json({
             error: "Error catch al actualizar la empresa",
