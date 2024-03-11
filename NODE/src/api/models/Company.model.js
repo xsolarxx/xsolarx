@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const validator = require("validator");
 
 //------------------------------------------------------------------------------------------------
 const CompanySchema = new Schema(
@@ -18,19 +19,36 @@ const CompanySchema = new Schema(
       type: String,
       required: true,
     },
-    companyServices: {
+    email: {
       type: String,
       required: true,
-      enum: [
-        "Installation budget",
-        "Photovoltaic panel budget",
-        "Energy study",
-        "Maintenance",
-        "Sizing and modeling of the installation",
-        "Safety study",
-        "Others",
-      ],
+      trim: true,
+      unique: true,
+      sparse: true,
+      validate: [validator.isEmail, "Email not valid"],
+      // Si el email no es válido, se lanzará el error ----> "Email not valid"
     },
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlenght: 9,
+    },
+    companyServices: [
+      {
+        type: String,
+        required: true,
+        enum: [
+          "Installation budget",
+          "Photovoltaic panel budget",
+          "Energy study",
+          "Maintenance",
+          "Sizing and modeling of the installation",
+          "Safety study",
+          "Others",
+        ],
+      },
+    ],
     image: {
       type: String,
       required: true,
