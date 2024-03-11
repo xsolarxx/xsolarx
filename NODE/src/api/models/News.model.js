@@ -25,11 +25,13 @@ const NewsSchema = new Schema(
       type: String,
       required: true,
     },
-    tags: {
-      type: String,
-      enum: ["Solar panels", "Wind power", "Others"],
-      required: true,
-    },
+    tags: [
+      {
+        type: String,
+        enum: ["Solar panels", "Wind power", "Others"],
+        required: true,
+      },
+    ],
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

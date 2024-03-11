@@ -31,8 +31,9 @@ const createNews = async (req, res, next) => {
     }
     if (req.body?.tags) {
       const resultEnum = enumOk("enumTags", req.body?.tags);
-      newNews.tags = resultEnum.check ? req.body?.tags : "Otros"; //Seleccionamos otros como opción
+      newNews.tags = resultEnum.check ? req.body?.tags : "Others"; //Seleccionamos Other como opción
     }
+    console.log(req.body.tags);
 
     const savedNews = await newNews.save(); // el await espera a que se resuelva la promesa
     if (savedNews) {
