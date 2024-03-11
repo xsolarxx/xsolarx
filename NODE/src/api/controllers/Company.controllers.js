@@ -111,6 +111,24 @@ const getById = async (req, res, next) => {
   }
 };
 
+// --------------------------------* GET BY ID POPULATE *-------------------------------------------------------------
+
+const getByIdPopulate = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const companyById = await Company.findById(id).populate(
+      "ownerAdmin userCompanyRatings userCompanyReviews userLikedCompany"
+    );
+    if (companyById) {
+      return res.status(200).json(companyById);
+    } else {
+      return res.status(404).json("No se ha encontrado la compañía");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
+
 //--------------------------------* GET BY SERVICES *---------------------------------------------------------
 
 const getByServices = async (req, res, next) => {
@@ -357,6 +375,7 @@ module.exports = {
   UpdatelikesCount,
   updateCompany,
   deleteCompany,
+  getByIdPopulate,
 };
 
 //Ok todo
