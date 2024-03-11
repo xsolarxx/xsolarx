@@ -812,31 +812,32 @@ const toggleLikedCompany = async (req, res, next) => {
     const { idCompany } = req.params; // id de la company
     const { _id, likedCompany } = req.user; // usuario y company
 
-    // una condicional con includes
-    if (likedCompany.includes(idCompany)) {
-      console.log("liked company includes company ID");
+    // Verificar si el usuario ya ha dado "me gusta" a la empresa
+    const alreadyLiked = likedCompany.includes(idCompany);
+
+    if (alreadyLiked) {
+      console.log("User already liked the company");
+
       try {
+        // Eliminar el "me gusta" del usuario y de la empresa
         await User.findByIdAndUpdate(_id, {
-          $pull: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+          $pull: { likedCompany: idCompany },
         });
         await Company.findByIdAndUpdate(idCompany, {
-          $pull: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+          $pull: { userLikedCompany: _id },
         });
 
-        try {
-          //Encuentra id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB)
-          await Company.findByIdAndUpdate(idCompany, {
-            $inc: { likesCount: -1 },
-          });
-          return res.status(200).json({
-            user: await User.findById(_id),
-            company: await Company.findById(idCompany).populate(
-              "userLikedCompany"
-            ),
-          });
-        } catch (error) {
-          console.error("Error liking company:", error);
-        }
+        // Decrementar el contador de "likes" solo si el usuario ya le había dado "me gusta"
+        await Company.findByIdAndUpdate(idCompany, {
+          $inc: { likesCount: -1 },
+        });
+
+        return res.status(200).json({
+          user: await User.findById(_id),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
       } catch (error) {
         return res.status(404).json({
           error: "Error al actualizar el like a la compañía",
@@ -844,33 +845,31 @@ const toggleLikedCompany = async (req, res, next) => {
         });
       }
     } else {
+      console.log("User has not liked the company");
+
       try {
+        // Agregar el "me gusta" del usuario y de la empresa
         await User.findByIdAndUpdate(_id, {
-          $push: { likedCompany: idCompany }, // relacionar con la clave en model USER con idCompany
+          $push: { likedCompany: idCompany },
         });
         await Company.findByIdAndUpdate(idCompany, {
-          $push: { userLikedCompany: _id }, // relacionar con la clave en model Company con Id user
+          $push: { userLikedCompany: _id },
         });
 
-        try {
-          //Encuentra id de la compañía y actualiza su likesCount con un incremento( inc -> operador mongoDB)
-          await Company.findByIdAndUpdate(idCompany, {
-            $inc: { likesCount: +1 },
-          });
-          return res.status(200).json({
-            user: await User.findById(_id),
-            company: await Company.findById(idCompany).populate(
-              "userLikedCompany"
-            ),
-          });
-        } catch (error) {
-          return res.status(404).json({
-            error: "Error al actualizar el like a la compañía",
-            message: error.message,
-          });
-        }
+        // Incrementar el contador de "likes"
+        await Company.findByIdAndUpdate(idCompany, { $inc: { likesCount: 1 } });
+
+        return res.status(200).json({
+          user: await User.findById(_id),
+          company: await Company.findById(idCompany).populate(
+            "userLikedCompany"
+          ),
+        });
       } catch (error) {
-        return res.status(404).json(error.message);
+        return res.status(404).json({
+          error: "Error al actualizar el like a la compañía",
+          message: error.message,
+        });
       }
     }
   } catch (error) {
