@@ -21,6 +21,7 @@ const {
   toggleFollow,
   toggleFollowedForum,
   getByIdPopulate,
+  getByName,
 } = require("../controllers/User.controllers");
 const express = require("express");
 const UserRoutes = express.Router();
@@ -47,6 +48,7 @@ UserRoutes.patch("/likedNews/:idNews", [isAuth], toggleLikedNews);
 UserRoutes.patch("/likedForum/:idForum", [isAuth], toggleLikedForum);
 UserRoutes.patch("/follow/:userToFollow", [isAuth], toggleFollow);
 UserRoutes.patch("/follow/forum/:idForum", [isAuth], toggleFollowedForum);
+UserRoutes.get("/byname/:name", [isAuth], getByName);
 
 /// ------------------> rutas que pueden ser redirect
 UserRoutes.get("/register/sendMail/:id", sendCode); // :id ---> es el nombre del param
