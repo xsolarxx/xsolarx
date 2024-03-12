@@ -198,6 +198,21 @@ const update = async (req, res, next) => {
 const deleteComment = async (req, res, next) => {
   try {
     const { idComment } = req.params;
+    const commentOwner = req.user._id; // ID del usuario que realiza la solicitud
+    console.log("owner", commentOwner);
+
+    // Buscar el comentario para asegurarse de que pertenece al usuario
+    const comment = await Comment.findById(idComment);
+    console.log("soy", comment.owner);
+    if (req.user._id == comment.owner) {
+      console.log("entrando aqui");
+    }
+    if (!comment || comment.owner != commentOwner) {
+      // Verificar si el comentario existe y si el usuario que realiza la solicitud es el propietario
+      return res.status(404).json({
+        error: "El comentario no existe o no tienes permiso para eliminarlo",
+      });
+    }
 
     // Elimina el comentario
     await Comment.findByIdAndDelete(idComment);
@@ -207,10 +222,6 @@ const deleteComment = async (req, res, next) => {
       User.updateMany(
         { favComments: idComment },
         { $pull: { favComments: idComment } }
-      ),
-      Comment.updateOne(
-        { likes: idComment },
-        { $pull: { likes: idComment } } // Elimina id del comentario de la lista de likes
       ),
       News.updateOne(
         { comments: idComment },
@@ -236,7 +247,6 @@ const deleteComment = async (req, res, next) => {
     });
   }
 };
-
 // ------------------------------* GET BY RECIPIENT *------------------------------------------------------
 
 const getByRecipient = async (req, res, next) => {
