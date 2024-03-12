@@ -207,7 +207,7 @@ const deleteComment = async (req, res, next) => {
     if (req.user._id == comment.owner) {
       console.log("entrando aqui");
     }
-    if (!comment || comment.owner != commentOwner) {
+    if (!comment || !comment.owner.equals(commentOwner)) {
       // Verificar si el comentario existe y si el usuario que realiza la solicitud es el propietario
       return res.status(404).json({
         error: "El comentario no existe o no tienes permiso para eliminarlo",
