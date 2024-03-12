@@ -14,7 +14,7 @@ CommentRoutes.post("/create/:idRecipient", [isAuth], createComment);
 CommentRoutes.delete("/comments/:idComment", [isAuth], deleteComment);
 CommentRoutes.get("/getall", getAll);
 CommentRoutes.get("/getbyid/:id", getById);
-CommentRoutes.patch("/update/:id", update);
+CommentRoutes.patch("/update/:id", [isAuth], update);
 CommentRoutes.get("/:recipientType/:id", getByRecipient);
 
 module.exports = CommentRoutes;
