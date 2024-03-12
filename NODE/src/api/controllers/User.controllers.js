@@ -1109,6 +1109,40 @@ const toggleFollowedForum = async (req, res, next) => {
     });
   }
 };
+//!------------
+//? GET BY NAME
+//!------------
+
+const getByName = async (req, res, next) => {
+  //es para name y para userName!!
+  try {
+    console.log(req.body);
+    let { name } = req.params;
+
+    console.log(name);
+    const UsersByName = await User.find({
+      $or: [
+        { userName: { $regex: name, $options: "i" } },
+        { nickName: { $regex: name, $options: "i" } },
+      ],
+    });
+    console.log(UsersByName);
+    if (UsersByName.length > 0) {
+      return res.status(200).json(UsersByName);
+    } else {
+      return res
+        .status(404)
+        .json("That username doesn't show up in our database.");
+    }
+  } catch (error) {
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
 
 //-------------------------------------------------------------------------------------------------------------------------
 
@@ -1133,4 +1167,5 @@ module.exports = {
   toggleFollow,
   toggleFollowedForum,
   getByIdPopulate,
+  getByName,
 };
