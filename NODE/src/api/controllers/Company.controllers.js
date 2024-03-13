@@ -163,10 +163,10 @@ const getByDescLikes = async (req, res, next) => {
     // sort() --> Función de prototype de .prototype.find() de la documentación de mongoose
     // Indica que ordene de manera descendente, para que salgan las valores más altos primero
     const companiesSortedByLikes = await Company.find()
-      .populate("userCompanyRatings")
       .sort({
         likesCount: -1,
-      });
+      })
+      .populate("userCompanyRatings");
 
     if (companiesSortedByLikes.length > 0) {
       return res.status(200).json(companiesSortedByLikes);
@@ -186,10 +186,10 @@ const getByAscLikes = async (req, res, next) => {
   try {
     // Indica que ordene de manera ascendente, para que salgan las valores más bajos primero
     const companiesSortedByLikes = await Company.find()
-      .populate("userCompanyRatings")
       .sort({
         likesCount: 1,
-      });
+      })
+      .populate("userCompanyRatings");
 
     if (companiesSortedByLikes.length > 0) {
       return res.status(200).json(companiesSortedByLikes);
