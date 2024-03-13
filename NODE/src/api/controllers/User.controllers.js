@@ -1018,7 +1018,7 @@ const toggleFollow = async (req, res, next) => {
 
         return res.status(200).json({
           acion: "He dejado de seguirlo",
-          authUser: await User.findById(req.user._id),
+          user: await User.findById(req.user._id),
           userToFollow: await User.findById(userToFollow),
         });
       } catch (error) {
@@ -1041,7 +1041,7 @@ const toggleFollow = async (req, res, next) => {
 
         return res.status(200).json({
           action: "Lo empiezo a seguir",
-          authUser: await User.findById(req.user._id),
+          user: await User.findById(req.user._id),
           userToFollow: await User.findById(userToFollow),
         });
       } catch (error) {
