@@ -67,7 +67,7 @@ const createRating = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allRating = await Rating.find();
+    const allRating = await Rating.find().populate("userCompanyRatings");
     if (allRating.length > 0) {
       return res.status(200).json(allRating);
     } else {
