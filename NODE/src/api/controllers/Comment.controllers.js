@@ -211,7 +211,7 @@ const update = async (req, res, next) => {
 const deleteComment = async (req, res, next) => {
   try {
     const { idComment } = req.params;
-    const requester = req.user._id; // ID del usuario que realiza la solicitud
+    const commentOwner = req.user._id; // ID del usuario que realiza la solicitud
     console.log("owner", commentOwner);
 
     // Buscar el comentario para asegurarse de que pertenece al usuario
@@ -220,7 +220,7 @@ const deleteComment = async (req, res, next) => {
     if (req.user._id == comment.owner) {
       console.log("entrando aqui");
     }
-    if (!comment || !comment.owner.equals(requester)) {
+    if (!comment || !comment.owner.equals(commentOwner)) {
       // Verificar si el comentario existe y si el usuario que realiza la solicitud es el propietario
       return res.status(404).json({
         error: "El comentario no existe o no tienes permiso para eliminarlo",
