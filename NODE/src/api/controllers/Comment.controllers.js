@@ -250,9 +250,10 @@ const deleteComment = async (req, res, next) => {
       ),
     ]);
 
-    return res
-      .status(200)
-      .json({ message: "Comentario eliminado correctamente" });
+    return res.status(200).json({
+      message: "Comentario eliminado correctamente",
+      user: await User.findById(req.user._id),
+    });
   } catch (error) {
     return res.status(500).json({
       error: "Error eliminando el comentario",
