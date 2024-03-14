@@ -430,6 +430,17 @@ const update = async (req, res, next) => {
     patchUser.confirmationCode = req.user.confirmationCode;
     patchUser.email = req.user.email;
     patchUser.check = req.user.check;
+    patchUser.comments = req.user.comments;
+    patchUser.companyPunctuated = req.user.companyPunctuated;
+    patchUser.favComments = req.user.favComments;
+    patchUser.forumFollowing = req.user.forumFollowing;
+    patchUser.forumOwner = req.user.forumOwner;
+    patchUser.likedCompany = req.user.likedCompany;
+    patchUser.likedForum = req.user.likedForum;
+    patchUser.likedNews = req.user.likedNews;
+    patchUser.ownerRating = req.user.ownerRating;
+    patchUser.usersFollowed = req.user.usersFollowed;
+    patchUser.usersFollowers = req.user.usersFollowers;
 
     if (req.body?.gender) {
       // lo comprobamos y lo metermos en patchUser con un ternario en caso de que sea true o false el resultado de la funcion
@@ -509,7 +520,7 @@ const update = async (req, res, next) => {
        * con los test
        */
       return res.status(200).json({
-        updateUser,
+        updateUser: await User.findById(req.user._id),
         testUpdate,
       });
     } catch (error) {
