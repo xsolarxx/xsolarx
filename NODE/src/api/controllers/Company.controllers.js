@@ -18,9 +18,10 @@ const createCompany = async (req, res, next) => {
     if (companyExist) {
       return res.status(409).json("Esta compañía ya existe");
     }
+    const processedText = req.body.description.replace(/\r\n|\r|\n/g, "<br>");
     const customBody = {
       companyName: req.body?.companyName,
-      description: req.body?.description,
+      description: processedText,
       companyType: req.body?.companyType,
       image: req.file?.path,
       phoneNumber: req.body?.phoneNumber,

@@ -8,9 +8,10 @@ const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const createForum = async (req, res, next) => {
   try {
     await Forum.syncIndexes();
+    const processedText = req.body.content.replace(/\r\n|\r|\n/g, "<br>");
     const customBody = {
       title: req.body?.title,
-      content: req.body?.content,
+      content: processedText,
       owner: req.user._id,
     };
 
