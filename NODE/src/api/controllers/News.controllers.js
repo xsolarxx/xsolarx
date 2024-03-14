@@ -15,10 +15,11 @@ const createNews = async (req, res, next) => {
     if (newsExist) {
       return res.status(409).json("Título repetido");
     }
+    const processedText = req.body.fullContent.replace(/\r\n|\r|\n/g, "<br>");
     const customBody = {
       title: req.body?.title,
       shortContent: req.body?.shortContent,
-      fullContent: req.body?.fullContent,
+      fullContent: processedText,
       author: req.body?.author,
       ownerAdmin: req.user._id,
     };
