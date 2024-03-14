@@ -30,7 +30,13 @@ const createComment = async (req, res, next) => {
           await User.findByIdAndUpdate(req.user._id, {
             $push: { comments: newComment._id },
           });
-          return res.status(200).json({ create: true, saveComment });
+          return res
+            .status(200)
+            .json({
+              create: true,
+              saveComment,
+              user: await User.findById(req.user._id),
+            });
         } catch (error) {
           res.status(404).json({
             error: "Error actualizando la noticia y el usuario",
@@ -55,7 +61,11 @@ const createComment = async (req, res, next) => {
           await User.findByIdAndUpdate(req.user._id, {
             $push: { comments: newComment._id },
           });
-          return res.status(200).json({ create: true, saveComment });
+          return res.status(200).json({
+            create: true,
+            saveComment,
+            user: await User.findById(req.user._id),
+          });
         } catch (error) {
           res.status(404).json({
             error: "Error actualizando el foro y el usuario",
@@ -81,7 +91,11 @@ const createComment = async (req, res, next) => {
           await User.findByIdAndUpdate(req.user._id, {
             $push: { comments: newComment._id },
           });
-          return res.status(200).json({ create: true, saveComment });
+          return res.status(200).json({
+            create: true,
+            saveComment,
+            user: await User.findById(req.user._id),
+          });
         } catch (error) {
           res.status(404).json({
             error: "Error actualizando la compañía y el usuario",
