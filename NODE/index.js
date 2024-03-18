@@ -12,10 +12,10 @@ connect();
 // Configura Cloudinary para la gestión de Img.
 files.configCloudinary();
 
-// const PORT = process.env.PORT;
+const PORT = process.env.PORT;
 
-//const cors = require("cors");
-//app.use(cors());
+const cors = require("cors");
+app.use(cors());
 
 const corsOptions = {
   origin: "https://frontend-iota-three-81.vercel.app",
