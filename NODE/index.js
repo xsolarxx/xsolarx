@@ -18,7 +18,7 @@ const cors = require("cors");
 app.use(
   cors({
     origin: "https://frontend-iota-three-81.vercel.app",
-    credentials: true,
+    // credentials: true,
   })
 );
 
