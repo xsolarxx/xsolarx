@@ -15,7 +15,12 @@ files.configCloudinary();
 const PORT = process.env.PORT;
 
 const cors = require("cors");
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://frontend-iota-three-81.vercel.app",
+    credentials: true,
+  })
+);
 
 //! ------------------ limitaciones de cantidad en el back end
 app.use(express.json({ limit: "5mb" }));
@@ -39,6 +44,10 @@ app.use("/api/v1/rating/", RatingRoutes);
 
 const CompanyRoutes = require("./src/api/routes/Company.routes");
 app.use("/api/v1/company/", CompanyRoutes);
+
+app.get("/ping", (req, res) => {
+  res.send("pong!");
+});
 
 app.use("*", (req, res, next) => {
   const error = new Error("Route not found");
