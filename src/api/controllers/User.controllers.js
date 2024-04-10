@@ -4,7 +4,7 @@ const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const { generateToken } = require("../../utils/token");
 const randomPassword = require("../../utils/randomPassword");
 const enumOk = require("../../utils/enumOk");
-const { UpdatelikesCount } = require("../controllers/Company.controllers");
+const { UpdatelikesCount } = require("./Company.controllers");
 const randomCode = require("../../utils/randomCode");
 const sendEmail = require("../../utils/sendEmail"); //!sendEmail no ha sido llamado aún
 
