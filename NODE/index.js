@@ -15,12 +15,7 @@ files.configCloudinary();
 const PORT = process.env.PORT;
 
 const cors = require("cors");
-app.use(
-  cors({
-    origin: "https://frontend-iota-three-81.vercel.app",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 //! ------------------ limitaciones de cantidad en el back end
 app.use(express.json({ limit: "5mb" }));
